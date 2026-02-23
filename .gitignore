@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Node / JS
+node_modules
+dist
+build
+.turbo
+
+# Env
+.env
+.env.*
+
+# Logs
+*.log
+
+# Editors
+.idea
+.vscode
