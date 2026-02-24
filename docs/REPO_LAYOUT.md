@@ -1,24 +1,37 @@
-# Repo Layout (Initial)
+# Repo Layout
 
-This repository starts intentionally minimal.
+## Workspace Structure
 
-## Why separate repos?
+pnpm monorepo with two packages:
 
-Current recommendation:
+- **`library/`** (`@dnd/library`) — TypeScript library: SRD/AA parsers, types, rules engine
+- **`app/`** (`@dnd/app`) — TanStack Start web application
 
-1. Keep `dnd-24-resources` separate for markdown/content lifecycle.
-2. Keep `dnd-24-platform` separate for code lifecycle.
+## Key Directories
 
-Benefits:
+```
+dnd-24-platform/
+├── CLAUDE.md              # Start here: navigational hub
+├── META-PLAN.md           # Philosophy and conventions
+├── library/               # @dnd/library
+│   ├── src/types/         # All TypeScript types
+│   ├── src/parsers/       # SRD/AA markdown parsers
+│   ├── src/engine/        # Rules engine (planned)
+│   └── tests/             # Vitest tests
+├── app/                   # @dnd/app
+│   └── src/routes/        # TanStack file-based routes
+├── content/srd-markdown/  # SRD 5.2.1 chapters (synced)
+├── scripts/               # Utility scripts
+└── docs/                  # Architecture, plans
+    ├── architecture.md
+    ├── campaign-modes.md
+    └── plans/
+        ├── active/
+        └── completed/
+```
 
-- Cleaner commit history (content changes vs code changes)
-- Easier publishing/open-sourcing decisions
-- Independent release cadence
+## Why Separate from dnd-24-resources?
 
-## Next step when you are ready
-
-When you want implementation scaffolding:
-
-1. Add package manager workspace config at repo root.
-2. Build TypeScript domain models in `library/`.
-3. Scaffold frontend/backend in `app/`.
+- `dnd-24-resources/` has its own git repo for content lifecycle
+- `dnd-24-platform/` (this repo) has its own git repo for code lifecycle
+- Content syncs via `scripts/sync-srd-content.sh`

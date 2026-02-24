@@ -2,18 +2,25 @@
 .DS_Store
 
 # Node / JS
-node_modules
-dist
-build
-.turbo
+node_modules/
+dist/
+build/
+.output/
+.turbo/
+coverage/
 
 # Env
 .env
 .env.*
+!.env.example
 
 # Logs
 *.log
+pnpm-debug.log*
 
 # Editors
-.idea
-.vscode
+.idea/
+.vscode/
+
+# Vitest
+__vitest__/

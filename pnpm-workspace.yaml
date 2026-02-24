@@ -1,0 +1,6 @@
+packages:
+  - library
+  - app
+
+onlyBuiltDependencies:
+  - esbuild
