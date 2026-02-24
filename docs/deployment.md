@@ -35,11 +35,15 @@ Locally, `VITE_BASE_PATH` is unset, so everything defaults to `/` and dev works 
 In `austin-site/sst.config.ts`:
 
 ```ts
-const DND_ORIGIN = process.env.DND_ORIGIN ?? "https://dnd-platform-production.up.railway.app";
+const DND_ORIGIN = process.env.DND_ORIGIN ?? "https://app-production-0cb2.up.railway.app";
 router.route("/dnd", DND_ORIGIN);
 ```
 
-After changing the SST config, deploy with `npx sst deploy --stage production` from the austin-site repo.
+After changing the SST config, deploy from the austin-site repo:
+
+```bash
+cd ~/dev/austin-site && AWS_PROFILE=prod npx sst deploy --stage production
+```
 
 ## Verification
 

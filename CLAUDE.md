@@ -38,7 +38,13 @@ Every commit must pass: `lint-staged` (oxlint on staged .ts/.tsx) → type-check
 
 ## Deployment
 
-Deploys to `www.austinwallace.ca/dnd` via Railway + SST Router. See `docs/deployment.md` for full details. Key: `VITE_BASE_PATH=/dnd/` is set on Railway at build time; locally it defaults to `/`.
+Deploys to `www.austinwallace.ca/dnd` via Railway + SST Router. See `docs/deployment.md` for full details.
+
+- Railway project: `dnd-platform`, service: `app`
+- Railway origin: `https://app-production-0cb2.up.railway.app`
+- `VITE_BASE_PATH=/dnd/` set on Railway; defaults to `/` locally
+- SST Router config lives in `~/dev/austin-site/sst.config.ts`
+- SST deploy: `cd ~/dev/austin-site && AWS_PROFILE=prod npx sst deploy --stage production`
 
 ## Docs (progressive disclosure)
 
