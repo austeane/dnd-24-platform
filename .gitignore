@@ -24,3 +24,6 @@ pnpm-debug.log*
 
 # Vitest
 __vitest__/
+
+# Repomix
+repomix-output.*

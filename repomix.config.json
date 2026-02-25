@@ -1,0 +1,33 @@
+{
+  "output": {
+    "filePath": "repomix-output.md",
+    "style": "markdown",
+    "removeComments": false,
+    "showLineNumbers": true,
+    "topFilesLength": 10
+  },
+  "include": [
+    "CLAUDE.md",
+    "META-PLAN.md",
+    "docs/architecture.md",
+    "docs/campaign-modes.md",
+    "docs/plans/active/003-canonical-content-architecture.md",
+    "library/src/types/**/*.ts",
+    "library/src/parsers/**/*.ts",
+    "library/src/index.ts",
+    "library/package.json",
+    "library/tsconfig.json",
+    "package.json",
+    "content/srd-markdown/chapter-summaries/00-condensed-summary.md"
+  ],
+  "ignore": {
+    "useGitignore": true,
+    "useDefaultPatterns": true,
+    "customPatterns": [
+      "node_modules",
+      "dist",
+      "*.lock",
+      "repomix-output.*"
+    ]
+  }
+}

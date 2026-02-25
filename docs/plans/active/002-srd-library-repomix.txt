@@ -1,0 +1,2230 @@
+This file is a merged representation of a subset of the codebase, containing specifically included files, combined into a single document by Repomix.
+
+<file_summary>
+This section contains a summary of this file.
+
+<purpose>
+This file contains a packed representation of a subset of the repository's contents that is considered the most important context.
+It is designed to be easily consumable by AI systems for analysis, code review,
+or other automated processes.
+</purpose>
+
+<file_format>
+The content is organized as follows:
+1. This summary section
+2. Repository information
+3. Directory structure
+4. Repository files (if enabled)
+5. Multiple file entries, each consisting of:
+  - File path as an attribute
+  - Full contents of the file
+</file_format>
+
+<usage_guidelines>
+- This file should be treated as read-only. Any changes should be made to the
+  original repository files, not this packed version.
+- When processing this file, use the file path to distinguish
+  between different files in the repository.
+- Be aware that this file may contain sensitive information. Handle it with
+  the same level of security as you would the original repository.
+</usage_guidelines>
+
+<notes>
+- Some files may have been excluded based on .gitignore rules and Repomix's configuration
+- Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
+- Only files matching these patterns are included: library/src/**/*.ts, library/tests/**/*.ts, library/package.json, content/srd-markdown/chapter-summaries/00-condensed-summary.md, docs/plans/active/002-srd-library.md, docs/architecture.md, docs/campaign-modes.md, CLAUDE.md, META-PLAN.md, tsconfig.base.json, package.json, pnpm-workspace.yaml
+- Files matching patterns in .gitignore are excluded
+- Files matching default ignore patterns are excluded
+- Files are sorted by Git change count (files with more changes are at the bottom)
+</notes>
+
+</file_summary>
+
+<directory_structure>
+content/
+  srd-markdown/
+    chapter-summaries/
+      00-condensed-summary.md
+docs/
+  plans/
+    active/
+      002-srd-library.md
+  architecture.md
+  campaign-modes.md
+library/
+  src/
+    engine/
+      index.ts
+    parsers/
+      index.ts
+      shared.ts
+      spells.ts
+    types/
+      aa-ability.ts
+      campaign.ts
+      character.ts
+      class.ts
+      condition.ts
+      effect.ts
+      equipment.ts
+      feat.ts
+      index.ts
+      magic-item.ts
+      monster.ts
+      spell.ts
+    index.ts
+  tests/
+    parsers/
+      spells.test.ts
+  package.json
+CLAUDE.md
+META-PLAN.md
+package.json
+pnpm-workspace.yaml
+tsconfig.base.json
+</directory_structure>
+
+<files>
+This section contains the contents of the repository's files.
+
+<file path="content/srd-markdown/chapter-summaries/00-condensed-summary.md">
+# SRD 5.2.1 Condensed Parser Reference
+
+All chapters share the same extraction pipeline artifacts. Strip these universally before parsing content.
+
+## Universal Noise Patterns
+
+**Page break markers** (every chapter):
+```
+## Page NNN
+
+<!-- source_txt: srd_extract/run2/pages/pNNN.txt -->
+<!-- source_image: srd_extract/run2/images/pNNN.png -->
+```
+`## Page N` is H2 — same level as semantic sections. Match `/^## Page \d+$/` to distinguish.
+
+**Page footers**: `**NNN** System Reference Document 5.2.1` — standalone lines, strip via `/^\*\*\d+\*\* System Reference Document/`.
+
+**Duplicate H1**: Every chapter has a plain `# Title` (file-level) AND a bold `# **Title**` (OCR artifact inside the first page block). Treat second as decorative.
+
+**Ghost header rows**: Bold plain-text line(s) above every GFM pipe table duplicate column names. Always discard:
+```
+**Column1** **Column2** **Column3**
+
+| Column1 | Column2 | Column3 |
+| --- | --- | --- |
+```
+
+**`<br>` in table cells**: Multi-line cell content uses raw `<br>` tags. Strip/normalize before processing cell values.
+
+**H3 skipped**: Most chapters jump H2 to H4, skipping H3 entirely (except ch12/13 which use H3 for stat block names).
+
+**Tables split across page breaks**: A single logical table gets interrupted by `## Page N` + HTML comments, producing two table fragments with repeated headers. Merge by matching identical column headers in the same section context.
+
+**Bold-italic sub-entries**: `_**Name.**_` pattern used across all chapters for named sub-items within entries.
+
+**En-dash (U+2013)** in ranges, **Unicode minus (U+2212)** in negative modifiers. Never assume ASCII hyphen.
+
+---
+
+## Ch01: Legal Information (~131 lines, ~350 entries, MEDIUM)
+**Content**: CC-BY-4.0 license (page 1), ToC + stat block index (pages 2-4).
+**ToC pattern**: `^(.+?)[\s.]+(\d+)$` after stripping markdown. Bold = chapter-level, plain = sub-entry.
+**Mid-line OCR artifact**: ` **.** ` (bold-wrapped period) appears ~30 times in dot-leader lines.
+**Two-line entries**: Subclass names split across lines — first line ends with colon, no page number; continuation has the page number.
+**Stat block index**: Starts at `# **Index of Stat Blocks**` mid-page-2 with no structural separator from ToC.
+**Parser priority**: Skip (no mechanical value).
+
+---
+
+## Ch02: Playing the Game (~1,518 lines, ~150 entries, MEDIUM-HIGH)
+**Split by**: `## Section` H2 headings (8 major sections). Subsections use `####` (H4), no H3.
+**Key tables**: Ability Descriptions, Ability Modifiers (16 rows), Skills (18 rows), Proficiency Bonus (8 rows), DCs (6 rows), Actions (11), Cover (3), Creature Sizes (6), Travel Pace (3).
+**Bold table title pattern**: `**Table Name**` on own line, then optional fake header row, then real pipe table.
+**Italic-bold definitions**: `_**Term.**_ Description...` for inline sub-rules (Bright Light, Round Down, etc.).
+**Numbered steps as bold inline**: `**1: The GM Describes a Scene.** Text...` (not ordered list items).
+**Bare-word lists**: Special senses and hazards listed as plain words on consecutive lines with no list markers.
+**Score ranges**: Use Unicode en-dash `2-3` (U+2013), not ASCII hyphen.
+**Gotchas**:
+- Actions table split by `## Page 10` break mid-table
+- Formula as bold inline: `**Base AC** = 10 + Dex modifier`
+- Heading skip H2->H4 means hierarchy can't be inferred from level alone
+
+---
+
+## Ch03: Character Creation (~750 lines, ~235 entries, MEDIUM)
+**Key tables**: Class Overview (12 rows), Character Advancement (20 rows), Standard Array by Class (12), Ability Score Point Costs (dual-column: `Score | Cost | Score | Cost`), Multiclass Spell Slots (20 rows), Trinkets (100 rows, split across 3 pages).
+**Alignment entries**: Embedded in prose via `_**Name (AB).**_` italic-bold pattern, not in a table.
+**Dual-column tables**: Point Costs and Ability Score Modifiers have paired columns — each row yields 2 records.
+**Gotchas**:
+- Trinket d100 uses `00` for 100 (fails naive `parseInt`)
+- `<br>` in primary ability cells: `Strength<br>or Dexterity` ("or" vs "and" have different mechanical meanings)
+- XP numbers use comma formatting: `2,700`, `100,000`
+- `--` (em-dash) as zero in Multiclass Spellcaster table
+- Rare Languages table: two-column layout `Language | Language`
+- Footnote `*Primordial includes...` is a plain paragraph below its table, not structurally linked
+
+---
+
+## Ch04: Classes (~5,818 lines, ~1,200 entries, HIGH)
+**Split by**: `## **ClassName**` H2 headings (12 sections). No H3 used.
+**Core Traits table**: 2-col key-value. `<br>` in key cells: `**Saving Throw**<br>**Proficiencies**`. Some classes (Fighter/Monk/Rogue) have content overflow — all content stuffed into left cell, right cell blank.
+**Progression table**: Variable extra columns per class. Ghost header rows (1-2 bold text lines) precede every table.
+  - Non-caster (Barbarian): `Level | Bonus | Class Features | Rages | Damage | Mastery`
+  - Full caster (Bard): adds `Die | Cantrips | Spells | 1-9` slot columns
+  - Half caster (Paladin): adds `Divinity | Spells | 1-5` slot columns
+  - Warlock (unique): `Invocations | Cantrips | Spells | Slots | Level` (Pact Magic, not per-level slots)
+**Feature heading**: `**Level N: Feature Name**` — bold inline, NOT a markdown heading.
+**Sub-features**: `_**Sub-heading.**_` italic-bold inline label.
+**Subclass heading**: `#### **ClassName Subclass: SubclassName**` — name may split across two bold spans: `#### **Monk Subclass: Warrior of the** **Open Hand**`.
+**Spell list tables**: `| Spell | School | Special |` per level. `C`=Concentration, `R`=Ritual, `M`=Material.
+**Eldritch Invocations** (Warlock only): Bold name, optional italic prerequisite line, body, optional `_**Repeatable.**_`.
+**Gotchas**:
+- "Subclass feature" is a placeholder in progression tables, not a real feature name
+- Duplicate feature names: Barbarian has "Improved Brutal Strike" at both levels 13 and 17
+- Rogue Starting Equipment is a bold paragraph BELOW the Core Traits table, not inside it
+- Druid has secondary "Beast Shapes" table embedded mid-prose in Wild Shape feature
+- Druid Circle of the Land has 4 sub-tables (Arid/Polar/Temperate/Tropical)
+- Cleric subclass features at levels 3/6/17 (not standard 3/6/10/14 pattern)
+- `--` = no spell slots in progression tables
+
+---
+
+## Ch05: Character Origins (~170 lines, ~16 entries, MEDIUM-HIGH)
+**Split by**: `## **Section**` H2 for Backgrounds / Species.
+**Background pattern** (4 entries: Acolyte, Criminal, Sage, Soldier):
+```
+**Acolyte**
+**Ability Scores:** Intelligence, Wisdom, Charisma
+**Feat:** Magic Initiate (Cleric) (see "Feats")
+**Skill Proficiencies:** Insight, Religion
+**Tool Proficiency:** Calligrapher's Supplies
+**Equipment:** _Choose A or B:_ (A) items, N GP; or (B) 50 GP
+```
+**Species pattern** (9 entries):
+```
+**Dwarf**
+**Creature Type:** Humanoid
+**Size:** Medium (about 4-5 feet tall)
+**Speed:** 30 feet
+```
+Traits follow as `_**TraitName.**_` paragraphs. Nested sub-options use `**Name (SubType).**` bold-only pattern.
+**Embedded tables**: Draconic Ancestors (inside Dragonborn), Elven Lineages, Fiendish Legacies — all with doubled header rows.
+**Gotchas**:
+- Human/Tiefling have dual Size: `Medium ... or Small ..., chosen when you select this species`
+- Floating `**Fiendish Legacies**` heading between Orc and Tiefling entries (table caption, not an entry)
+- Soldier tool proficiency spans two separate italic runs due to OCR: `_Choose one kind of_ _Gaming Set_`
+
+---
+
+## Ch06: Feats (~117 lines, ~18 entries, MEDIUM)
+**Feat entry pattern**:
+```
+**Alert**
+_Origin Feat_
+```
+or with prerequisite:
+```
+**Grappler**
+_General Feat (Prerequisite: Level 4+, Strength or_
+_Dexterity 13+)_
+```
+**4 categories**: Origin (4), General (2), Fighting Style (4), Epic Boon (8). Category headers: `#### **Category Name**`.
+**Sub-benefits**: `_**Benefit Name.**_` inline. `_**Repeatable.**_` always last when present.
+**Gotchas**:
+- Prerequisite line wraps across 2 italic lines — must join consecutive italic lines
+- Simple feats (Savage Attacker, Archery, etc.) have no named sub-benefits — pure prose
+- Introductory `#### Parts of a Feat` section uses same `_**Label.**_` pattern but is NOT a feat entry
+- Origin/Fighting Style feats have no parenthetical; General/Epic Boon embed prerequisites inline
+
+---
+
+## Ch07: Equipment (~383 lines, ~257 entries, HIGH)
+**Weapons table**: Category rows as italic merged cells: `| _Simple Melee Weapons_ | | | | | |`. Properties column has embedded args: `Ammunition (Range 80/320; Bolt), Loading, Two-Handed`. Split on `, ` only at top level (not inside parens). Ammo type after `;` inside Ammunition parens.
+**Armor table**: Category rows include don/doff: `_Medium Armor (5 Minutes to Don and 1 Minute to Doff)_`. AC values: plain int (`16`), modifier expr (`11 + Dex modifier`), capped (`12 + Dex modifier (max 2)`), bonus (`+2` for Shield).
+**Tool entries** (prose, not table):
+```
+**Alchemist's Supplies (50 GP)**
+**Ability:** Intelligence **Weight:** 8 lb.
+**Utilize:** Identify a substance (DC 15), or start a fire (DC 15)
+**Craft:** Acid, Alchemist's Fire, Component Pouch, Oil, Paper, Perfume
+```
+Variants: `**Variants:** Dice (1 SP), dragonchess (1 GP), playing cards (5 SP)`
+**Food/Drink/Lodging**: 4-column two-pair layout `| Item | Cost | Item | Cost |` with italic category rows in each pair.
+**Gotchas**:
+- Blowgun damage is `1 Piercing` (flat int, not dice)
+- Lance: `Two-Handed (unless mounted)` — conditional, not damage override
+- Light Armor category row missing from table — don/doff must be inferred
+- Shield is `+2` AC (additive bonus, not base)
+- Musical Instrument variants split across page with hyphenated word: `dul-\ncimer`
+- Weight formats: `2 lb.`, `1/4 lb.`, `1½ lb.` (Unicode half), `5 lb. (full)`, `--`, `Varies`
+- Cost values: some use commas (`1,500 GP`), some don't
+- Vex mastery property definition text is missing/cut off
+
+---
+
+## Ch08: Spells (~9,274 lines, ~339 entries, HIGH)
+**Leveled header**: `**Acid Arrow**` then `_Level 2 Evocation (Wizard)_`
+**Cantrip header**: `**Acid Splash**` then `_Evocation Cantrip (Sorcerer, Wizard)_`
+**Metadata block** (4 lines):
+```
+**Casting Time:** Action
+**Range:** 90 feet
+**Components:** V, S, M (powdered rhubarb leaf)
+**Duration:** Instantaneous
+```
+**Upgrade sections**: `_**Using a Higher-Level Spell Slot.**_` or `_**Cantrip Upgrade.**_`
+**4 embedded stat blocks**: Animated Object, Otherworldly Steed, Giant Insect, Draconic Spirit — each uses `### **Name**` heading. Ability table formats vary between them.
+**Gotchas**:
+- Class list wraps to 2 italic lines (~10-15 spells): `_Level 4 Abjuration (Cleric, Paladin, Sorcerer, Warlock,_` / `_Wizard)_`
+- Reaction Casting Time is multi-line (trigger description flows onto next lines)
+- Material Components wrap across lines (up to 3 lines for Astral Projection)
+- Duration `Special` exists (Creation spell)
+- Concentration cantrip exists (Dancing Lights)
+- Spell name with slash: `Antipathy/Sympathy`
+- Irregular list indentation: both `- ` and `     - ` (five-space) in same chapter
+- Page break can interrupt metadata block between Casting Time and Range
+
+---
+
+## Ch09: Rules Glossary (~255 lines, ~131 entries, MEDIUM)
+**Entry pattern**: `**Entry Name**` or `**Entry Name [Tag]**` — bold inline, NOT a heading.
+**Tags**: `[Action]` (12), `[Condition]` (15), `[Hazard]` (5), `[Area of Effect]` (6), `[Attitude]` (3).
+**Two sub-entry label styles**: Most use `_**Label.**_` (italic-bold), but Long Rest/Short Rest/Truesight/Unarmed Strike use `**Label.**` (bold only).
+**Cross-refs**: `_See also_ "Term," "Term," and "Chapter" ("Section").`
+**Multi-column list artifacts**: Bare words with no list markers, separated by blank lines (from PDF multi-column layout).
+**Abbreviations table**: Split across two pages with entries between fragments — must merge.
+**Embedded tables**: Damage Types (13 types), Object AC/HP, Carrying Capacity, Water/Food Needs, Influence Checks, Search skills, Areas of Knowledge.
+**Gotchas**:
+- Damage Types table split by page break into two separate tables
+- Exhaustion is a condition with cumulative stacking (unique among 15 conditions)
+- Creature type list and condition list are enumerations embedded inside parent entries, not standalone entries
+
+---
+
+## Ch10: Gameplay Toolbox (~202 lines, ~79 entries, HIGH complexity, NICE-TO-HAVE priority)
+**Content types**: Travel terrain (11 rows), poisons (13), traps (8), contagions (3), environmental hazards (8), XP budget (20 rows), fear/stress DCs.
+**Poison header**: `**Assassin's Blood (150 GP)**` / `_Ingested Poison_`
+**Trap header**: `**Collapsing Roof**` / `_Deadly Trap (Levels 1-4)_` then `**Trigger:**` / `**Duration:**` fields.
+**Trap scaling table**: Pre-table noise line + GFM table per trap.
+**Gotchas**:
+- Rolling Stone has dual severity: `_Deadly Trap (Levels 11-16) or Nuisance Trap (Levels 17-20)_`
+- XP Budget table has orphaned headers as 3 separate plain-text lines above the table (no header row in table itself)
+- Spiked Pit scaling table uses `<br>` in a cell: `10 (3d6) Bludgeoning plus 13<br>(3d8) Piercing`
+- Table footnotes use `*` / `+` inline, no standard footnote syntax
+
+---
+
+## Ch11: Magic Items (~362 lines, ~257 entries + ~163 named properties, HIGH)
+**A-Z boundary**: `## **Magic Items A-Z**` divides preamble rules from item catalog.
+**Item header**:
+```
+**Amulet of Health**
+_Wondrous Item, Rare (Requires Attunement)_
+```
+**Multi-line category**: Consecutive italic lines after name must be joined.
+**Multi-rarity**: `_Weapon (Any Ammunition), Uncommon (+1), Rare (+2), or Very Rare (+3)_`
+**Named properties**: `_**Property Name.**_` pattern. 163 total. `_**Curse.**_` signals cursed item.
+**Variant families** (~10): Belt of Giant Strength (table), Figurine of Wondrous Power (inline `_**Name (Rarity).**_`), Ioun Stone (inline), Feather Token (inline), Potion of Healing (table), Bag of Tricks, Crystal Ball.
+**Embedded tables**: ~52 random-result tables in A-Z section. Dual-column format common: `| 1d100 | Type | 1d100 | Type |`.
+**Rarity enum**: Common, Uncommon, Rare, Very Rare, Legendary, Artifact (6 values — Artifact from Dragon Orb).
+**Gotchas**:
+- Item name wraps across 2 bold lines: `**Amulet of Proof against Detection**` / `**and Location**` — merge consecutive bold lines before italic category
+- Figurine of Wondrous Power embeds a full `### Giant Fly` stat block
+- Mysterious Deck table split into 2 segments with card descriptions interspersed
+- Bold monster names mid-prose (`**Water Elemental**`) are cross-refs, not item headers — item headers always followed by italic category line
+- Pre-table label rows (`**1d100** **Destination**`) look like item names but aren't
+
+---
+
+## Ch12: Monsters (~12,252 lines, ~234 stat blocks, HIGH)
+## Ch13: Animals (~750 lines, ~96 stat blocks, MEDIUM)
+
+**These two chapters share identical stat block format.** Parse with same state machine; ch13 adds: strip stray ch12 entries before `# **Animals**` H1, handle compound swarm type `"Swarm of Tiny Beasts"`.
+
+**Group/Entry headings**: `## **Group Name**` (H2) -> `### **Monster Name**` (H3). Single-variant groups repeat name at both levels.
+**Type line**: `_Size Type (Tag), Alignment_` — e.g., `_Huge Fiend (Demon), Chaotic Evil_`. Dual-size: `_Medium or Small Humanoid_`.
+**Combat stats** (3 lines, always together, always this order):
+```
+**AC** 17 **Initiative** +7 (17)
+**HP** 150 (20d10 + 40)
+**Speed** 10 ft., Swim 40 ft., Fly 90 ft. (hover)
+```
+
+**Ability score table** (11-col, 2-row):
+```
+| Str 21 | +5 | +5 | Col4 | Dex 9 | -1 | +3 | Col8 | Con 15 | +2 | +6 |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| **Int** 18 | +4 | +8 |  | **Wis**	15 | +2 | +6 |  | **Cha**	18 | +4 | +4 |
+```
+Row 1: Str/Dex/Con (unbolded). Row 2: Int/Wis/Cha (**bolded**). Cells: `AbilityName Score | modifier | save`. `Col4`/`Col8` in separator columns (~224 occurrences) = empty. Tab chars in row-2 cells. Unicode minus (U+2212) for negatives.
+
+**`MOD SAVE` artifact**: `MOD SAVE MOD SAVE MOD SAVE` — plain text before ability table on ~12 monsters total (5 in ch12, 7 in ch13). Discard.
+
+**Optional fields** (fixed order, any may be absent): `**Skills**` -> `**Resistances**` -> `**Vulnerabilities**` -> `**Immunities**` -> `**Gear**` -> `**Senses**` -> `**Languages**` -> `**CR**`. Only Senses and CR always present.
+**Immunities**: Damage types and conditions in ONE field, semicolon-separated: `**Immunities** Poison, Thunder; Exhaustion, Grappled, Paralyzed`.
+**CR**: `**CR** 10 (XP 5,900, or 7,200 in lair; PB +4)`. Fractional: `1/8`, `1/4`, `1/2`.
+
+**Section labels**: Bare unformatted text on own line: `Traits`, `Actions`, `Bonus Actions`, `Reactions`, `Legendary Actions`. NOT headings, NOT bold.
+**Trait/Action pattern**: `_**Name.**_ Description...`
+  - Usage: `_**Name (Recharge 5-6).**_`, `_**Name (2/Day).**_`, `_**Name (3/Day, or 4/Day in Lair).**_`
+  - Attacks: `_**Bite.**_ _Melee Attack Roll:_ +N, reach N ft. _Hit:_ N (XdY + Z) Type damage.`
+  - Saves: `_**Name.**_ _Ability Saving Throw:_ DC N, target. _Failure:_ effect. _Success:_ effect.`
+  - Reactions: `_**Name.**_ _Trigger:_ description. _Response:_ description.`
+  - Sub-items use `**Bold.**` (not italic-bold): Vampire Weakness, Sphinx Roar
+
+**Legendary Actions**: Section label followed by multi-line italic boilerplate: `_Legendary Action Uses: 3 (4 in Lair). Immediately after..._ ` — strip boilerplate, parse action entries below.
+
+**Spellcasting block**:
+```
+_**Spellcasting.**_ The lich casts ... using Intelligence ... (spell save DC 20):
+**At Will:** _Spell_, _Spell_ (level 5 version)
+**2/Day Each:** _Spell_, _Spell_
+```
+Frequency categories bold; spell names italic. Parenthetical notes after spell names. Lists can wrap across lines and page breaks.
+
+**Gotchas**:
+- Spell names wrap across lines: `_Power` at line end, `_Word Kill_` at next line start
+- Couatl Shapechange note wraps across page break inside a parenthetical
+- Green Hag `Coven Magic` is freeform prose spellcasting (no structured frequency categories)
+- Action entries with bold cross-refs (`**Black Puddings**`) are prose, not action names
+- Languages: `Understands Common but can't speak` variant (capture `canSpeak: false`)
+- ch13: 5 non-Beast entries (Flying Snake=Monstrosity, Giant Eagle/Elk/Owl=Celestial, Giant Vulture=Monstrosity)
+- ch13: Swarm type string: `Large Swarm of Tiny Beasts` — compound type, not standard Size+Type
+- ch13: 2 stray ch12 entries (unnamed creature fragment + Ogre Zombie) before Animals H1
+</file>
+
+<file path="docs/plans/active/002-srd-library.md">
+# Plan 002: SRD → TypeScript Library
+
+## Context
+
+The `@dnd/library` package has complete type definitions (~350 LOC) and stub parsers, but no actual parsing implementation. The SRD 5.2.1 markdown (13 chapters, ~45K lines) sits in `content/srd-markdown/chapters/` ready to be transformed into typed data.
+
+**Goal**: Build a complete parsing + data pipeline so the library exports ready-to-use typed arrays (`allSpells`, `allClasses`, etc.) that power the app's compendium, character builder, and leveling system. Design for LLM-assisted development: TDD contracts, one-parser-per-agent scoping, and a verification layer.
+
+**Non-goals**: Live combat/VTT calculations. AA parsing (separate plan, but interfaces designed to accommodate it). Database schema.
+
+**Reference**: Detailed per-chapter format analysis in `content/srd-markdown/chapter-summaries/`.
+
+---
+
+## SRD Chapter Analysis Summary
+
+Per-chapter summaries live in `content/srd-markdown/chapter-summaries/`. Key findings:
+
+| Ch | Content | Entries | Complexity | Priority | Parser |
+|----|---------|---------|------------|----------|--------|
+| 01 | Legal/TOC | ~250 | Low | **Skip** | — |
+| 02 | Playing the Game | ~50 | Medium | Important | `rules.ts` (partial) |
+| 03 | Character Creation | ~235 | Medium | **Important** | `creation.ts` |
+| 04 | Classes | ~1,200 | **High** | **Critical** | `classes.ts` |
+| 05 | Origins | ~13 | Medium | **Critical** | `origins.ts` |
+| 06 | Feats | ~18 | Medium | **Critical** | `feats.ts` |
+| 07 | Equipment | ~257 | **High** | **Critical** | `equipment.ts` |
+| 08 | Spells | ~320 | **High** | **Critical** | `spells.ts` |
+| 09 | Rules Glossary | ~131 | Medium | **Critical** | `rules.ts` |
+| 10 | Gameplay Toolbox | ~50 | Medium | Nice-to-have | `toolbox.ts` |
+| 11 | Magic Items | ~257 | **High** | **Critical** | `magic-items.ts` |
+| 12 | Monsters | ~234 | **High** | **Critical** | `monsters.ts` |
+| 13 | Animals | ~96 | Medium | Important | `monsters.ts` (shared) |
+
+### Universal Noise Patterns (every parser must handle)
+
+These appear in ALL chapters and must be stripped in a preprocessing pass:
+
+1. **Page break markers**: `## Page NN` H2 headings + `<!-- source_txt: ... -->` HTML comments
+2. **Page footer lines**: `**NN** System Reference Document 5.2.1` as bold paragraphs
+3. **Ghost table headers**: Duplicate bold text lines above every pipe table (OCR artifact) — e.g., `**Level** **Bonus** **Class Features**` followed by the real `| Level | Bonus | ... |` table
+4. **`<br>` HTML tags**: Inside table cells for multi-line values
+5. **Unicode artifacts**: En-dash (U+2013) in ranges, minus sign (U+2212) in ability modifiers, tab characters in ability score cells
+
+### Per-Parser Critical Gotchas (from chapter summaries)
+
+**Spells (ch08)**: Two header formats (leveled: `_Level N School (Classes)_`, cantrip: `_School Cantrip (Classes)_`). ~10-15 spells have class lists wrapping across two italic lines. Ritual tag is inside casting time field ("Action or Ritual"). 4 spells contain embedded stat blocks with `### **Name**` headings. Upgrade sections: `_**Using a Higher-Level Spell Slot.**_` vs `_**Cantrip Upgrade.**_`.
+
+**Classes (ch04)**: Feature headings are inline bold `**Level N: Feature Name**`, NOT markdown headings. 12 different progression table column shapes (Barbarian has 4 extras, Bard has 12, Warlock uses unique Slot Level column). Subclass heading format varies across 3 different patterns. Same-named features at different levels exist (Barbarian "Improved Brutal Strike" at 13 and 17). Ghost header rows above every progression table.
+
+**Equipment (ch07)**: Italic category-header rows embedded INSIDE data tables (`_Simple Melee Weapons_`). Properties column needs parenthesis-aware comma splitting (e.g., `Thrown (Range 20/60), Versatile (1d8)`). Blowgun has non-dice damage `1 Piercing`. Lance has conditional Two-Handed. Adventuring Gear table split across multiple page boundaries. ~19 distinct data types.
+
+**Monsters (ch12+13)**: Ability score table is 2-row × 11-column with 3 abilities per row, Unicode minus signs, tab characters, and stray `MOD SAVE MOD SAVE MOD SAVE` artifact lines in ~224/234 entries. Section delimiters (Traits, Actions, Bonus Actions, Reactions, Legendary Actions) are bare unformatted plaintext, not headings. ~27 monsters have lair-scaled values in CR, Legendary Resistance, and Legendary Actions. Ch13 has 2 stray ch12 entries at top of file.
+
+**Magic Items (ch11)**: A-Z catalog starts at line ~564 after rules preamble. ~20 items have multi-line category metadata wrapping across italic lines. Multi-rarity items encode variants inline: `_Weapon (Any), Uncommon (+1), Rare (+2), Very Rare (+3)_`. 7 "Rarity Varies" items use two different sub-patterns (table vs inline bullets). 52 embedded tables with ghost headers. 163 named sub-properties using `_**PropertyName.**_`.
+
+**Rules Glossary (ch09)**: All entries are bold paragraphs, not headings. Conditions tagged with `[Condition]`. Two sub-entry styles coexist: `_**Label.**_` (bold-italic) and `**Label.**` (bold-only). Multi-column list artifacts (bare words, no bullet markers). Abbreviations table split across two pages with unrelated content between halves. Damage Types table cleaved by page break with duplicated header.
+
+**Origins (ch05)**: Backgrounds are highly regular (5 bold-label fields each). Species have free-form trait prose with `_**TraitName.**_` pattern, nested sub-option lists (Giant Ancestry, Gnomish Lineage), and embedded tables (Draconic Ancestors, Elven Lineages). Human and Tiefling have compound Size ("Small or Medium").
+
+**Character Creation (ch03)**: Contains foundational math tables: Level Advancement (XP thresholds), Ability Score Modifiers (-5 to +10), Point Buy costs, Multiclass Spell Slots. Dual-column tables where each row = two logical records. Em-dash `—` means 0 in spell slot table.
+
+---
+
+## Phase 1: Shared Utilities + Infrastructure
+
+### 1A. Extend `library/src/parsers/shared.ts`
+
+Add utilities needed by multiple parsers. The universal noise patterns documented above mean a **preprocessing pass** is critical — every parser needs clean AST input.
+
+```
+preprocessMarkdown(markdown: string): string
+  — Strip all noise BEFORE parsing to AST: remove "## Page NN" lines,
+    HTML comments, page footer lines, ghost table header lines.
+    This is a string-level pass that simplifies everything downstream.
+
+filterPageNoise(nodes: Content[]): Content[]
+  — AST-level backup: remove any remaining page marker headings,
+    HTML comment nodes, and page-number paragraphs from node arrays.
+
+parseMarkdownTable(node: Table): Record<string, string>[]
+  — Convert a remark Table node into array of row objects keyed by header.
+    Handle <br> tags in cells, strip italic category rows.
+
+extractBoldField(nodes: Content[], fieldName: string): string | undefined
+  — From a sequence of nodes, find "**Field Name:** value" patterns.
+    Handle the common SRD metadata pattern (spells, origins).
+
+splitByBoldParagraph(nodes: Content[]): Array<{name: string, children: Content[]}>
+  — Split node list into sections where each starts with a bold-only
+    paragraph. Used for spells, feats, magic items, rules, conditions.
+
+nodesToMarkdown(nodes: Content[]): string
+  — Serialize AST nodes back to markdown (for description fields).
+    New dep: mdast-util-to-markdown.
+
+splitBySection(nodes: Content[], markers: string[]): Record<string, Content[]>
+  — Split nodes by bare plaintext section markers like "Traits", "Actions",
+    "Bonus Actions", "Reactions", "Legendary Actions". Returns a map.
+
+joinWrappedItalicLines(nodes: Content[]): Content[]
+  — Concatenate consecutive italic-only paragraphs into single nodes.
+    Fixes the ~10-15 spells and ~20 magic items with wrapped metadata.
+
+normalizeUnicode(text: string): string
+  — Replace U+2212 (minus) with ASCII hyphen, U+2013 (en-dash) with
+    hyphen, normalize tabs to spaces. Used across all parsers.
+```
+
+### 1B. New dependency
+
+Add `mdast-util-to-markdown` to `library/package.json` for `nodesToMarkdown`.
+
+### 1C. Data export layer: `library/src/data/`
+
+Create a data module that runs parsers against in-repo markdown and exports typed arrays:
+
+```
+library/src/data/
+  index.ts          — barrel: re-exports all parsed data
+  spells.ts         — import ch08 markdown, export allSpells: Spell[]
+  classes.ts        — import ch04, export allClasses: Class[]
+  equipment.ts      — import ch07, export allWeapons, allArmor, allGear
+  feats.ts          — import ch06, export allFeats: Feat[]
+  magic-items.ts    — import ch11, export allMagicItems: MagicItem[]
+  monsters.ts       — import ch12+ch13, export allMonsters: Monster[]
+  origins.ts        — import ch05, export allSpecies, allBackgrounds
+  rules.ts          — import ch09, export allRules, allConditions
+  creation.ts       — import ch03, export levelAdvancement, abilityScoreModifiers, etc.
+```
+
+Each file reads markdown via `fs.readFileSync` at module level (Node-only; the app imports the parsed data, not the parser). The `library/src/index.ts` barrel re-exports `data/index.ts`.
+
+**Import strategy**: Use Node `fs` to read from `content/srd-markdown/chapters/` relative to the library root. This keeps the library self-contained within the monorepo.
+
+### 1D. Type adjustments
+
+Based on chapter summary analysis, these types need changes:
+
+**Modifications to existing types**:
+- **`Monster`**: Add `initiative: { modifier: number; score: number }`, `proficiencyBonus: number`, `bonusActions: MonsterAction[]` (currently missing from type).
+- **`Weapon`**: Add `mastery: string` field — SRD weapons table has a Mastery column (Slow, Nick, Vex, etc.).
+
+**New types needed**:
+- **`Species`**: `{ name, creatureType, size: string | string[], speed, traits: SpeciesTrait[] }` — size can be compound ("Small or Medium").
+- **`SpeciesTrait`**: `{ name, description, effects: Effect[] }` — for individual species traits like Breath Weapon, Darkvision.
+- **`Background`**: `{ name, abilityScores: string[], feat: string, skills: string[], toolProficiency: string, equipment: string }`.
+- **`LevelAdvancement`**: `{ level, xp, proficiencyBonus }` — from ch03 table.
+- **`AbilityScoreModifier`**: `{ score, modifier }` — from ch03 table.
+
+### 1E. Fixture + test infrastructure
+
+Create `tests/fixtures/` with representative markdown snippets. Each fixture should contain 2-3 entries covering the edge cases identified in chapter summaries.
+
+```
+tests/fixtures/
+  spell-sample.md         — exists; expand to 5+ spells (cantrip, leveled, ritual, multi-line classes, table in description)
+  class-barbarian.md      — Barbarian: traits table, progression, 4+ features incl. Rage detail, subclass
+  class-wizard.md         — Wizard: spellcasting class to test spell slot columns + cantrips
+  weapons-sample.md       — 5+ weapons (simple melee, martial ranged, blowgun non-dice, lance conditional, versatile)
+  armor-sample.md         — one per category (light/medium/heavy/shield) with AC parsing edge cases
+  feat-sample.md          — 3+ feats (origin simple, general with prereq, fighting style, one with Repeatable)
+  magic-item-sample.md    — 4+ items (simple, attunement, multi-rarity +1/+2/+3, Rarity Varies with table)
+  monster-sample.md       — 3 monsters (simple beast, medium CR, legendary actions + lair)
+  species-sample.md       — 2 species (Dragonborn with tables, Dwarf simpler)
+  background-sample.md    — 2 backgrounds (Acolyte, Criminal)
+  rules-sample.md         — 5+ entries (2 conditions with [Condition] tag, 2 rules, 1 action with [Action] tag)
+  creation-tables.md      — Level Advancement + Ability Score Modifiers + Point Buy tables from ch03
+```
+
+---
+
+## Phase 2: Parser Implementations (TDD)
+
+Each parser follows the same pattern:
+1. Write fixture markdown (small, representative snippet from SRD)
+2. Write expected output as typed objects in the test file
+3. Implement parser to make tests pass
+4. Run against full chapter as integration test (count + spot-check)
+
+### Parser execution order (dependencies →)
+
+```
+shared utilities → spells → feats → equipment → origins → creation-tables → classes → magic-items → rules → monsters
+```
+
+Rationale: Spells have the most consistent per-entry format. Classes are deferred because they're most complex and benefit from patterns established in feats/origins. Monsters last because they have the most irregular formatting.
+
+### 2A. `parseSpells(markdown: string): Spell[]`
+**File**: `library/src/parsers/spells.ts`
+**Source**: chapter 08 (~9,274 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/08-spells.md`
+**Strategy**:
+- Preprocess markdown (strip noise), parse to AST
+- Split by `splitByBoldParagraph` on spell name headers
+- Join wrapped italic lines, then parse italic subheading for level/school/classes
+  - Leveled: `_Level N School (Class1, Class2)_`
+  - Cantrip: `_School Cantrip (Class1, Class2)_`
+- Extract `**Casting Time:**`, `**Range:**`, `**Components:**`, `**Duration:**` via `extractBoldField`
+- Parse components string: V/S/M detection + material text in parentheses
+- Detect `concentration` from "Concentration" in duration, `ritual` from "or Ritual" in casting time
+- Remaining nodes = description; split off `_**Using a Higher-Level Spell Slot.**_` / `_**Cantrip Upgrade.**_`
+- Skip the 4 embedded stat blocks within spell bodies (Animate Objects, etc.) — don't let them create false spell entries
+
+**Expected counts**: ~320 spells
+**Key edge cases**: Multi-line class lists (~15 spells), spells with tables, ritual tag in casting time, reaction casting time spanning multiple lines
+
+### 2B. `parseFeats(markdown: string): Feat[]`
+**File**: `library/src/parsers/feats.ts`
+**Source**: chapter 06 (~238 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/06-feats.md`
+**Strategy**:
+- Preprocess, parse, split by bold paragraph
+- Skip "Parts of a Feat" intro section (uses same `_**Label.**_` pattern as feat benefits)
+- Parse italic line for category + prerequisite:
+  - `_Origin Feat_` → category: "origin", no prereq
+  - `_General Feat (Prerequisite: Level 4+)_` → category: "general", prereq: "Level 4+"
+  - `_Fighting Style Feat (Prerequisite: Fighting Style Feature)_`
+  - `_Epic Boon Feat (Prerequisite: Level 19+)_`
+- Handle wrapped prerequisite lines (join consecutive italic paragraphs)
+- Detect `_**Repeatable.**_` in body
+- Remaining = description
+
+**Expected counts**: ~18 feats across 4 categories
+
+### 2C. `parseWeapons` + `parseArmor` + `parseGear`
+**File**: `library/src/parsers/equipment.ts`
+**Source**: chapter 07 (~1,666 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/07-equipment.md`
+**Strategy**:
+- **Weapons**: Find weapons table in AST. Use `parseMarkdownTable`. Handle:
+  - Italic category rows (`_Simple Melee Weapons_`) → set current category context, don't emit as weapon
+  - Damage parsing: split "1d8 Slashing" → damage: "1d8", damageType: "Slashing". Handle "1 Piercing" (blowgun)
+  - Properties: parenthesis-aware comma split. "Thrown (Range 20/60), Versatile (1d8)" → 2 properties
+  - Mastery: single word from Mastery column
+- **Armor**: Find armor table. Parse AC formula:
+  - Light: "11 + Dex modifier" → ac: 11, dexBonus: true, maxDexBonus: undefined
+  - Medium: "14 + Dex modifier (max 2)" → ac: 14, dexBonus: true, maxDexBonus: 2
+  - Heavy: "18" → ac: 18, dexBonus: false
+  - Shield: "+2" → special handling
+  - Category from italic section rows. Strength req from "Str 13" → 13. Stealth: "Disadvantage" → true
+- **Gear**: Parse Tools table + Adventuring Gear table(s) into `Gear[]` (name, cost, weight, description)
+
+**Expected counts**: ~37 weapons, ~14 armor + shield, ~50+ gear items
+
+### 2D. `parseSpecies` + `parseBackgrounds`
+**File**: `library/src/parsers/origins.ts`
+**Source**: chapter 05 (~474 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/05-character-origins.md`
+**Strategy**:
+- **Backgrounds**: Split "Background Descriptions" section by bold paragraph. Extract:
+  - `**Ability Scores:**` → string[]
+  - `**Feat:**` → string
+  - `**Skill Proficiencies:**` → string[]
+  - `**Tool Proficiency:**` → string
+  - `**Equipment:**` → string (raw, include A/B choice)
+- **Species**: Split "Species Descriptions" section by bold paragraph. Extract:
+  - `**Creature Type:**`, `**Size:**`, `**Speed:**` bold fields
+  - Size: handle compound "Small or Medium" → string[]
+  - Traits: parse `_**Trait Name.**_` pattern within each species body
+  - Some traits have embedded tables (Draconic Ancestors) — include as description markdown
+
+**Expected counts**: ~4 backgrounds, ~9 species
+
+### 2E. `parseCreationTables`
+**File**: `library/src/parsers/creation.ts`
+**Source**: chapter 03 (~998 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/03-character-creation.md`
+**Strategy**:
+- Extract key reference tables (not all prose content):
+  - **Level Advancement table**: level → XP threshold → proficiency bonus
+  - **Ability Score Modifiers table**: score → modifier (1-30)
+  - **Ability Score Point Cost table**: score → point cost
+  - **Multiclass Spell Slots table**: total caster levels → slots per level (em-dash = 0)
+- Handle dual-column table format (2 logical records per row)
+- These are foundational to the character computation engine
+
+**Expected outputs**: 4 typed lookup tables
+
+### 2F. `parseClasses(markdown: string): Class[]`
+**File**: `library/src/parsers/classes.ts`
+**Source**: chapter 04 (~5,818 lines, 12 classes)
+**Summary ref**: `content/srd-markdown/chapter-summaries/04-classes.md`
+**Strategy** (most complex parser):
+- Preprocess markdown, parse to AST
+- Split chapter by `## **ClassName**` H2 headings (12 sections)
+- Per class:
+  - **Core Traits**: Find "Core X Traits" table. Parse for: Primary Ability, Hit Point Die (extract number), Saving Throw Proficiencies, Skill Proficiencies (options + count from "Choose 2:" pattern), Weapon/Armor Proficiencies, Starting Equipment. Handle `<br>` in cells.
+  - **Progression table**: Find the features table. Variable columns per class — always has Level, Proficiency Bonus, Class Features. Extra columns go into `extras: Record<string, string>`. Warlock is unique (Slot Level column instead of per-level slots).
+  - **Feature descriptions**: Scan for `**Level N: Feature Name**` bold paragraphs. Group consecutive text into feature description. Handle same-named features at different levels.
+  - **Subclasses**: Detect subclass boundaries (3 different heading patterns across classes). Parse subclass features with their own level-keyed descriptions.
+  - **Spellcasting**: Detect spellcasting feature, extract ability from text. Identify spell list sections (varies by class).
+
+**Expected counts**: 12 classes × (20-level progression + 15-20 features + 1-3 subclasses)
+**Key edge cases**: Ghost header rows above every table, Rogue's Starting Equipment outside traits table, 12 different progression column shapes, `## Page N` splitting features mid-paragraph
+
+### 2G. `parseMagicItems(markdown: string): MagicItem[]`
+**File**: `library/src/parsers/magic-items.ts`
+**Source**: chapter 11 (~5,854 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/11-magic-items.md`
+**Strategy**:
+- Find A-Z catalog boundary (starts at `## **Magic Items A–Z**`, ~line 564)
+- Split by bold paragraph for item names
+- Join wrapped italic metadata lines, then parse:
+  - Standard: `_Wondrous Item, Uncommon (Requires Attunement)_`
+  - Typed: `_Armor (Chain Mail), Rare_`
+  - Multi-rarity: `_Weapon (Any), Uncommon (+1), Rare (+2), or Very Rare (+3)_`
+  - Rarity Varies: `_Wondrous Item, Rarity Varies (Requires Attunement)_`
+- Extract: category, rarity, requiresAttunement, attunementRequirement
+- For multi-rarity items: either expand to N entries or store variant info
+- Remaining nodes = description (preserve embedded tables as markdown)
+
+**Expected counts**: ~257 items (290+ if expanding variants)
+**Key edge cases**: Multi-line metadata (~20 items), 7 Rarity Varies items with two sub-patterns, 52 embedded tables
+
+### 2H. `parseRules` + `parseConditions`
+**File**: `library/src/parsers/rules.ts`
+**Source**: chapter 09 (~1,858 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/09-rules-glossary.md`
+**Strategy**:
+- Preprocess, parse, split by bold paragraph
+- Detect tagged entries: `**Term [Tag]**` → tag in brackets identifies type
+  - `[Condition]` → Condition (15 entries)
+  - `[Action]` → Action rules (12 entries)
+  - `[Area of Effect]` → AoE rules (6 entries)
+  - `[Hazard]` → Hazard rules (5 entries)
+  - `[Attitude]` → Attitude rules (3 entries)
+  - No tag → general Rule
+- For Conditions: extract bulleted effects into `effects: string[]`
+- For all: description as markdown text
+- Handle both `_**Label.**_` and `**Label.**` sub-entry styles
+- Skip abbreviations table (split across pages, low value)
+
+**Expected counts**: ~131 entries (15 conditions + 116 rules)
+
+### 2I. `parseMonsters(markdown: string): Monster[]`
+**File**: `library/src/parsers/monsters.ts`
+**Source**: chapter 12 (~12,251 lines) + chapter 13 (~3,110 lines)
+**Summary ref**: `content/srd-markdown/chapter-summaries/12-monsters.md` + `13-animals.md`
+**Strategy** (most irregular format):
+- Preprocess: strip page noise + `MOD SAVE MOD SAVE MOD SAVE` artifact lines
+- Split by `### **Creature Name**` H3 headings
+- Skip ch13 preamble stray entries (2 ch12 monsters before the `# **Animals**` H1)
+- Per entry parse:
+  - **Type line**: italic `_Size Type (Tags), Alignment_`
+  - **Combat stats**: regex on `**AC** N`, `**Initiative** +N (N)`, `**HP** N (dice)`, `**Speed** ...`
+  - **Ability scores**: The 2-row × 11-column table. Parse using column positions (cols 1-3 = Str score/mod/save, 5-7 = Dex, 9-11 = Con; row 2 = Int/Wis/Cha). Normalize Unicode minus signs. Handle tab characters. Ignore stray Col4/Col8 separator columns.
+  - **Detail lines**: Parse `**Skills**`, `**Senses**`, `**Languages**`, `**CR**` bold fields. CR format: `10 (XP 5,900; PB +4)` or with lair: `10 (XP 5,900, or 7,200 in lair; PB +4)`
+  - **Sections**: Split by bare text markers "Traits", "Actions", "Bonus Actions", "Reactions", "Legendary Actions". Parse `_**Name.**_` entries within each.
+  - **Spellcasting**: Detect `At Will:` / `N/Day Each:` patterns, parse italic spell names
+  - **Lair actions**: Detect lair section marker, parse lair action entries
+
+**Expected counts**: ~234 (ch12) + ~96 (ch13) = ~330 total
+**Key edge cases**: Ability table formatting (the hardest single element), lair-scaled values on ~27 monsters, fractional CRs (1/8, 1/4, 1/2), swarm compound types, spellcasting blocks wrapping across pages
+
+---
+
+## Phase 3: Effect Extraction (LLM-Assisted)
+
+After all parsers produce clean typed data with `effects: []`, a second pass populates `Effect[]` on relevant types.
+
+### 3A. Design the extraction contract
+
+Create `library/src/effects/` module:
+
+```
+library/src/effects/
+  extract.ts        — Effect extraction functions per type
+  verify.ts         — Verification/validation of extracted effects
+  index.ts          — barrel
+```
+
+**`extractEffectsFromFeature(feature: ClassFeature): Effect[]`** — Given a parsed feature with name, level, and description, return the effects it grants. Same pattern for feats, magic items, species traits.
+
+### 3B. Effect extraction approach
+
+For each entity type, effects fall into categories by extractability:
+
+**Mechanically deterministic** (extractable from structured fields):
+- Class proficiencies → `{ type: "proficiency", category, value }` from traits table
+- Saving throw proficiencies → from traits table
+- AC formulas (Unarmored Defense) → `{ type: "set-ac-formula", formula }`
+- Extra Attack → `{ type: "extra-attack", count }`
+- Speed bonuses → `{ type: "speed-bonus", value, movementType }`
+
+**Extractable from description patterns** (regex/heuristic):
+- "Resistance to X damage" → `{ type: "resistance", damageType }`
+- "Immunity to X" → `{ type: "immunity", damageType }`
+- "proficiency with X" → `{ type: "proficiency", ... }`
+- "+N bonus to X" → `{ type: "modifier", target, value }`
+
+**Requires interpretation** (LLM-assisted):
+- Complex features (Rage: multiple effects, conditional)
+- Features with choices ("choose two skills from...")
+- Resource grants (uses per rest)
+- Granted actions (Breath Weapon, Cunning Action)
+
+### 3C. Implementation strategy
+
+1. **Heuristic extractor**: Write rule-based extraction for the deterministic + pattern categories above. This handles ~40-60% of effects.
+2. **LLM extraction task**: For each entity type, give an agent:
+   - The type definitions (Effect discriminated union)
+   - The parsed entities (name + description)
+   - The heuristic results as a starting point
+   - Instructions to fill in remaining effects or correct heuristic ones
+3. **Verification test**: For each entity, a test that checks:
+   - No empty effects on features that clearly grant something
+   - Effect types match what the description says (spot-check)
+   - Known effects are present (e.g., Barbarian Rage MUST have resistance + modifier + grant-action)
+
+### 3D. What gets effects
+
+| Type | Gets Effect[] | Notes |
+|------|---------------|-------|
+| ClassFeature | Yes | Core value — powers leveling |
+| SubclassFeature | Yes | Same |
+| Feat | Yes | Powers feat selection |
+| MagicItem | Yes | Powers equipment screen |
+| SpeciesTrait | Yes | Powers character creation |
+| Background | Indirectly | Proficiency grants via feat/skill fields |
+| Spell | No | Spells ARE effects; they don't produce Effect[] |
+| Monster | No | Monsters use their own stat block |
+| Condition | No | Conditions are referenced, not applied as Effect[] |
+
+---
+
+## Phase 4: Verification Layer
+
+### 4A. Count validation (`tests/validation/counts.test.ts`)
+
+After parsing full chapters, assert known counts:
+- Spells: >= 300
+- Classes: exactly 12
+- Feats: >= 15
+- Weapons: >= 35
+- Armor: >= 14
+- Magic Items: >= 200
+- Monsters + Animals: >= 300
+- Species: exactly 9
+- Backgrounds: >= 4
+- Conditions: >= 14
+- Rules: >= 80
+
+### 4B. Spot-check validation (`tests/validation/spot-checks.test.ts`)
+
+Hand-verify specific entries against known values:
+- Fireball: level 3, Evocation, 8d6 fire, 150 feet, V/S/M, concentration false
+- Cure Wounds: level 1, Abjuration, classes includes "Cleric" and "Druid"
+- Barbarian: d12 hit die, STR primary, STR+CON saves, 20 levels, Rage at level 1
+- Wizard: d6 hit die, INT spellcasting, Arcane Recovery at level 1
+- Longsword: martial melee, 1d8 slashing, Versatile (1d10), Sap mastery
+- Plate Armor: heavy, AC 18, STR 15 req, stealth disadvantage, no dex bonus
+- Aboleth: CR 10, Large Aberration, AC 17, HP 150, 3 legendary resistances
+- Alert feat: origin category, no prerequisite, not repeatable
+- Dragonborn species: Humanoid, Medium, 30 ft, has Breath Weapon trait
+- Bag of Holding: Wondrous Item, Uncommon, no attunement
+
+### 4C. Completeness checks (`tests/validation/completeness.test.ts`)
+
+- Every spell has: name, level (0-9), school, ≥1 class, castingTime, range, components, duration, description (non-empty)
+- Every class has: 20 levels in progression, hitDie > 0, ≥1 subclass, features at levels 1-20, savingThrows.length === 2
+- Every weapon has: name, category, range, damage, damageType, cost, mastery
+- Every armor has: name, category, ac > 0, cost
+- Every monster has: name, type, armorClass > 0, hitPoints (non-empty), challengeRating, ≥1 action
+- Every magic item has: name, rarity, category, description (non-empty)
+- Every species has: name, creatureType, size, speed, ≥1 trait
+- Every feat has: name, category, description (non-empty)
+
+### 4D. Effect verification (`tests/validation/effects.test.ts`)
+
+- Barbarian Rage: has resistance effect (bludgeoning/piercing/slashing), modifier effect, grant-action effect
+- Alert feat: has modifier effect on initiative
+- Fighter Extra Attack (level 5): has extra-attack effect with count >= 1
+- Barbarian Unarmored Defense: has set-ac-formula effect with DEX + CON
+- Dragonborn Breath Weapon: has grant-action effect
+- Dwarf Dwarven Resilience: has resistance effect (poison)
+- Sample 5+ class features per class: no empty effects on features with clear mechanical grants
+
+---
+
+## Agent Execution Plan
+
+### Guiding principle
+
+Each agent task has: **focused scope, clear inputs, testable outputs, fixture-first TDD**. No agent handles more than one parser. Context stays lean.
+
+Each agent receives:
+1. The plan section for their specific parser
+2. The chapter summary for their source chapter
+3. The relevant type definitions
+4. The shared utilities (from Phase 1)
+5. The fixture file for their parser
+6. Access to the full chapter markdown
+
+### Wave 0: Infrastructure (1 agent, sequential)
+**Agent**: "infra-setup"
+**Scope**:
+- Extend `shared.ts` with all new utilities listed in 1A
+- Add `mdast-util-to-markdown` dependency
+- Create `Species`, `SpeciesTrait`, `Background`, `LevelAdvancement`, `AbilityScoreModifier` types
+- Add `mastery: string` to `Weapon`
+- Add `initiative`, `bonusActions`, `proficiencyBonus` to `Monster`
+- Create `library/src/data/` directory with stub files
+- Create ALL fixture files in `tests/fixtures/` (copy representative snippets from SRD chapters)
+- Create test file stubs with expected outputs for each fixture
+**Verify**: `pnpm check` passes, all fixtures exist, all test stubs exist
+
+### Wave 1: Simple Parsers (3 agents, parallel)
+Parsers with the most consistent per-entry markdown formats.
+
+**Agent 1**: "parse-spells"
+- Reads: `content/srd-markdown/chapter-summaries/08-spells.md` for format reference
+- Input fixture: `tests/fixtures/spell-sample.md`
+- Implement: `parseSpells` in `parsers/spells.ts`
+- Wire: `data/spells.ts` exports `allSpells`
+- Verify: fixture tests pass, integration count >= 300, Fireball spot-check
+
+**Agent 2**: "parse-feats"
+- Reads: `content/srd-markdown/chapter-summaries/06-feats.md`
+- Input fixture: `tests/fixtures/feat-sample.md`
+- Implement: `parseFeats` in `parsers/feats.ts`
+- Wire: `data/feats.ts` exports `allFeats`
+- Verify: fixture tests pass, integration count >= 15, Alert spot-check
+
+**Agent 3**: "parse-equipment"
+- Reads: `content/srd-markdown/chapter-summaries/07-equipment.md`
+- Input fixtures: `tests/fixtures/weapons-sample.md` + `armor-sample.md`
+- Implement: `parseWeapons`, `parseArmor`, `parseGear` in `parsers/equipment.ts`
+- Wire: `data/equipment.ts` exports `allWeapons`, `allArmor`, `allGear`
+- Verify: fixture tests pass, weapons >= 35, armor >= 14, Longsword + Plate spot-checks
+
+### Wave 2: Medium Parsers (3 agents, parallel)
+
+**Agent 4**: "parse-origins"
+- Reads: `content/srd-markdown/chapter-summaries/05-character-origins.md`
+- Input fixtures: `tests/fixtures/species-sample.md` + `background-sample.md`
+- Implement: `parseSpecies`, `parseBackgrounds` in `parsers/origins.ts`
+- Wire: `data/origins.ts` exports `allSpecies`, `allBackgrounds`
+- Verify: species = 9, backgrounds >= 4, Dragonborn spot-check
+
+**Agent 5**: "parse-magic-items"
+- Reads: `content/srd-markdown/chapter-summaries/11-magic-items.md`
+- Input fixture: `tests/fixtures/magic-item-sample.md`
+- Implement: `parseMagicItems` in `parsers/magic-items.ts`
+- Wire: `data/magic-items.ts` exports `allMagicItems`
+- Verify: fixture tests pass, items >= 200, Bag of Holding spot-check
+
+**Agent 6**: "parse-rules"
+- Reads: `content/srd-markdown/chapter-summaries/09-rules-glossary.md`
+- Input fixture: `tests/fixtures/rules-sample.md`
+- Implement: `parseRules`, `parseConditions` in `parsers/rules.ts`
+- Wire: `data/rules.ts` exports `allRules`, `allConditions`
+- Verify: conditions >= 14, rules >= 80
+
+### Wave 3: Complex Parsers (3 agents, parallel)
+
+**Agent 7**: "parse-classes"
+- Reads: `content/srd-markdown/chapter-summaries/04-classes.md`
+- Input fixtures: `tests/fixtures/class-barbarian.md` + `class-wizard.md`
+- Implement: `parseClasses` in `parsers/classes.ts`
+- Wire: `data/classes.ts` exports `allClasses`
+- Verify: exactly 12 classes, 20-level progressions, Barbarian + Wizard spot-checks
+
+**Agent 8**: "parse-monsters"
+- Reads: `content/srd-markdown/chapter-summaries/12-monsters.md` + `13-animals.md`
+- Input fixture: `tests/fixtures/monster-sample.md`
+- Implement: `parseMonsters` in `parsers/monsters.ts`
+- Wire: `data/monsters.ts` exports `allMonsters`
+- Verify: total >= 300, Aboleth spot-check, fractional CRs parse correctly
+
+**Agent 9**: "parse-creation-tables"
+- Reads: `content/srd-markdown/chapter-summaries/03-character-creation.md`
+- Input fixture: `tests/fixtures/creation-tables.md`
+- Implement: `parseCreationTables` in `parsers/creation.ts`
+- Wire: `data/creation.ts` exports lookup tables
+- Verify: 20 level entries, ability modifiers for scores 1-30, multiclass slot table
+
+### Wave 4: Effect Extraction (3 agents, parallel)
+
+**Agent 10**: "effects-heuristic"
+- Implement rule-based `extractEffects` functions in `library/src/effects/extract.ts`
+- Cover: proficiency grants, resistance/immunity, numeric modifiers, AC formulas, extra attack, speed bonuses
+- Unit tests with known feature descriptions → expected effects
+
+**Agent 11**: "effects-classes-feats"
+- Input: All parsed class features + feats from Wave 1-3
+- Apply heuristic extractor, then LLM-fill remaining effects
+- Output: effect arrays for all class features + feats as verified data
+- Verification tests for 10+ known features
+
+**Agent 12**: "effects-items-species"
+- Input: All parsed magic items + species traits
+- Same approach as Agent 11
+- Verification tests for 10+ known items/traits
+
+### Wave 5: Integration + Validation (1 agent)
+
+**Agent 13**: "validation-integration"
+- Wire all `data/*.ts` modules into `data/index.ts` barrel
+- Update `library/src/index.ts` to re-export data
+- Write count, spot-check, completeness, and effect verification tests
+- Run full test suite: `pnpm -F @dnd/library test`
+- Run type check: `pnpm check`
+- Verify: all tests green, all counts match, all spot-checks pass
+
+---
+
+## File Inventory
+
+### New files
+```
+library/src/parsers/spells.ts          — rewrite (exists as stub)
+library/src/parsers/equipment.ts       — new
+library/src/parsers/classes.ts         — new
+library/src/parsers/feats.ts           — new
+library/src/parsers/magic-items.ts     — new
+library/src/parsers/monsters.ts        — new
+library/src/parsers/origins.ts         — new
+library/src/parsers/rules.ts           — new
+library/src/parsers/creation.ts        — new
+library/src/data/index.ts              — new
+library/src/data/spells.ts             — new
+library/src/data/classes.ts            — new
+library/src/data/equipment.ts          — new
+library/src/data/feats.ts              — new
+library/src/data/magic-items.ts        — new
+library/src/data/monsters.ts           — new
+library/src/data/origins.ts            — new
+library/src/data/rules.ts              — new
+library/src/data/creation.ts           — new
+library/src/effects/extract.ts         — new
+library/src/effects/verify.ts          — new
+library/src/effects/index.ts           — new
+library/src/types/species.ts           — new
+library/src/types/background.ts        — new
+library/src/types/creation.ts          — new (LevelAdvancement, AbilityScoreModifier)
+tests/fixtures/spell-sample.md         — expand existing
+tests/fixtures/class-barbarian.md      — new
+tests/fixtures/class-wizard.md         — new
+tests/fixtures/weapons-sample.md       — new
+tests/fixtures/armor-sample.md         — new
+tests/fixtures/feat-sample.md          — new
+tests/fixtures/magic-item-sample.md    — new
+tests/fixtures/monster-sample.md       — new
+tests/fixtures/species-sample.md       — new
+tests/fixtures/background-sample.md    — new
+tests/fixtures/rules-sample.md         — new
+tests/fixtures/creation-tables.md      — new
+tests/parsers/spells.test.ts           — expand existing
+tests/parsers/feats.test.ts            — new
+tests/parsers/equipment.test.ts        — new
+tests/parsers/classes.test.ts          — new
+tests/parsers/magic-items.test.ts      — new
+tests/parsers/monsters.test.ts         — new
+tests/parsers/origins.test.ts          — new
+tests/parsers/rules.test.ts            — new
+tests/parsers/creation.test.ts         — new
+tests/validation/counts.test.ts        — new
+tests/validation/spot-checks.test.ts   — new
+tests/validation/completeness.test.ts  — new
+tests/validation/effects.test.ts       — new
+```
+
+### Modified files
+```
+library/src/parsers/shared.ts          — add 9 utility functions
+library/src/parsers/index.ts           — re-export all parsers
+library/src/types/index.ts             — re-export Species, Background, SpeciesTrait, creation types
+library/src/types/monster.ts           — add initiative, bonusActions, proficiencyBonus
+library/src/types/equipment.ts         — add mastery to Weapon
+library/src/index.ts                   — re-export data module
+library/package.json                   — add mdast-util-to-markdown
+```
+
+---
+
+## Verification
+
+After all waves complete:
+
+```bash
+# Type check
+pnpm check
+
+# Run all tests (unit + integration + validation)
+pnpm -F @dnd/library test
+
+# Spot check: print parsed counts
+node -e "
+  const d = require('./library/src/data');
+  console.log('Spells:', d.allSpells.length);
+  console.log('Classes:', d.allClasses.length);
+  console.log('Feats:', d.allFeats.length);
+  console.log('Weapons:', d.allWeapons.length);
+  console.log('Armor:', d.allArmor.length);
+  console.log('Monsters:', d.allMonsters.length);
+  console.log('Magic Items:', d.allMagicItems.length);
+  console.log('Species:', d.allSpecies.length);
+  console.log('Backgrounds:', d.allBackgrounds.length);
+  console.log('Conditions:', d.allConditions.length);
+  console.log('Rules:', d.allRules.length);
+"
+```
+
+Expected: all tests green, counts match SRD, spot-checks pass, effects populated on class features/feats/items/species traits.
+</file>
+
+<file path="docs/architecture.md">
+# Architecture
+
+## Overview
+
+The platform is split into two workspace packages:
+
+- **`@dnd/library`** — Pure TypeScript. Parsers, types, and rules engine. Zero React/DB dependencies.
+- **`@dnd/app`** — TanStack Start web application. Routing, persistence, UI. Depends on `@dnd/library`.
+
+Game logic lives exclusively in the library. The app is a thin layer.
+
+## Library Design
+
+### Parsers
+
+Parsers convert SRD markdown chapters (and AA markdown files) into typed TypeScript objects.
+
+**Pipeline**: `markdown string → remark AST → walk/extract → typed data`
+
+Each parser is a pure function: same input, same output. No side effects.
+
+- `parsers/spells.ts` — Chapter 08 → `Spell[]`
+- `parsers/classes.ts` — Chapter 04 → `Class[]`
+- `parsers/monsters.ts` — Chapter 12 → `Monster[]`
+- `parsers/equipment.ts` — Chapter 07 → `Equipment[]`
+- `parsers/magic-items.ts` — Chapter 11 → `MagicItem[]`
+- `parsers/feats.ts` — Chapter 06 → `Feat[]`
+- `parsers/conditions.ts` — Chapter 09 → `Condition[]`
+- `parsers/aa-abilities.ts` — AA markdowns → `AAAbility[]`
+
+### SRD Markdown Format
+
+Spells (chapter 08) follow a consistent pattern:
+```
+**Spell Name**
+_Level N School (Class1, Class2)_      ← leveled spells
+_School Cantrip (Class1, Class2)_      ← cantrips
+
+**Casting Time:** ...
+**Range:** ...
+**Components:** V, S, M (material)
+**Duration:** ...
+
+Description text...
+_**Using a Higher-Level Spell Slot.**_ ... (optional)
+```
+
+Other chapters have their own patterns. See `content/srd-markdown/chapters/` for source files.
+
+### Effect Model
+
+The unified effect model is the core architectural abstraction. It makes hybrid mode work.
+
+Every character modifier is a **Source** that produces **Effects**:
+
+```
+Source (class feature, AA purchase, item, feat, etc.)
+  → Effect[] (modifier, proficiency, resistance, grant-action, etc.)
+    → CharacterState (computed AC, HP, skills, etc.)
+```
+
+All sources — class features, AA purchases, magic items, species traits, feats, DM overrides — produce Effects through the same `SourceWithEffects` interface. The engine resolves, deduplicates, and computes final character state.
+
+Key types: `Source`, `Effect`, `SourceWithEffects` in `library/src/types/effect.ts`.
+
+### Engine (planned)
+
+- **CharacterComputer** — Takes `SourceWithEffects[]`, produces `CharacterState`
+- **PrerequisiteEvaluator** — Checks if a character meets `AAPrerequisite[]`
+- **EffectResolver** — Handles deduplication and stacking rules
+- **Explanation** — Generates `ModifierExplanation` breakdowns ("Why is my AC 18?")
+
+## Data Flow
+
+### Static Reference Data (SRD, AA)
+
+SRD and AA content is static. It's parsed at import time from markdown files on disk. No database involved.
+
+```
+content/srd-markdown/chapters/*.md → parsers → typed arrays → library exports
+meta-resources/advanced-adventurers/ → aa-parser → AAAbility[] → library exports
+```
+
+### Mutable State (Postgres)
+
+Campaigns, characters, XP transactions, wiki pages, homebrew content — all mutable state lives in Postgres via Drizzle ORM.
+
+```
+User action → App route → Drizzle → Postgres
+                       → Library (compute) → Response
+```
+
+## Tech Stack Rationale
+
+| Choice | Why |
+|--------|-----|
+| unified/remark | SRD markdown has page breaks, HTML in tables, nested formatting. Regex would break. |
+| Postgres + Drizzle | CRUD app with campaigns, characters, transactions needs a real DB. |
+| Postgres FTS | Start with built-in full-text search. Upgrade to Meilisearch only if needed. |
+| TanStack Start | SSR + server functions, type-safe routing, same stack as kink project. |
+| Tailwind v4 | Utility CSS, agent-friendly, no config file needed. |
+</file>
+
+<file path="docs/campaign-modes.md">
+# Campaign Progression Modes
+
+The platform supports three progression modes, configured per campaign.
+
+## Standard 5e 2024
+
+Traditional D&D 2024 SRD rules.
+
+- Characters pick a class and follow its progression table
+- Leveling via XP thresholds or milestone (DM choice)
+- Spells are governed by class spell lists and preparation rules
+- Feats via ASI (Ability Score Improvement) choices
+- No XP-as-currency spending
+
+## AA Only (Advanced Adventurers)
+
+No classes. Everything purchased with XP.
+
+- **XP is currency**: DM awards XP, players spend it on abilities, HP, ability scores, spells, proficiencies
+- **Level**: Every 20 XP earned = 1 level (determines proficiency bonus)
+- **Saving throws**: Your two highest ability scores become save proficiencies
+- **Spellcasting**: Modular. Pick INT/WIS/CHA. Buy cantrip casting (6 exp), slots individually, learn spells (1 exp each). No preparation — cast any known spell.
+- **Abilities**: Purchased from a catalog with prerequisites and ability trees
+- **No classes, no subclasses**
+
+## Hybrid (Classes + AA)
+
+The mode our campaign uses. XP can be spent on class levels OR AA purchases.
+
+- Characters can take class levels (costs 20 XP per level)
+- Characters can also buy AA abilities with XP
+- XP earned can be split: e.g., 8 XP earned → 5 on AA ability, 3 banked toward next class level
+- When banked XP ≥ 20, a "Level Up" option appears
+- Spell access can come from both class spell lists AND AA purchases
+- Effects from both sources merge through the unified effect model
+
+### Hybrid Conflict Rules
+
+- **Proficiency deduplication**: Same proficiency from class + AA doesn't double-count
+- **Extra Attack stacking**: Modeled as `extraAttackCount`, max from any source wins
+- **Spell slots**: Class slots and AA slots are separate pools (TBD: or merged?)
+- **Spell preparation**: Class spells follow class prep rules. AA spells require no preparation.
+
+## Feature Matrix
+
+| Feature | Standard | AA Only | Hybrid |
+|---------|----------|---------|--------|
+| Classes & subclasses | Yes | No | Yes |
+| XP as currency | No (unless XP leveling) | Yes | Yes |
+| Level progression | XP thresholds / milestone | 20 XP = 1 level | 20 XP = 1 class level |
+| Spell access | Class spell lists | Universal (buy + learn) | Both |
+| Preparation | By class rules | None | Mixed by source |
+| Saving throw prof | Class-granted | Top 2 ability scores | Class-granted |
+| Armor/weapon prof | Class/species/feat | Purchased | Both |
+| AA ability purchases | No | Yes | Yes |
+
+## Implementation Notes
+
+The `ProgressionMode` type (`"aa-only" | "hybrid" | "standard"`) is set on `CampaignConfig` and flows through all character computation. The effect model handles all three modes uniformly — the difference is which Sources are available to a character.
+</file>
+
+<file path="library/src/engine/index.ts">
+// Engine module — to be implemented after parsers produce typed data.
+//
+// Planned modules:
+// - character-computer.ts: Compute CharacterState from SourceWithEffects[]
+// - prerequisite-evaluator.ts: Evaluate AAPrerequisite[] against CharacterState
+// - effect-resolver.ts: Resolve and deduplicate Effects from multiple Sources
+// - explanation.ts: Generate ModifierExplanation breakdowns
+
+export const ENGINE_VERSION = "0.0.1" as const;
+</file>
+
+<file path="library/src/parsers/index.ts">
+export { parseSpells } from "./spells.ts";
+export { parseMarkdown, splitByHeading, nodeText, isPageNumberLine } from "./shared.ts";
+</file>
+
+<file path="library/src/parsers/shared.ts">
+import { unified } from "unified";
+import remarkParse from "remark-parse";
+import { toString } from "mdast-util-to-string";
+import type { Root, Content, Heading } from "mdast";
+
+/** Parse a markdown string into a remark AST */
+export function parseMarkdown(markdown: string): Root {
+  const processor = unified().use(remarkParse);
+  return processor.parse(markdown);
+}
+
+/** Get the plain text content of an AST node */
+export function nodeText(node: Content): string {
+  return toString(node).trim();
+}
+
+/**
+ * Split an AST into sections by heading level.
+ * Returns an array of { heading, children } where children are all nodes
+ * between this heading and the next heading of equal or lesser depth.
+ */
+export function splitByHeading(
+  root: Root,
+  level: Heading["depth"],
+): Array<{ heading: string; children: Content[] }> {
+  const sections: Array<{ heading: string; children: Content[] }> = [];
+  let current: { heading: string; children: Content[] } | undefined;
+
+  for (const node of root.children) {
+    if (node.type === "heading" && node.depth === level) {
+      if (current) {
+        sections.push(current);
+      }
+      current = { heading: nodeText(node), children: [] };
+    } else if (current) {
+      current.children.push(node);
+    }
+  }
+
+  if (current) {
+    sections.push(current);
+  }
+
+  return sections;
+}
+
+/**
+ * Check if a string looks like a page number line from the SRD
+ * (e.g. "104 System Reference Document 5.2.1")
+ */
+export function isPageNumberLine(text: string): boolean {
+  return /^\d+\s+System Reference Document/.test(text.trim());
+}
+</file>
+
+<file path="library/src/parsers/spells.ts">
+import type { Spell } from "../types/spell.ts";
+import { parseMarkdown, splitByHeading } from "./shared.ts";
+
+/**
+ * Parse spell entries from SRD chapter 08 markdown.
+ *
+ * The spell format is:
+ *   **Spell Name**
+ *   _Level N School (Class1, Class2)_    — for leveled spells
+ *   _School Cantrip (Class1, Class2)_    — for cantrips
+ *
+ *   **Casting Time:** ...
+ *   **Range:** ...
+ *   **Components:** ...
+ *   **Duration:** ...
+ *
+ *   Description text...
+ *   _**Using a Higher-Level Spell Slot.**_ ... (optional)
+ */
+export function parseSpells(_markdown: string): Spell[] {
+  // TODO: implement spell parsing
+  // 1. Parse markdown to AST
+  // 2. Find spell entry boundaries (bold name headers)
+  // 3. Extract metadata fields (level, school, classes, casting time, etc.)
+  // 4. Extract description text
+  // 5. Handle cantrip vs leveled spell format differences
+  void parseMarkdown;
+  void splitByHeading;
+  return [];
+}
+</file>
+
+<file path="library/src/types/aa-ability.ts">
+import type { Effect } from "./effect.ts";
+
+export type AAAbilityCategory =
+  | "offensive-combat"
+  | "defensive"
+  | "general-utility"
+  | "adventuring-exploration"
+  | "spellcasting"
+  | "racial"
+  | "ability-tree";
+
+export type AAPrerequisiteType =
+  | "ability"
+  | "ability-score"
+  | "level"
+  | "proficiency"
+  | "spellcasting";
+
+export interface AAPrerequisite {
+  type: AAPrerequisiteType;
+  /** Human-readable value, e.g. "Rage", "STR 16", "Level 8" */
+  value: string;
+}
+
+export interface AAAbilityTier {
+  expCost: number;
+  description: string;
+  effects: Effect[];
+}
+
+export interface AAAbility {
+  name: string;
+  expCost: number;
+  prerequisites: AAPrerequisite[];
+  description: string;
+  repeatable: boolean;
+  /** For tiered abilities like Rage with scaling costs/benefits */
+  tiers: AAAbilityTier[] | undefined;
+  effects: Effect[];
+  category: AAAbilityCategory;
+  /** Which ability tree this belongs to, e.g. "Rage Tree", "Ki Tree" */
+  treeName: string | undefined;
+}
+</file>
+
+<file path="library/src/types/campaign.ts">
+export type ProgressionMode = "aa-only" | "hybrid" | "standard";
+
+export type LevelingMethod =
+  | "standard-xp"
+  | "milestone"
+  | "fixed-cost"
+  | "aa-formula";
+
+export interface CampaignConfig {
+  progressionMode: ProgressionMode;
+  levelingMethod: LevelingMethod;
+  sources: {
+    srd: boolean;
+    advancedAdventurers: boolean;
+    homebrew: boolean;
+  };
+}
+</file>
+
+<file path="library/src/types/character.ts">
+import type { SourceWithEffects } from "./effect.ts";
+import type { ProgressionMode } from "./campaign.ts";
+
+export interface AbilityScoreSet {
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+}
+
+export interface XPLedgerEntry {
+  id: string;
+  timestamp: string;
+  amount: number;
+  /** "award" = DM grants XP, "spend-aa" = buy AA ability, "spend-level" = buy class level, "refund" */
+  category: "award" | "spend-aa" | "spend-level" | "refund";
+  note: string;
+  sessionId: string | undefined;
+}
+
+/** A modifier breakdown for explainability: "Why is my AC 18?" */
+export interface ModifierExplanation {
+  total: number;
+  contributors: Array<{
+    sourceName: string;
+    value: number;
+    condition: string | undefined;
+  }>;
+}
+
+/** The fully computed state of a character, derived from all sources */
+export interface CharacterState {
+  name: string;
+  level: number;
+  proficiencyBonus: number;
+  progressionMode: ProgressionMode;
+
+  abilityScores: AbilityScoreSet;
+  maxHP: number;
+  armorClass: ModifierExplanation;
+  initiative: ModifierExplanation;
+  speed: number;
+
+  /** All sources contributing to this character */
+  sources: SourceWithEffects[];
+
+  /** XP tracking (relevant for AA and Hybrid modes) */
+  xp: {
+    totalEarned: number;
+    totalSpent: number;
+    banked: number;
+    spentOnLevels: number;
+    spentOnAA: number;
+  };
+}
+</file>
+
+<file path="library/src/types/class.ts">
+import type { Effect } from "./effect.ts";
+
+export interface ClassFeature {
+  name: string;
+  level: number;
+  description: string;
+  effects: Effect[];
+}
+
+export interface SubclassFeature {
+  name: string;
+  level: number;
+  description: string;
+  effects: Effect[];
+}
+
+export interface Subclass {
+  name: string;
+  className: string;
+  description: string;
+  features: SubclassFeature[];
+}
+
+export interface ClassProgression {
+  level: number;
+  proficiencyBonus: number;
+  features: string[];
+  /** Class-specific columns (e.g. Rages, Rage Damage for Barbarian) */
+  extras: Record<string, string>;
+}
+
+export interface Class {
+  name: string;
+  hitDie: number;
+  primaryAbility: string;
+  savingThrows: string[];
+  skillChoices: { options: string[]; count: number };
+  armorProficiencies: string[];
+  weaponProficiencies: string[];
+  startingEquipment: string;
+  progression: ClassProgression[];
+  features: ClassFeature[];
+  subclasses: Subclass[];
+  /** Spellcasting ability, if any */
+  spellcastingAbility: string | undefined;
+}
+</file>
+
+<file path="library/src/types/condition.ts">
+export interface Condition {
+  name: string;
+  description: string;
+  /** Mechanical bullet points of what the condition does */
+  effects: string[];
+}
+
+export interface Rule {
+  name: string;
+  description: string;
+}
+</file>
+
+<file path="library/src/types/effect.ts">
+/** Where an effect originates */
+export type SourceKind =
+  | "class-feature"
+  | "subclass-feature"
+  | "species"
+  | "background"
+  | "feat"
+  | "aa-purchase"
+  | "magic-item"
+  | "equipment"
+  | "condition"
+  | "override";
+
+export interface Source {
+  id: string;
+  kind: SourceKind;
+  /** Human-readable label, e.g. "Fighter 5", "AA: Extra Attack", "Feat: Alert" */
+  name: string;
+  description: string | undefined;
+}
+
+/** What a modifier targets on a character */
+export type ModifierTarget =
+  | "strength"
+  | "dexterity"
+  | "constitution"
+  | "intelligence"
+  | "wisdom"
+  | "charisma"
+  | "ac"
+  | "initiative"
+  | "speed"
+  | "hp-max"
+  | "melee-attack"
+  | "ranged-attack"
+  | "spell-attack"
+  | "melee-damage"
+  | "ranged-damage"
+  | "spell-dc";
+
+export type ProficiencyCategory =
+  | "saving-throw"
+  | "skill"
+  | "weapon"
+  | "armor"
+  | "tool"
+  | "language";
+
+export type ActionTiming = "action" | "bonus-action" | "reaction" | "free" | "special";
+
+export type RestType = "short" | "long";
+
+export interface GrantedAction {
+  name: string;
+  timing: ActionTiming;
+  description: string;
+}
+
+export interface GrantedResource {
+  name: string;
+  maxUses: number;
+  resetOn: RestType;
+}
+
+export interface ACFormula {
+  base: number;
+  /** Ability modifiers to add, e.g. ["dexterity"] or ["dexterity", "constitution"] */
+  abilityModifiers: string[];
+  /** Maximum AC from this formula, if any */
+  maxAC: number | undefined;
+}
+
+/** A single modification to character state. Discriminated union on `type`. */
+export type Effect =
+  | { type: "modifier"; target: ModifierTarget; value: number; condition: string | undefined }
+  | { type: "proficiency"; category: ProficiencyCategory; value: string }
+  | { type: "expertise"; skill: string }
+  | { type: "resistance"; damageType: string; condition: string | undefined }
+  | { type: "immunity"; damageType: string }
+  | { type: "grant-action"; action: GrantedAction }
+  | { type: "grant-resource"; resource: GrantedResource }
+  | { type: "grant-spell-access"; spellName: string; alwaysPrepared: boolean; source: string }
+  | { type: "set-ac-formula"; formula: ACFormula }
+  | { type: "extra-attack"; count: number }
+  | { type: "speed-bonus"; value: number; movementType: string }
+  | { type: "unmodeled"; description: string };
+
+/** A source paired with the effects it grants */
+export interface SourceWithEffects {
+  source: Source;
+  effects: Effect[];
+}
+</file>
+
+<file path="library/src/types/equipment.ts">
+export type WeaponCategory = "simple" | "martial";
+export type WeaponRange = "melee" | "ranged";
+
+export interface Weapon {
+  name: string;
+  category: WeaponCategory;
+  range: WeaponRange;
+  damage: string;
+  damageType: string;
+  weight: string;
+  cost: string;
+  properties: string[];
+}
+
+export type ArmorCategory = "light" | "medium" | "heavy" | "shield";
+
+export interface Armor {
+  name: string;
+  category: ArmorCategory;
+  ac: number;
+  /** Whether Dex modifier is added (and max bonus if applicable) */
+  dexBonus: boolean;
+  maxDexBonus: number | undefined;
+  strengthRequirement: number | undefined;
+  stealthDisadvantage: boolean;
+  weight: string;
+  cost: string;
+}
+
+export interface Gear {
+  name: string;
+  cost: string;
+  weight: string;
+  description: string;
+}
+
+export type Equipment = Weapon | Armor | Gear;
+</file>
+
+<file path="library/src/types/feat.ts">
+import type { Effect } from "./effect.ts";
+
+export type FeatCategory = "general" | "origin" | "fighting-style" | "epic-boon";
+
+export interface Feat {
+  name: string;
+  category: FeatCategory;
+  prerequisite: string | undefined;
+  repeatable: boolean;
+  description: string;
+  effects: Effect[];
+}
+</file>
+
+<file path="library/src/types/index.ts">
+export type {
+  Spell,
+  SpellSchool,
+  SpellComponents,
+} from "./spell.ts";
+
+export type {
+  Source,
+  SourceKind,
+  Effect,
+  SourceWithEffects,
+  ModifierTarget,
+  ProficiencyCategory,
+  ActionTiming,
+  RestType,
+  GrantedAction,
+  GrantedResource,
+  ACFormula,
+} from "./effect.ts";
+
+export type {
+  AAAbility,
+  AAAbilityCategory,
+  AAAbilityTier,
+  AAPrerequisite,
+  AAPrerequisiteType,
+} from "./aa-ability.ts";
+
+export type {
+  CampaignConfig,
+  ProgressionMode,
+  LevelingMethod,
+} from "./campaign.ts";
+
+export type {
+  Class,
+  ClassFeature,
+  ClassProgression,
+  Subclass,
+  SubclassFeature,
+} from "./class.ts";
+
+export type {
+  Monster,
+  MonsterAction,
+  MonsterTrait,
+  AbilityScores,
+} from "./monster.ts";
+
+export type {
+  Equipment,
+  Weapon,
+  Armor,
+  Gear,
+  WeaponCategory,
+  WeaponRange,
+  ArmorCategory,
+} from "./equipment.ts";
+
+export type {
+  MagicItem,
+  ItemRarity,
+} from "./magic-item.ts";
+
+export type {
+  Feat,
+  FeatCategory,
+} from "./feat.ts";
+
+export type {
+  Condition,
+  Rule,
+} from "./condition.ts";
+
+export type {
+  CharacterState,
+  AbilityScoreSet,
+  XPLedgerEntry,
+  ModifierExplanation,
+} from "./character.ts";
+</file>
+
+<file path="library/src/types/magic-item.ts">
+import type { Effect } from "./effect.ts";
+
+export type ItemRarity =
+  | "common"
+  | "uncommon"
+  | "rare"
+  | "very-rare"
+  | "legendary"
+  | "artifact";
+
+export interface MagicItem {
+  name: string;
+  rarity: ItemRarity;
+  category: string;
+  requiresAttunement: boolean;
+  attunementRequirement: string | undefined;
+  description: string;
+  effects: Effect[];
+}
+</file>
+
+<file path="library/src/types/monster.ts">
+export interface AbilityScores {
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+}
+
+export interface MonsterAction {
+  name: string;
+  description: string;
+}
+
+export interface MonsterTrait {
+  name: string;
+  description: string;
+}
+
+export interface Monster {
+  name: string;
+  size: string;
+  type: string;
+  alignment: string;
+  armorClass: number;
+  armorDescription: string | undefined;
+  hitPoints: string;
+  speed: string;
+  abilityScores: AbilityScores;
+  savingThrows: Record<string, number>;
+  skills: Record<string, number>;
+  damageResistances: string[];
+  damageImmunities: string[];
+  conditionImmunities: string[];
+  senses: string;
+  languages: string;
+  challengeRating: string;
+  traits: MonsterTrait[];
+  actions: MonsterAction[];
+  reactions: MonsterAction[];
+  legendaryActions: MonsterAction[];
+}
+</file>
+
+<file path="library/src/types/spell.ts">
+export type SpellSchool =
+  | "Abjuration"
+  | "Conjuration"
+  | "Divination"
+  | "Enchantment"
+  | "Evocation"
+  | "Illusion"
+  | "Necromancy"
+  | "Transmutation";
+
+export interface SpellComponents {
+  verbal: boolean;
+  somatic: boolean;
+  /** Material component description, or undefined if no M component */
+  material: string | undefined;
+}
+
+export interface Spell {
+  name: string;
+  /** 0 for cantrips, 1-9 for leveled spells */
+  level: number;
+  school: SpellSchool;
+  /** Classes that have access to this spell */
+  classes: string[];
+  castingTime: string;
+  ritual: boolean;
+  range: string;
+  components: SpellComponents;
+  duration: string;
+  concentration: boolean;
+  /** Raw markdown of the spell effect description */
+  description: string;
+  /** "Using a Higher-Level Spell Slot" text, if present */
+  higherLevels: string | undefined;
+}
+</file>
+
+<file path="library/src/index.ts">
+// Types
+export type * from "./types/index.ts";
+
+// Parsers
+export { parseSpells } from "./parsers/index.ts";
+export { parseMarkdown, splitByHeading, nodeText, isPageNumberLine } from "./parsers/index.ts";
+</file>
+
+<file path="library/tests/parsers/spells.test.ts">
+import { describe, it, expect } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve, dirname } from "node:path";
+import { fileURLToPath } from "node:url";
+import { parseSpells } from "../../src/parsers/spells.ts";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const fixture = readFileSync(
+  resolve(__dirname, "../fixtures/spell-sample.md"),
+  "utf-8",
+);
+
+describe("parseSpells", () => {
+  it("returns an array", () => {
+    const spells = parseSpells(fixture);
+    expect(Array.isArray(spells)).toBe(true);
+  });
+
+  // These tests will pass once the parser is implemented:
+
+  it.todo("parses Acid Arrow as a level 2 Evocation spell");
+  // const spells = parseSpells(fixture);
+  // const acidArrow = spells.find(s => s.name === "Acid Arrow");
+  // expect(acidArrow).toBeDefined();
+  // expect(acidArrow!.level).toBe(2);
+  // expect(acidArrow!.school).toBe("Evocation");
+  // expect(acidArrow!.classes).toEqual(["Wizard"]);
+  // expect(acidArrow!.castingTime).toBe("Action");
+  // expect(acidArrow!.range).toBe("90 feet");
+  // expect(acidArrow!.components.verbal).toBe(true);
+  // expect(acidArrow!.components.somatic).toBe(true);
+  // expect(acidArrow!.components.material).toBe("powdered rhubarb leaf");
+  // expect(acidArrow!.duration).toBe("Instantaneous");
+  // expect(acidArrow!.concentration).toBe(false);
+  // expect(acidArrow!.ritual).toBe(false);
+  // expect(acidArrow!.higherLevels).toBeDefined();
+
+  it.todo("parses Acid Splash as a cantrip (level 0)");
+  // const spells = parseSpells(fixture);
+  // const acidSplash = spells.find(s => s.name === "Acid Splash");
+  // expect(acidSplash).toBeDefined();
+  // expect(acidSplash!.level).toBe(0);
+  // expect(acidSplash!.school).toBe("Evocation");
+  // expect(acidSplash!.classes).toEqual(["Sorcerer", "Wizard"]);
+  // expect(acidSplash!.components.verbal).toBe(true);
+  // expect(acidSplash!.components.somatic).toBe(true);
+  // expect(acidSplash!.components.material).toBeUndefined();
+});
+</file>
+
+<file path="library/package.json">
+{
+  "name": "@dnd/library",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./src/index.ts",
+      "types": "./src/index.ts"
+    }
+  },
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "mdast-util-to-string": "^4",
+    "remark-parse": "^11",
+    "unified": "^11"
+  },
+  "devDependencies": {
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^25.3.0",
+    "typescript": "^5.7",
+    "vitest": "^3"
+  }
+}
+</file>
+
+<file path="META-PLAN.md">
+# Meta-Plan: Agent-First Development Philosophy
+
+Adapted from [OpenAI's harness engineering approach](https://openai.com/index/harness-engineering/).
+
+## Core Principle
+
+**Humans steer. Agents execute.**
+
+The primary job is not to write code, but to design environments, specify intent, and build feedback loops that let agents do reliable work. When something fails, the fix is never "try harder" — it's "what capability is missing, and how do we make it legible and enforceable?"
+
+## Project
+
+A D&D 2024 campaign platform supporting three progression modes:
+- **Standard 5e 2024**: classes, levels, traditional PHB rules
+- **AA Only**: no classes, XP-as-currency, ability purchases (Advanced Adventurers system)
+- **Hybrid**: classes + AA purchases (XP can buy class levels OR AA abilities)
+
+## Architecture Principles
+
+1. **Library-first**: All game logic lives in `@dnd/library`. Pure TypeScript, zero React/DB deps. The app calls the library, never the reverse.
+2. **Unified effect model**: Every character modifier flows through `Source → Effect[] → CharacterState`. Classes, AA purchases, items, feats — all produce Effects through the same interface.
+3. **Parsers are deterministic**: Same markdown in, same typed data out. No side effects, no network calls.
+4. **The app is a thin layer**: Routing, persistence, UI. Game logic calls the library.
+5. **Validate at boundaries**: Zod for API inputs, TypeScript strict mode for internal contracts.
+
+## Tech Choices
+
+| What | Why |
+|------|-----|
+| pnpm workspaces | Monorepo without framework overhead |
+| TypeScript strict | Catch bugs, agent-friendly |
+| Vitest | Fast, TS-native, good watch mode |
+| oxlint | 50-100x faster than eslint, good enough rules |
+| husky + lint-staged | Pre-commit gate |
+| unified/remark | Markdown AST parsing for SRD chapters |
+| TanStack Start | SSR + server functions, type-safe routing |
+| Drizzle | Type-safe SQL, good migration story |
+| Postgres | CRUD app with campaigns, characters, transactions |
+| Postgres FTS | tsvector/tsquery for search; upgrade only if insufficient |
+| TipTap | ProseMirror-based, extensible for @mentions |
+| Tailwind v4 | Utility CSS, agent-friendly |
+
+## CLAUDE.md Philosophy
+
+Following the lesson: "We tried the one big AGENTS.md approach. It failed."
+
+CLAUDE.md should be:
+- **Short** (~100 lines) — a table of contents, not a manual
+- **Stable** — change rarely, point to things that change often
+- **Navigational** — tell agents where to look, not what to do
+
+## Mechanical Enforcement Over Documentation
+
+> "When documentation falls short, promote the rule into code."
+
+### Enforcement Stack
+
+1. **oxlint** — Fast linter on staged files
+2. **TypeScript strict mode** — `noUncheckedIndexedAccess`, `verbatimModuleSyntax`
+3. **Pre-commit hooks** (husky + lint-staged): lint staged `.ts`/`.tsx` files
+
+When an agent hits a lint failure, the error message should tell it how to fix it.
+
+## Repository as System of Record
+
+Anything not in the repo doesn't exist for agents.
+
+### Knowledge Architecture
+
+```
+dnd-24-platform/
+├── CLAUDE.md              # ~100 lines, table of contents
+├── META-PLAN.md           # This file: philosophy and patterns
+├── docs/
+│   ├── architecture.md    # Library design, effect model, parsing
+│   ├── campaign-modes.md  # Progression mode rules
+│   └── plans/
+│       ├── active/        # In-progress execution plans
+│       └── completed/     # Done plans (for context)
+```
+
+## Plan Workflow
+
+1. Plans are created in `docs/plans/active/` with format `NNN-slug.md`
+2. Plans include: goal, approach, file changes, acceptance criteria
+3. Completed plans move to `docs/plans/completed/`
+
+## What This Means in Practice
+
+When building a feature:
+1. Write the execution plan (`docs/plans/active/`)
+2. Define the types first
+3. Implement with mechanical enforcement (lints, types, tests)
+4. Validate via tests + UI
+5. Move plan to completed when done
+
+When something breaks:
+1. Don't "try harder" — ask what's missing
+2. If the agent can't find context → add it to docs
+3. If the agent makes a mistake → add a lint rule
+4. If the pattern drifts → add a structural test
+
+The goal is a codebase that gets easier for agents to work in over time, not harder.
+</file>
+
+<file path="pnpm-workspace.yaml">
+packages:
+  - library
+  - app
+
+onlyBuiltDependencies:
+  - esbuild
+</file>
+
+<file path="tsconfig.base.json">
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "lib": ["ES2022"],
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "noEmit": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "verbatimModuleSyntax": true
+  }
+}
+</file>
+
+<file path="CLAUDE.md">
+# dnd-24-platform
+
+D&D 2024 campaign platform. TypeScript library for SRD/AA parsing and rules engine (`library/`), TanStack Start web app (`app/`). Supports three progression modes: Standard 5e 2024, AA Only, and Hybrid.
+
+**Read `META-PLAN.md` first.** It defines how this project is built: library-first, humans steer, agents execute.
+
+## Structure
+
+- `library/` — `@dnd/library`: SRD parsers, AA parsers, types, rules engine. Pure TS, no React/DB deps.
+- `app/` — `@dnd/app`: TanStack Start campaign platform. Depends on `@dnd/library`.
+- `content/srd-markdown/` — SRD 5.2.1 chapters (synced from `../dnd-24-resources`)
+- `docs/` — Architecture docs, plans
+- `scripts/` — Utility scripts
+
+## Commands
+
+```
+pnpm install                    # Install all workspace deps
+pnpm -F @dnd/library test       # Run library tests
+pnpm -F @dnd/library test:watch # Watch mode
+pnpm -F @dnd/app dev            # Start app dev server
+pnpm check                      # Type-check all packages
+pnpm lint                       # Lint all packages (oxlint)
+```
+
+## Pre-commit Contract
+
+Every commit must pass: `lint-staged` (oxlint on staged .ts/.tsx) → type-check.
+
+## Conventions
+
+- TypeScript strict mode everywhere. No `any`. No `as` casts without comment.
+- Named exports only. No default exports.
+- Parsers are pure functions: markdown string in, typed data out.
+- The effect model is the core abstraction: every character modifier is a `Source` producing `Effect[]`.
+- Three progression modes: `"aa-only" | "hybrid" | "standard"` — always test all three.
+- SRD data is static (parsed at import time). Postgres is for mutable state only.
+
+## Deployment
+
+Deploys to `www.austinwallace.ca/dnd` via Railway + SST Router. See `docs/deployment.md` for full details.
+
+- Railway project: `dnd-platform`, service: `app`
+- Railway origin: `https://app-production-0cb2.up.railway.app`
+- `VITE_BASE_PATH=/dnd/` set on Railway; defaults to `/` locally
+- SST Router config lives in `~/dev/austin-site/sst.config.ts`
+- SST deploy: `cd ~/dev/austin-site && AWS_PROFILE=prod npx sst deploy --stage production`
+
+## Docs (progressive disclosure)
+
+- `META-PLAN.md` — Project philosophy, tech choices, architecture principles
+- `docs/architecture.md` — Library design, effect model, parsing strategy
+- `docs/campaign-modes.md` — Progression mode rules and differences
+- `docs/deployment.md` — Railway + SST Router deployment setup
+- `docs/plans/active/` — In-progress execution plans
+- `docs/plans/completed/` — Finished plans (for context)
+
+## Plans
+
+When creating a plan in Claude plan mode, copy the `~/.claude/plans/` plan file to `docs/plans/active/NNN-slug.md` before presenting for approval. Completed plans move to `docs/plans/completed/`.
+
+## Session Hygiene
+
+When you have fully completed a task, update `docs/` with what was built, changed, or decided. Future agents should be able to read CLAUDE.md → docs/ and understand the current state without needing conversation history.
+</file>
+
+<file path="package.json">
+{
+  "name": "dnd-24-platform",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22",
+    "pnpm": ">=10"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "scripts": {
+    "build": "pnpm -F @dnd/app build",
+    "start": "node app/.output/server/index.mjs",
+    "check": "pnpm -r run check",
+    "lint": "oxlint .",
+    "lint:fix": "oxlint --fix .",
+    "test": "pnpm -r run test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9",
+    "lint-staged": "^15",
+    "oxlint": "^0.16",
+    "typescript": "^5.7"
+  },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "oxlint"
+    ]
+  }
+}
+</file>
+
+</files>
