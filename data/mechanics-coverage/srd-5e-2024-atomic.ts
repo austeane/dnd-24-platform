@@ -37,6 +37,8 @@ const refs = {
   testsWildShape: "library/tests/engine/wild-shape.test.ts",
   testsCasterFeatures: "library/tests/engine/class-features-casters.test.ts",
   testsFeatsSpecies: "library/tests/engine/feats-and-species.test.ts",
+  testsActionInventory: "library/tests/engine/action-inventory.test.ts",
+  testsHp: "library/tests/engine/hp.test.ts",
   testsLiveRoster: "library/tests/verification/live-roster-snapshot.test.ts",
   engineAttacks: "library/src/engine/attack-profiles.ts",
   engineConditions: "library/src/engine/conditions.ts",
@@ -190,7 +192,7 @@ const coreCharacter: AtomicMechanicsCoverageEntry[] = [
     "HP base snapshot fallback",
     "partial",
     "Reviewed HP values can seed runtime state, but they are not yet replaced by class-hit-die math.",
-    { refs: [refs.engineCharacter, refs.seedScript], verificationGates: ["runtime", "explainability", "tests", "live-roster"] },
+    { refs: [refs.engineCharacter, refs.seedScript, refs.testsHp, refs.testsLiveRoster, refs.verifiedRoster], verificationGates: ["runtime", "explainability", "tests", "live-roster"] },
   ),
   atomic(
     "core-hp-level-derivation",
@@ -385,7 +387,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Action inventory",
     "partial",
     "Granted actions are surfaced in runtime state, but only as static entries.",
-    { refs: [refs.engineCharacter, refs.canonClassFeatures], verificationGates: ["runtime", "tests", "live-roster"] },
+    { refs: [refs.engineCharacter, refs.canonClassFeatures, refs.testsActionInventory, refs.testsLiveRoster, refs.verifiedRoster], verificationGates: ["runtime", "tests", "live-roster"] },
   ),
   atomic(
     "action-bonus-action-inventory",
@@ -394,7 +396,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Bonus action inventory",
     "partial",
     "Bonus actions are surfaced, but there is no spend or execution flow.",
-    { refs: [refs.engineCharacter, refs.canonClassFeatures], verificationGates: ["runtime", "tests", "live-roster"] },
+    { refs: [refs.engineCharacter, refs.canonClassFeatures, refs.testsActionInventory, refs.testsLiveRoster, refs.verifiedRoster], verificationGates: ["runtime", "tests", "live-roster"] },
   ),
   atomic(
     "action-reaction-inventory",
@@ -403,7 +405,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Reaction inventory",
     "partial",
     "Reaction-granted abilities can appear in runtime state, but there is no execution or lockout model.",
-    { refs: [refs.engineCharacter, refs.canonSpecies], verificationGates: ["runtime", "tests", "live-roster"] },
+    { refs: [refs.engineCharacter, refs.canonSpecies, refs.testsActionInventory, refs.testsLiveRoster, refs.verifiedRoster], verificationGates: ["runtime", "tests", "live-roster"] },
   ),
   atomic(
     "action-fixed-resource-pools",
