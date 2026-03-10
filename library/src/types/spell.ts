@@ -12,7 +12,7 @@ export interface SpellComponents {
   verbal: boolean;
   somatic: boolean;
   /** Material component description, or undefined if no M component */
-  material: string | undefined;
+  material?: string;
 }
 
 export interface Spell {
@@ -31,5 +31,5 @@ export interface Spell {
   /** Raw markdown of the spell effect description */
   description: string;
   /** "Using a Higher-Level Spell Slot" text, if present */
-  higherLevels: string | undefined;
+  higherLevels?: string;
 }

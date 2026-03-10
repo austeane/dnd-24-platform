@@ -1,7 +1,7 @@
 # Plan 003: Canonical Content Architecture
 
-> **Status**: Active — design review phase
-> **Supersedes**: [Plan 002: SRD → TypeScript Library](./002-srd-library.md)
+> **Status**: Partially accepted as reference architecture. This remains the deep design doc for canonical content, but active execution is now tracked by Plans 004-008.
+> **Supersedes**: [Plan 002: SRD → TypeScript Library](../superceded/002-srd-library.md)
 > **Goal**: Define the content model, file format, compile pipeline, and type system for converting SRD + AA source material into a typed, agent-maintainable content layer that powers the app.
 
 ---

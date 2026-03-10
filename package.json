@@ -10,17 +10,32 @@
   "scripts": {
     "build": "pnpm -F @dnd/app build",
     "start": "node app/.output/server/index.mjs",
+    "compile": "tsx scripts/compile-canon.ts",
+    "import:srd-spells": "tsx scripts/import-srd-spells.ts",
     "check": "pnpm -r run check",
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "test": "pnpm -r run test",
+    "extract:character-sheets": "tsx scripts/extract-character-sheets.ts",
+    "seed:real-campaign": "pnpm -F @dnd/app db:seed:real-campaign",
+    "db:generate": "pnpm -F @dnd/app db:generate",
+    "db:migrate": "pnpm -F @dnd/app db:migrate",
+    "db:push": "pnpm -F @dnd/app db:push",
+    "db:check": "pnpm -F @dnd/app db:check",
+    "db:studio": "pnpm -F @dnd/app db:studio",
+    "report:mechanics-coverage": "tsx scripts/report-mechanics-coverage.ts",
+    "report:fleet-readiness": "tsx scripts/report-fleet-readiness.ts",
     "prepare": "husky"
   },
   "devDependencies": {
+    "fast-glob": "^3.3.3",
+    "gray-matter": "^4.0.3",
     "husky": "^9",
     "lint-staged": "^15",
     "oxlint": "^0.16",
-    "typescript": "^5.7"
+    "tsx": "^4.21.0",
+    "typescript": "^5.7",
+    "zod": "^4.3.6"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

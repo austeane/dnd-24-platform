@@ -1,9 +1,4 @@
-// Engine module — to be implemented after parsers produce typed data.
-//
-// Planned modules:
-// - character-computer.ts: Compute CharacterState from SourceWithEffects[]
-// - prerequisite-evaluator.ts: Evaluate AAPrerequisite[] against CharacterState
-// - effect-resolver.ts: Resolve and deduplicate Effects from multiple Sources
-// - explanation.ts: Generate ModifierExplanation breakdowns
+export { computeCharacterState, getAbilityModifier } from "./character-computer.ts";
+export { evaluatePrerequisites } from "./prerequisite-evaluator.ts";
 
-export const ENGINE_VERSION = "0.0.1" as const;
+export const ENGINE_VERSION = "0.1.0" as const;

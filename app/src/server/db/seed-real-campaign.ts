@@ -1,0 +1,649 @@
+import { readFile } from "node:fs/promises";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import {
+  getCanonicalEffectsForSource,
+  getCanonicalSpellByName,
+  normalizeCanonicalEntityId,
+  type PackId,
+} from "@dnd/library";
+import { eq, inArray } from "drizzle-orm";
+import { z } from "zod";
+import {
+  createCampaign,
+  createCharacter,
+  getCampaignBySlug,
+  listCampaignRoster,
+  updateCampaignSettings,
+  updateCharacterIdentity,
+} from "../campaigns/index.ts";
+import { client, db } from "./index.ts";
+import {
+  characterSourceKinds,
+  characterSources,
+  levelingMethods,
+  progressionModes,
+  xpTransactionCategories,
+  xpTransactions,
+} from "./schema/index.ts";
+import {
+  getCharacterRuntimeState,
+  listCharacterSources,
+} from "../progression/index.ts";
+
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
+const defaultSeedPath = path.join(
+  rootDir,
+  "data",
+  "real-campaign-intake",
+  "verified-characters.json",
+);
+
+const reviewStatuses = ["reviewed", "verified", "needs-review"] as const;
+const abilityNames = [
+  "strength",
+  "dexterity",
+  "constitution",
+  "intelligence",
+  "wisdom",
+  "charisma",
+] as const;
+
+const featureSchema = z.object({
+  id: z.string().min(1),
+  label: z.string().min(1),
+  sourceKind: z.enum(characterSourceKinds),
+  sourceEntityId: z.string().min(1),
+  sourcePackId: z.string().min(1).nullable().optional(),
+  rank: z.number().int().positive().optional(),
+  description: z.string().min(1).optional(),
+  effects: z.array(z.record(z.string(), z.unknown())).default([]),
+  notes: z.array(z.string()).default([]),
+});
+
+const xpEntrySchema = z.object({
+  id: z.string().min(1),
+  amount: z.number().int(),
+  category: z.enum(xpTransactionCategories),
+  note: z.string().min(1),
+  createdByLabel: z.string().min(1).default("seed-real-campaign"),
+  sessionId: z.string().min(1).nullable().optional(),
+});
+
+const verifiedCharacterSchema = z.object({
+  reviewStatus: z.enum(reviewStatuses),
+  sourceFiles: z.array(z.string().min(1)).min(1),
+  identity: z.object({
+    name: z.string().min(1),
+    slug: z.string().min(1),
+    className: z.string().min(1),
+    classId: z.string().min(1),
+    level: z.number().int().positive(),
+  }),
+  tableState: z.object({
+    armorClass: z.number().int().nonnegative(),
+    maxHp: z.number().int().nonnegative(),
+    speed: z.number().int().nonnegative(),
+    passivePerception: z.number().int().nonnegative().optional(),
+  }),
+  abilities: z.object({
+    strength: z.number().int(),
+    dexterity: z.number().int(),
+    constitution: z.number().int(),
+    intelligence: z.number().int(),
+    wisdom: z.number().int(),
+    charisma: z.number().int(),
+  }),
+  spellcasting: z.object({
+    ability: z.enum(abilityNames),
+    spellSaveDc: z.number().int().nonnegative().optional(),
+    spellAttackBonus: z.number().int().optional(),
+    knownSpells: z.array(z.string().min(1)).default([]),
+  }).nullable(),
+  sourceLedger: z.object({
+    features: z.array(featureSchema).default([]),
+  }).default({ features: [] }),
+  xpLedger: z.array(xpEntrySchema).default([]),
+  notes: z.array(z.string()).default([]),
+});
+
+const verifiedCampaignSchema = z.object({
+  campaign: z.object({
+    reviewStatus: z.enum(reviewStatuses),
+    id: z.string().min(1),
+    slug: z.string().min(1),
+    name: z.string().min(1),
+    progressionMode: z.enum(progressionModes).default("hybrid"),
+    levelingMethod: z.enum(levelingMethods).default("fixed-cost"),
+    enabledPackIds: z.array(z.string().min(1)).min(1),
+  }),
+  characters: z.array(verifiedCharacterSchema).min(1),
+});
+
+type VerifiedCampaignSeed = z.infer<typeof verifiedCampaignSchema>;
+type VerifiedCharacterSeed = z.infer<typeof verifiedCharacterSchema>;
+type SeedFeature = z.infer<typeof featureSchema>;
+
+interface DefaultFeatureBlueprint {
+  minimumLevel: number;
+  feature: SeedFeature;
+}
+
+function createSeedId(characterSlug: string, suffix: string): string {
+  return `seed:${characterSlug}:${suffix}`;
+}
+
+const defaultClassFeatureBlueprints: Record<string, DefaultFeatureBlueprint[]> = {
+  fighter: [
+    {
+      minimumLevel: 1,
+      feature: {
+        id: "second-wind",
+        label: "Second Wind",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:second-wind",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Bonus Action self-healing that refreshes on rests.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 1,
+      feature: {
+        id: "weapon-mastery",
+        label: "Weapon Mastery",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:weapon-mastery",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Tracked as a known combat feature.",
+        effects: [],
+        notes: [],
+      },
+    },
+  ],
+  druid: [
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "druidic-spellcasting-2",
+        label: "Druidic Spellcasting (Level 2)",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:druidic-spellcasting-2",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Level-2 spell-slot progression for druid spellcasting.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "wild-shape",
+        label: "Wild Shape",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:wild-shape",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Core Wild Shape action and resource loop.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "wild-companion",
+        label: "Wild Companion",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:wild-companion",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Spend Wild Shape for companion utility.",
+        effects: [],
+        notes: [],
+      },
+    },
+  ],
+  warlock: [
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "pact-magic-2",
+        label: "Pact Magic (Level 2)",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:pact-magic-2",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Level-2 pact slot progression for warlock spellcasting.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "magical-cunning",
+        label: "Magical Cunning",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:magical-cunning",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Recover pact slots after a short ritual.",
+        effects: [],
+        notes: [],
+      },
+    },
+  ],
+  bard: [
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "bard-spellcasting-2",
+        label: "Bard Spellcasting (Level 2)",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:bard-spellcasting-2",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Level-2 spell-slot progression for bard spellcasting.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 1,
+      feature: {
+        id: "bardic-inspiration",
+        label: "Bardic Inspiration",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:bardic-inspiration",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Action and resource loop for bardic support.",
+        effects: [],
+        notes: [],
+      },
+    },
+  ],
+  sorcerer: [
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "sorcerous-spellcasting-2",
+        label: "Sorcerous Spellcasting (Level 2)",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:sorcerous-spellcasting-2",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Level-2 spell-slot progression for sorcerer spellcasting.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "font-of-magic",
+        label: "Font of Magic",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:font-of-magic",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Sorcery point resource loop.",
+        effects: [],
+        notes: [],
+      },
+    },
+    {
+      minimumLevel: 2,
+      feature: {
+        id: "metamagic",
+        label: "Metamagic",
+        sourceKind: "class-feature",
+        sourceEntityId: "class-feature:metamagic",
+        sourcePackId: "srd-5e-2024",
+        rank: 1,
+        description: "Metamagic options modify how sorcerer spells behave.",
+        effects: [],
+        notes: [],
+      },
+    },
+  ],
+};
+
+async function upsertCharacterSource(
+  values: typeof characterSources.$inferInsert,
+): Promise<void> {
+  await db
+    .insert(characterSources)
+    .values(values)
+    .onConflictDoUpdate({
+      target: characterSources.id,
+      set: {
+        sourceKind: values.sourceKind,
+        sourceEntityId: values.sourceEntityId,
+        sourcePackId: values.sourcePackId ?? null,
+        label: values.label,
+        rank: values.rank ?? 1,
+        payloadJson: values.payloadJson ?? null,
+        suppressedAt: null,
+        updatedAt: new Date(),
+      },
+    });
+}
+
+async function upsertXpTransaction(
+  values: typeof xpTransactions.$inferInsert,
+): Promise<void> {
+  await db
+    .insert(xpTransactions)
+    .values(values)
+    .onConflictDoUpdate({
+      target: xpTransactions.id,
+      set: {
+        campaignId: values.campaignId,
+        characterId: values.characterId,
+        sessionId: values.sessionId ?? null,
+        category: values.category,
+        amount: values.amount,
+        note: values.note,
+        createdByLabel: values.createdByLabel,
+      },
+    });
+}
+
+async function cleanupStaleSeedRows(
+  characterId: string,
+  characterSlug: string,
+  desiredSourceIds: Set<string>,
+  desiredXpIds: Set<string>,
+): Promise<void> {
+  const existingSources = await listCharacterSources(characterId);
+  const staleSourceIds = existingSources
+    .filter((record) =>
+      record.id.startsWith(`seed:${characterSlug}:`) && !desiredSourceIds.has(record.id)
+    )
+    .map((record) => record.id);
+
+  if (staleSourceIds.length > 0) {
+    await db.delete(characterSources).where(inArray(characterSources.id, staleSourceIds));
+  }
+
+  const existingXp = await db
+    .select({ id: xpTransactions.id })
+    .from(xpTransactions)
+    .where(eq(xpTransactions.characterId, characterId));
+  const staleXpIds = existingXp
+    .map((record) => record.id)
+    .filter((id) => id.startsWith(`seed:${characterSlug}:xp:`) && !desiredXpIds.has(id));
+
+  if (staleXpIds.length > 0) {
+    await db.delete(xpTransactions).where(inArray(xpTransactions.id, staleXpIds));
+  }
+}
+
+function buildBaseSnapshot(
+  progressionMode: (typeof progressionModes)[number],
+  character: VerifiedCharacterSeed,
+  seedFeatures: SeedFeature[],
+) {
+  const derivedWalkSpeedBonus = seedFeatures.reduce((sum, feature) => {
+    const canonicalEffects = getCanonicalEffectsForSource(
+      feature.sourcePackId ?? undefined,
+      feature.sourceEntityId,
+    );
+    const combinedEffects = [...canonicalEffects, ...feature.effects];
+
+    return sum + combinedEffects.reduce((innerSum, effect) => {
+      if (effect.type !== "speed-bonus" || effect.movementType !== "walk") {
+        return innerSum;
+      }
+
+      return innerSum + effect.value;
+    }, 0);
+  }, 0);
+
+  return {
+    name: character.identity.name,
+    progressionMode,
+    abilityScores: character.abilities,
+    baseArmorClass: character.tableState.armorClass,
+    baseMaxHP: character.tableState.maxHp,
+    baseSpeed: Math.max(character.tableState.speed - derivedWalkSpeedBonus, 0),
+    basePassivePerception: character.tableState.passivePerception,
+    spellcastingAbility: character.spellcasting?.ability,
+  };
+}
+
+function buildFeaturePayload(feature: SeedFeature): Record<string, unknown> {
+  return {
+    description: feature.description,
+    notes: feature.notes,
+    effects: feature.effects,
+    seedTag: "real-campaign-intake",
+  };
+}
+
+function getFeatureMergeKey(feature: SeedFeature): string {
+  return [
+    feature.sourceKind,
+    normalizeCanonicalEntityId(feature.sourceEntityId) ?? feature.sourceEntityId,
+    feature.rank ?? 1,
+  ].join(":");
+}
+
+function buildSeedFeatureSet(character: VerifiedCharacterSeed): SeedFeature[] {
+  const merged = new Map<string, SeedFeature>();
+
+  for (const blueprint of defaultClassFeatureBlueprints[character.identity.classId] ?? []) {
+    if (character.identity.level < blueprint.minimumLevel) {
+      continue;
+    }
+
+    merged.set(getFeatureMergeKey(blueprint.feature), blueprint.feature);
+  }
+
+  for (const feature of character.sourceLedger.features) {
+    merged.set(getFeatureMergeKey(feature), feature);
+  }
+
+  return [...merged.values()];
+}
+
+async function seedCharacter(
+  campaignId: string,
+  campaignName: string,
+  progressionMode: (typeof progressionModes)[number],
+  enabledPackIds: PackId[],
+  character: VerifiedCharacterSeed,
+): Promise<void> {
+  const roster = await listCampaignRoster(campaignId);
+  const existing = roster.find((entry) => entry.slug === character.identity.slug);
+  const record = existing
+    ? await updateCharacterIdentity({
+        characterId: existing.id,
+        slug: character.identity.slug,
+        name: character.identity.name,
+      })
+    : await createCharacter({
+        campaignId,
+        slug: character.identity.slug,
+        name: character.identity.name,
+      });
+
+  if (!record) {
+    throw new Error(`Could not create or update character ${character.identity.slug}`);
+  }
+
+  const desiredSourceIds = new Set<string>();
+  const desiredXpIds = new Set<string>();
+  const seedFeatures = buildSeedFeatureSet(character);
+
+  const baseSourceId = createSeedId(character.identity.slug, "base");
+  desiredSourceIds.add(baseSourceId);
+  await upsertCharacterSource({
+    id: baseSourceId,
+    characterId: record.id,
+    sourceKind: "override",
+    sourceEntityId: "seed:base-snapshot",
+    sourcePackId: null,
+    label: "Verified sheet baseline",
+      rank: 1,
+      payloadJson: {
+      baseSnapshot: buildBaseSnapshot(progressionMode, character, seedFeatures),
+      sourceFiles: character.sourceFiles,
+      reviewStatus: character.reviewStatus,
+      notes: character.notes,
+      seedTag: "real-campaign-intake",
+    },
+  });
+
+  const classSourceId = createSeedId(
+    character.identity.slug,
+    `class:${character.identity.classId}`,
+  );
+  desiredSourceIds.add(classSourceId);
+  await upsertCharacterSource({
+    id: classSourceId,
+    characterId: record.id,
+    sourceKind: "class-level",
+    sourceEntityId: `class:${character.identity.classId}`,
+    sourcePackId: "srd-5e-2024",
+    label: `${character.identity.className} ${character.identity.level}`,
+    rank: 1,
+    payloadJson: {
+      description: `Seeded from verified sheet intake for ${campaignName}.`,
+      levelsGranted: character.identity.level,
+      seedTag: "real-campaign-intake",
+    },
+  });
+
+  if (character.spellcasting && character.spellcasting.knownSpells.length > 0) {
+    const spellSourceId = createSeedId(character.identity.slug, "feature:spell-list");
+    desiredSourceIds.add(spellSourceId);
+    await upsertCharacterSource({
+      id: spellSourceId,
+      characterId: record.id,
+      sourceKind: "class-feature",
+      sourceEntityId: "seed:spell-list",
+      sourcePackId: null,
+      label: `${character.identity.className} spell list`,
+      rank: 1,
+      payloadJson: {
+        description: "Photo-reviewed spell list used for initial runtime projection.",
+        effects: character.spellcasting.knownSpells.map((spellName) => {
+          const spell = getCanonicalSpellByName(spellName, enabledPackIds);
+
+          return {
+            type: "grant-spell-access",
+            spell: {
+              spellName,
+              spellEntityId: spell?.id,
+              spellPackId: spell?.packId,
+              alwaysPrepared: false,
+              source: character.identity.className,
+            },
+          };
+        }),
+        sheetSpellSaveDc: character.spellcasting.spellSaveDc,
+        sheetSpellAttackBonus: character.spellcasting.spellAttackBonus,
+        seedTag: "real-campaign-intake",
+      },
+    });
+  }
+
+  for (const feature of seedFeatures) {
+    const featureSourceId = createSeedId(character.identity.slug, `feature:${feature.id}`);
+    desiredSourceIds.add(featureSourceId);
+    await upsertCharacterSource({
+      id: featureSourceId,
+      characterId: record.id,
+      sourceKind: feature.sourceKind,
+      sourceEntityId: feature.sourceEntityId,
+      sourcePackId: feature.sourcePackId ?? null,
+      label: feature.label,
+      rank: feature.rank ?? 1,
+      payloadJson: buildFeaturePayload(feature),
+    });
+  }
+
+  for (const entry of character.xpLedger) {
+    const xpId = createSeedId(character.identity.slug, `xp:${entry.id}`);
+    desiredXpIds.add(xpId);
+    await upsertXpTransaction({
+      id: xpId,
+      campaignId,
+      characterId: record.id,
+      sessionId: entry.sessionId ?? null,
+      category: entry.category,
+      amount: entry.amount,
+      note: entry.note,
+      createdByLabel: entry.createdByLabel,
+    });
+  }
+
+  await cleanupStaleSeedRows(record.id, character.identity.slug, desiredSourceIds, desiredXpIds);
+
+  const runtimeState = await getCharacterRuntimeState(record.id);
+  if (!runtimeState) {
+    throw new Error(`Could not compute runtime state for ${character.identity.slug}`);
+  }
+
+  process.stdout.write(
+    `Seeded ${character.identity.name}: level ${runtimeState.level}, AC ${runtimeState.armorClass.total}, HP ${runtimeState.maxHP}, banked XP ${runtimeState.xp.banked}\n`,
+  );
+}
+
+async function main(): Promise<void> {
+  const inputPath = process.argv[2]
+    ? path.resolve(process.cwd(), process.argv[2])
+    : defaultSeedPath;
+  const rawInput = await readFile(inputPath, "utf8");
+  const parsed = verifiedCampaignSchema.parse(JSON.parse(rawInput)) satisfies VerifiedCampaignSeed;
+
+  const existingCampaign = await getCampaignBySlug(parsed.campaign.slug);
+  const campaign = existingCampaign
+    ? await updateCampaignSettings({
+        campaignId: existingCampaign.id,
+        name: parsed.campaign.name,
+        progressionMode: parsed.campaign.progressionMode,
+        levelingMethod: parsed.campaign.levelingMethod,
+        enabledPackIds: parsed.campaign.enabledPackIds,
+      })
+    : await createCampaign({
+        id: parsed.campaign.id,
+        slug: parsed.campaign.slug,
+        name: parsed.campaign.name,
+        progressionMode: parsed.campaign.progressionMode,
+        levelingMethod: parsed.campaign.levelingMethod,
+        enabledPackIds: parsed.campaign.enabledPackIds,
+      });
+
+  if (!campaign) {
+    throw new Error("Failed to create or update campaign");
+  }
+
+  for (const character of parsed.characters) {
+    if (character.reviewStatus === "needs-review") {
+      process.stdout.write(`Skipping ${character.identity.slug}: needs-review\n`);
+      continue;
+    }
+
+    await seedCharacter(
+      campaign.id,
+      campaign.name,
+      parsed.campaign.progressionMode,
+      parsed.campaign.enabledPackIds as PackId[],
+      character,
+    );
+  }
+}
+
+try {
+  await main();
+} finally {
+  await client.end({ timeout: 5 });
+}

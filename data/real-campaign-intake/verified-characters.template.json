@@ -1,0 +1,70 @@
+{
+  "campaign": {
+    "reviewStatus": "reviewed",
+    "id": "real-aa-campaign",
+    "slug": "real-aa-campaign",
+    "name": "Real AA Campaign",
+    "progressionMode": "hybrid",
+    "levelingMethod": "fixed-cost",
+    "enabledPackIds": [
+      "srd-5e-2024",
+      "advanced-adventurers"
+    ]
+  },
+  "characters": [
+    {
+      "reviewStatus": "needs-review",
+      "sourceFiles": [
+        "front.jpg",
+        "back.jpg"
+      ],
+      "identity": {
+        "name": "Example Character",
+        "slug": "example-character",
+        "className": "Wizard",
+        "classId": "wizard",
+        "level": 2
+      },
+      "tableState": {
+        "armorClass": 12,
+        "maxHp": 14,
+        "speed": 30,
+        "passivePerception": 11
+      },
+      "abilities": {
+        "strength": 8,
+        "dexterity": 14,
+        "constitution": 12,
+        "intelligence": 16,
+        "wisdom": 10,
+        "charisma": 13
+      },
+      "spellcasting": {
+        "ability": "intelligence",
+        "spellSaveDc": 13,
+        "spellAttackBonus": 5,
+        "knownSpells": [
+          "Mage Hand"
+        ]
+      },
+      "sourceLedger": {
+        "features": [
+          {
+            "id": "arcane-recovery",
+            "label": "Arcane Recovery",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:arcane-recovery",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Short summary copied from the sheet or verified notes.",
+            "effects": [],
+            "notes": []
+          }
+        ]
+      },
+      "xpLedger": [],
+      "notes": [
+        "Use review notes here for anything still uncertain."
+      ]
+    }
+  ]
+}

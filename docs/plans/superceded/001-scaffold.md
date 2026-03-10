@@ -1,5 +1,7 @@
 # Plan: Scaffold dnd-24-platform
 
+> **Status**: Substantially complete. The scaffold landed and the repo passes its basic workspace checks. Treat this as a historical record of setup work; active execution now lives in Plans 004+.
+
 ## Context
 
 The `dnd-24-platform` repo (at `/Users/austin/dev/dnd/dnd-24-platform/`) is a bare scaffold with two empty directories (`library/`, `app/`), SRD content in `content/srd-markdown/`, and docs. No code, no configs, no CLAUDE.md. We need to set up the full development environment so work on the TypeScript library (SRD/AA parsers, types, rules engine) can begin immediately.
@@ -168,7 +170,7 @@ Just enough to validate the workspace: TanStack Start hello-world page with Tail
 5. **App shell**: Minimal TanStack Start + Tailwind hello-world
 6. **Enforcement**: `pnpm install`, `husky init`, `.husky/pre-commit`, verify `pnpm check` + `pnpm lint` + `pnpm test` all pass
 7. **Docs**: `architecture.md`, `campaign-modes.md`, update `REPO_LAYOUT.md`
-8. **Copy plan**: Copy this plan to `docs/plans/active/001-scaffold.md`
+8. **Copy plan**: Copy this plan to `docs/plans/superceded/001-scaffold.md`
 
 ## What Is NOT In This Scaffold
 
@@ -189,4 +191,4 @@ After scaffolding is complete:
 5. `pnpm -F @dnd/app dev` starts the dev server and renders the hello-world page
 6. `git commit` triggers husky pre-commit hook running lint-staged
 7. `CLAUDE.md` exists and is under 100 lines
-8. `docs/plans/active/001-scaffold.md` contains a copy of this plan
+8. `docs/plans/superceded/001-scaffold.md` contains a copy of this plan

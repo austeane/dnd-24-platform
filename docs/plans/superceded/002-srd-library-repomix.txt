@@ -32,7 +32,7 @@ The content is organized as follows:
 <notes>
 - Some files may have been excluded based on .gitignore rules and Repomix's configuration
 - Binary files are not included in this packed representation. Please refer to the Repository Structure section for a complete list of file paths, including binary files
-- Only files matching these patterns are included: library/src/**/*.ts, library/tests/**/*.ts, library/package.json, content/srd-markdown/chapter-summaries/00-condensed-summary.md, docs/plans/active/002-srd-library.md, docs/architecture.md, docs/campaign-modes.md, CLAUDE.md, META-PLAN.md, tsconfig.base.json, package.json, pnpm-workspace.yaml
+- Only files matching these patterns are included: library/src/**/*.ts, library/tests/**/*.ts, library/package.json, content/srd-markdown/chapter-summaries/00-condensed-summary.md, docs/plans/superceded/002-srd-library.md, docs/architecture.md, docs/campaign-modes.md, CLAUDE.md, META-PLAN.md, tsconfig.base.json, package.json, pnpm-workspace.yaml
 - Files matching patterns in .gitignore are excluded
 - Files matching default ignore patterns are excluded
 - Files are sorted by Git change count (files with more changes are at the bottom)
@@ -394,7 +394,7 @@ Frequency categories bold; spell names italic. Parenthetical notes after spell n
 - ch13: 2 stray ch12 entries (unnamed creature fragment + Ogre Zombie) before Animals H1
 </file>
 
-<file path="docs/plans/active/002-srd-library.md">
+<file path="docs/plans/superceded/002-srd-library.md">
 # Plan 002: SRD → TypeScript Library
 
 ## Context

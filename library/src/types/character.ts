@@ -1,5 +1,22 @@
-import type { SourceWithEffects } from "./effect.ts";
+import type { AAPrerequisite } from "./aa-ability.ts";
+import type {
+  GrantedAction,
+  GrantedResource,
+  GrantedSense,
+  GrantedSpellCapacity,
+  GrantedSpellAccess,
+  GrantedTrait,
+  SourceWithEffects,
+} from "./effect.ts";
 import type { ProgressionMode } from "./campaign.ts";
+
+export type AbilityName =
+  | "strength"
+  | "dexterity"
+  | "constitution"
+  | "intelligence"
+  | "wisdom"
+  | "charisma";
 
 export interface AbilityScoreSet {
   strength: number;
@@ -10,12 +27,28 @@ export interface AbilityScoreSet {
   charisma: number;
 }
 
+export interface CharacterBaseSnapshot {
+  name: string;
+  progressionMode: ProgressionMode;
+  abilityScores: AbilityScoreSet;
+  baseArmorClass: number;
+  baseMaxHP: number;
+  baseSpeed: number;
+  basePassivePerception?: number;
+  spellcastingAbility?: AbilityName;
+}
+
+export interface CharacterComputationInput {
+  base: CharacterBaseSnapshot;
+  sources: SourceWithEffects[];
+  xpLedger: XPLedgerEntry[];
+}
+
 export interface XPLedgerEntry {
   id: string;
   timestamp: string;
   amount: number;
-  /** "award" = DM grants XP, "spend-aa" = buy AA ability, "spend-level" = buy class level, "refund" */
-  category: "award" | "spend-aa" | "spend-level" | "refund";
+  category: "award" | "spend-aa" | "spend-level" | "refund" | "adjustment";
   note: string;
   sessionId: string | undefined;
 }
@@ -30,18 +63,97 @@ export interface ModifierExplanation {
   }>;
 }
 
-/** The fully computed state of a character, derived from all sources */
+export interface CharacterProficiencySet {
+  savingThrows: string[];
+  skills: string[];
+  weapons: string[];
+  armors: string[];
+  tools: string[];
+  languages: string[];
+}
+
+export interface EvaluatedAction extends GrantedAction {
+  sourceName: string;
+}
+
+export interface EvaluatedResource extends GrantedResource {
+  sourceName: string;
+}
+
+export interface EvaluatedTrait extends GrantedTrait {
+  sourceName: string;
+}
+
+export interface EvaluatedSense extends GrantedSense {
+  sourceName: string;
+}
+
+export interface CharacterSpellSlotPool {
+  sourceName: string;
+  source: string;
+  resetOn: "short" | "long";
+  slots: Array<{
+    level: number;
+    total: number;
+  }>;
+}
+
+export interface CharacterSpellCapacity extends GrantedSpellCapacity {
+  sourceName: string;
+}
+
+export interface CharacterSpellcastingState {
+  ability: AbilityName;
+  grantedSpells: GrantedSpellAccess[];
+  grantedSpellNames: string[];
+  slotPools: CharacterSpellSlotPool[];
+  capacities: CharacterSpellCapacity[];
+  spellAttackBonus: number;
+  spellAttackExplanation: ModifierExplanation;
+  spellSaveDc: number;
+  spellSaveExplanation: ModifierExplanation;
+}
+
+export interface PrerequisiteCheck {
+  prerequisite: AAPrerequisite;
+  passed: boolean;
+  reason: string;
+}
+
+export interface PrerequisiteEvaluation {
+  passed: boolean;
+  checks: PrerequisiteCheck[];
+}
+
+/** The fully computed state of a character, derived from all stored sources */
 export interface CharacterState {
   name: string;
   level: number;
   proficiencyBonus: number;
+  proficiencyBonusExplanation: ModifierExplanation;
   progressionMode: ProgressionMode;
 
   abilityScores: AbilityScoreSet;
   maxHP: number;
+  maxHPExplanation: ModifierExplanation;
   armorClass: ModifierExplanation;
   initiative: ModifierExplanation;
   speed: number;
+  passivePerception: ModifierExplanation;
+
+  spellcasting: CharacterSpellcastingState | null;
+  actions: EvaluatedAction[];
+  resources: EvaluatedResource[];
+  traits: EvaluatedTrait[];
+  senses: EvaluatedSense[];
+  notes: string[];
+  proficiencies: CharacterProficiencySet;
+  resistances: Array<{
+    damageType: string;
+    condition: string | undefined;
+  }>;
+  immunities: string[];
+  extraAttackCount: number;
 
   /** All sources contributing to this character */
   sources: SourceWithEffects[];
@@ -50,8 +162,11 @@ export interface CharacterState {
   xp: {
     totalEarned: number;
     totalSpent: number;
+    totalSpentOnLevels: number;
+    totalSpentOnAA: number;
+    totalRefunded: number;
+    totalAdjusted: number;
     banked: number;
-    spentOnLevels: number;
-    spentOnAA: number;
+    entries: XPLedgerEntry[];
   };
 }

@@ -1,0 +1,456 @@
+{
+  "campaign": {
+    "reviewStatus": "reviewed",
+    "id": "real-aa-campaign",
+    "slug": "real-aa-campaign",
+    "name": "Real AA Campaign",
+    "progressionMode": "hybrid",
+    "levelingMethod": "fixed-cost",
+    "enabledPackIds": [
+      "srd-5e-2024",
+      "advanced-adventurers"
+    ]
+  },
+  "characters": [
+    {
+      "reviewStatus": "reviewed",
+      "sourceFiles": [
+        "633693217_812807168501075_497739657323287790_n.jpg"
+      ],
+      "identity": {
+        "name": "Ronan Wildspark",
+        "slug": "ronan-wildspark",
+        "className": "Fighter",
+        "classId": "fighter",
+        "level": 2
+      },
+      "tableState": {
+        "armorClass": 14,
+        "maxHp": 22,
+        "speed": 30,
+        "passivePerception": 10
+      },
+      "abilities": {
+        "strength": 13,
+        "dexterity": 17,
+        "constitution": 15,
+        "intelligence": 12,
+        "wisdom": 10,
+        "charisma": 8
+      },
+      "spellcasting": null,
+      "sourceLedger": {
+        "features": [
+          {
+            "id": "species-goliath",
+            "label": "Goliath",
+            "sourceKind": "species",
+            "sourceEntityId": "species:goliath",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Species traits box shows Stone's Endurance as the active goliath ancestry feature.",
+            "effects": [],
+            "notes": []
+          },
+          {
+            "id": "second-wind",
+            "label": "Second Wind",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:second-wind",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Bonus Action to regain Hit Points equal to 1d10 plus your Fighter level. Once used, it refreshes on a short rest.",
+            "effects": [],
+            "notes": []
+          },
+          {
+            "id": "weapon-mastery",
+            "label": "Weapon Mastery",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:weapon-mastery",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Two weapon masteries selected on the sheet; detailed mastery choices are not yet modeled.",
+            "effects": [],
+            "notes": [
+              "Sheet shows a mastery note beside weapons, but the exact mastery-state modeling is deferred."
+            ]
+          },
+          {
+            "id": "savage-attacker",
+            "label": "Savage Attacker",
+            "sourceKind": "feat",
+            "sourceEntityId": "feat:savage-attacker",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Once per turn when you hit with a weapon attack, you can reroll the weapon's damage dice twice and use either roll.",
+            "effects": [],
+            "notes": []
+          }
+        ]
+      },
+      "xpLedger": [],
+      "notes": [
+        "Species appears to be Goliath.",
+        "Passive Perception cell is faint; seeded as 10 from Wisdom 10 pending later confirmation."
+      ]
+    },
+    {
+      "reviewStatus": "reviewed",
+      "sourceFiles": [
+        "634274459_1989923724899109_4246272943118090927_n.jpg",
+        "639013425_2058106995036078_6226103486010556925_n.jpg"
+      ],
+      "identity": {
+        "name": "Tali",
+        "slug": "tali",
+        "className": "Druid",
+        "classId": "druid",
+        "level": 2
+      },
+      "tableState": {
+        "armorClass": 13,
+        "maxHp": 19,
+        "speed": 30,
+        "passivePerception": 13
+      },
+      "abilities": {
+        "strength": 8,
+        "dexterity": 12,
+        "constitution": 14,
+        "intelligence": 14,
+        "wisdom": 17,
+        "charisma": 10
+      },
+      "spellcasting": {
+        "ability": "wisdom",
+        "spellSaveDc": 13,
+        "spellAttackBonus": 5,
+        "knownSpells": [
+          "Shillelagh",
+          "Druidcraft",
+          "Guidance",
+          "Message",
+          "Hex",
+          "Entangle",
+          "Cure Wounds",
+          "Faerie Fire",
+          "Detect Magic",
+          "Jump",
+          "Disguise Self"
+        ]
+      },
+      "sourceLedger": {
+        "features": [
+          {
+            "id": "sheet-species-magic",
+            "label": "Sheet Species Magic",
+            "sourceKind": "species",
+            "sourceEntityId": "seed:species:sheet-species-magic",
+            "description": "Species traits box lists Darkvision 60, Feerie Tollen, telepathic message, remote viewing, and Hex Magic with Disguise Self and Hex.",
+            "effects": [
+              {
+                "type": "grant-sense",
+                "sense": {
+                  "sense": "Darkvision",
+                  "range": 60
+                }
+              },
+              {
+                "type": "grant-trait",
+                "trait": {
+                  "name": "Feerie Tollen",
+                  "description": "Reviewed sheet note: bonus-action telepathic message and remote viewing."
+                }
+              },
+              {
+                "type": "grant-trait",
+                "trait": {
+                  "name": "Hex Magic",
+                  "description": "Reviewed sheet note: species-origin magic includes Disguise Self and Hex."
+                }
+              }
+            ],
+            "notes": [
+              "The handwritten species name is not fully legible yet, so this remains a reviewed sheet-derived species source."
+            ]
+          },
+          {
+            "id": "primal-order-warden",
+            "label": "Primal Order: Warden",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:primal-order-warden",
+            "sourcePackId": "srd-5e-2024",
+            "description": "The class features box shows Warden.",
+            "effects": [],
+            "notes": []
+          },
+          {
+            "id": "wild-shape",
+            "label": "Wild Shape",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:wild-shape",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Front-page notes list Wild Shape with cat, horse, spider, and wolf forms.",
+            "effects": [],
+            "notes": [
+              "Exact 2024 Wild Shape action/resource details are deferred."
+            ]
+          },
+          {
+            "id": "wild-companion",
+            "label": "Wild Companion",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:wild-companion",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Front-page notes mention Wild Companion using spell slots or Wild Shape.",
+            "effects": [],
+            "notes": []
+          }
+        ]
+      },
+      "xpLedger": [],
+      "notes": [
+        "The back-page spell list includes a mix of druid and species-origin magic; it is stored as known spell access for now.",
+        "One additional druid back-page photo appears to duplicate this sheet."
+      ]
+    },
+    {
+      "reviewStatus": "reviewed",
+      "sourceFiles": [
+        "637081818_903649365600538_4800846982233133757_n.jpg",
+        "637811344_864231973245849_407537896633557968_n.jpg"
+      ],
+      "identity": {
+        "name": "Oriana",
+        "slug": "oriana",
+        "className": "Warlock",
+        "classId": "warlock",
+        "level": 2
+      },
+      "tableState": {
+        "armorClass": 12,
+        "maxHp": 18,
+        "speed": 30,
+        "passivePerception": 13
+      },
+      "abilities": {
+        "strength": 8,
+        "dexterity": 12,
+        "constitution": 15,
+        "intelligence": 10,
+        "wisdom": 14,
+        "charisma": 17
+      },
+      "spellcasting": {
+        "ability": "charisma",
+        "spellSaveDc": 13,
+        "spellAttackBonus": 5,
+        "knownSpells": [
+          "Dancing Lights",
+          "Eldritch Blast",
+          "Toll the Dead",
+          "Hex",
+          "Hellish Rebuke"
+        ]
+      },
+      "sourceLedger": {
+        "features": [
+          {
+            "id": "species-drow",
+            "label": "Drow",
+            "sourceKind": "species",
+            "sourceEntityId": "species:drow",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Species traits box lists Darkvision 120, Fey Ancestry, and Trance-style rest text.",
+            "effects": [],
+            "notes": [
+              "The sheet header reads Half-Elf Drow, but the visible species mechanics line up with drow lineage traits."
+            ]
+          },
+          {
+            "id": "pact-weapon",
+            "label": "Pact Weapon",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:pact-of-the-blade",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Front-page notes describe conjuring a pact weapon or turning a magic weapon into one, then using Charisma for attack and damage rolls.",
+            "effects": [],
+            "notes": [
+              "The exact 2024 or AA mechanical source for this sheet note still needs confirmation."
+            ]
+          },
+          {
+            "id": "slot-recovery",
+            "label": "Spell Slot Recovery",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:magical-cunning",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Front-page notes describe spending 1 minute to regain a spell slot equal to half max.",
+            "effects": [],
+            "notes": [
+              "Stored as an unmodeled source note until the exact feature is identified."
+            ]
+          },
+          {
+            "id": "skilled",
+            "label": "Skilled",
+            "sourceKind": "feat",
+            "sourceEntityId": "feat:skilled",
+            "sourcePackId": "srd-5e-2024",
+            "description": "The feat box reads Skilled.",
+            "effects": [],
+            "notes": []
+          }
+        ]
+      },
+      "xpLedger": [],
+      "notes": [
+        "Species is written as Half-Elf Drow.",
+        "Passive Perception is taken from the sheet rather than recomputed from fully modeled skills."
+      ]
+    },
+    {
+      "reviewStatus": "reviewed",
+      "sourceFiles": [
+        "638331554_1347138773838818_7766768129190932106_n.jpg",
+        "640764394_2729708284045076_6923932246102210335_n.jpg"
+      ],
+      "identity": {
+        "name": "Vivennah",
+        "slug": "vivennah",
+        "className": "Bard",
+        "classId": "bard",
+        "level": 2
+      },
+      "tableState": {
+        "armorClass": 13,
+        "maxHp": 15,
+        "speed": 35,
+        "passivePerception": 10
+      },
+      "abilities": {
+        "strength": 8,
+        "dexterity": 18,
+        "constitution": 14,
+        "intelligence": 12,
+        "wisdom": 10,
+        "charisma": 17
+      },
+      "spellcasting": {
+        "ability": "charisma",
+        "spellSaveDc": 13,
+        "spellAttackBonus": 5,
+        "knownSpells": [
+          "Druidcraft",
+          "True Strike",
+          "Vicious Mockery",
+          "Speak with Animals",
+          "Faerie Fire",
+          "Tasha's Hideous Laughter",
+          "Thunderwave"
+        ]
+      },
+      "sourceLedger": {
+        "features": [
+          {
+            "id": "species-wood-elf",
+            "label": "Wood Elf",
+            "sourceKind": "species",
+            "sourceEntityId": "species:wood-elf",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Species is written as Wood Elf on the reviewed front sheet.",
+            "effects": [],
+            "notes": []
+          },
+          {
+            "id": "bardic-inspiration",
+            "label": "Bardic Inspiration",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:bardic-inspiration",
+            "sourcePackId": "srd-5e-2024",
+            "description": "The class feature box notes three d6 inspiration uses, regained on a long rest.",
+            "effects": [],
+            "notes": []
+          },
+          {
+            "id": "musician",
+            "label": "Musician",
+            "sourceKind": "feat",
+            "sourceEntityId": "feat:musician",
+            "sourcePackId": "srd-5e-2024",
+            "description": "The feat box reads Musician: rest = inspiration.",
+            "effects": [],
+            "notes": []
+          }
+        ]
+      },
+      "xpLedger": [],
+      "notes": [
+        "Species is written as Wood Elf.",
+        "The sheet uses the handwritten spelling Vivennah; this is preserved as entered."
+      ]
+    },
+    {
+      "reviewStatus": "reviewed",
+      "sourceFiles": [
+        "634303499_2231697407240467_3701917419116937128_n.jpg"
+      ],
+      "identity": {
+        "name": "Nara",
+        "slug": "nara",
+        "className": "Sorcerer",
+        "classId": "sorcerer",
+        "level": 2
+      },
+      "tableState": {
+        "armorClass": 10,
+        "maxHp": 12,
+        "speed": 30,
+        "passivePerception": 11
+      },
+      "abilities": {
+        "strength": 8,
+        "dexterity": 10,
+        "constitution": 12,
+        "intelligence": 16,
+        "wisdom": 13,
+        "charisma": 16
+      },
+      "spellcasting": {
+        "ability": "charisma",
+        "spellSaveDc": 13,
+        "spellAttackBonus": 5,
+        "knownSpells": []
+      },
+      "sourceLedger": {
+        "features": [
+          {
+            "id": "magic-initiate-wizard",
+            "label": "Magic Initiate (Wizard)",
+            "sourceKind": "feat",
+            "sourceEntityId": "feat:magic-initiate",
+            "sourcePackId": "srd-5e-2024",
+            "description": "The feat box reads Magic Init Wiz.",
+            "effects": [],
+            "notes": [
+              "The exact chosen wizard cantrips and level-1 spell are not legible from the available sheet photo."
+            ]
+          },
+          {
+            "id": "sorcerer-sheet-notes",
+            "label": "Sorcerer Sheet Notes",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "seed:feature:sorcerer-sheet-notes",
+            "description": "The class feature box mentions an inner source of magic, Sorcery Points, and metamagic choices that appear to include Subtle Spell and Twinned Spell.",
+            "effects": [],
+            "notes": [
+              "No matching back-page spell sheet has been confidently paired yet."
+            ]
+          }
+        ]
+      },
+      "xpLedger": [],
+      "notes": [
+        "Species text is faint and remains unresolved.",
+        "This character is seeded from the front sheet only for now."
+      ]
+    }
+  ]
+}

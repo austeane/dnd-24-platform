@@ -15,7 +15,14 @@ export type {
   RestType,
   GrantedAction,
   GrantedResource,
+  GrantedScalingResource,
+  GrantedSpellAccess,
+  GrantedSpellCapacity,
+  GrantedSpellSlotPool,
+  GrantedSense,
+  GrantedTrait,
   ACFormula,
+  EffectAbilityName,
 } from "./effect.ts";
 
 export type {
@@ -73,8 +80,21 @@ export type {
 } from "./condition.ts";
 
 export type {
+  AbilityName,
+  CharacterBaseSnapshot,
+  CharacterComputationInput,
   CharacterState,
+  CharacterSpellCapacity,
+  CharacterSpellcastingState,
+  CharacterSpellSlotPool,
+  CharacterProficiencySet,
   AbilityScoreSet,
+  EvaluatedAction,
+  EvaluatedResource,
+  EvaluatedSense,
+  EvaluatedTrait,
   XPLedgerEntry,
   ModifierExplanation,
+  PrerequisiteCheck,
+  PrerequisiteEvaluation,
 } from "./character.ts";

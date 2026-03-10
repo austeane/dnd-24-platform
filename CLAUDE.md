@@ -1,5 +1,7 @@
 # dnd-24-platform
 
+The ultimate goal of this repo is to make it so that when we are playing dnd irl, with 5e rules but AA additions, players don't have to use their character sheets at all, and don't have to consult outside resources when levelling up or using their characters.
+
 D&D 2024 campaign platform. TypeScript library for SRD/AA parsing and rules engine (`library/`), TanStack Start web app (`app/`). Supports three progression modes: Standard 5e 2024, AA Only, and Hybrid.
 
 **Read `META-PLAN.md` first.** It defines how this project is built: library-first, humans steer, agents execute.
@@ -21,6 +23,9 @@ pnpm -F @dnd/library test:watch # Watch mode
 pnpm -F @dnd/app dev            # Start app dev server
 pnpm check                      # Type-check all packages
 pnpm lint                       # Lint all packages (oxlint)
+pnpm compile                    # Compile canonical content
+pnpm report:fleet-readiness     # Regenerate fleet reports + CSV
+pnpm report:mechanics-coverage  # Regenerate coarse mechanics report
 ```
 
 ## Pre-commit Contract
@@ -46,6 +51,21 @@ Deploys to `www.austinwallace.ca/dnd` via Railway + SST Router. See `docs/deploy
 - SST Router config lives in `~/dev/austin-site/sst.config.ts`
 - SST deploy: `cd ~/dev/austin-site && AWS_PROFILE=prod npx sst deploy --stage production`
 
+## Fleet Execution
+
+This repo uses a batch-based fleet execution model for parallel agent work. Read [Plan 010](docs/plans/active/010-fleet-execution-model.md) for rules.
+
+- **Batch assignments**: `docs/reports/fleet-work-items.csv` — one row per batch, all context included
+- **Mechanics tracker**: `docs/reports/srd-mechanics-coverage-atomic.md` — execution truth, 111 atomic mechanics
+- **Fleet readiness**: `docs/reports/fleet-readiness.md` — wave/batch status and dependency graph
+- **Batch source**: `data/fleet/srd-fleet-batches.ts` — typed batch definitions with owned paths, gates, and hints
+- **Atomic mechanics source**: `data/mechanics-coverage/srd-5e-2024-atomic.ts`
+
+Key rules:
+- Each batch owns explicit write paths. Do not write outside your batch's `ownedPaths`.
+- Do not mark a mechanic `full` without linked tests, fixtures, or live-roster evidence.
+- Regenerate reports after status changes: `pnpm report:fleet-readiness`
+
 ## Docs (progressive disclosure)
 
 - `META-PLAN.md` — Project philosophy, tech choices, architecture principles
@@ -62,3 +82,6 @@ When creating a plan in Claude plan mode, copy the `~/.claude/plans/` plan file 
 ## Session Hygiene
 
 When you have fully completed a task, update `docs/` with what was built, changed, or decided. Future agents should be able to read CLAUDE.md → docs/ and understand the current state without needing conversation history.
+
+
+## AGENTS.md is a symlink of CLAUDE.md
