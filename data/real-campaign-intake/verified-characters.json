@@ -466,6 +466,22 @@
         "weaponLabel": "Pact Weapon (conjured)",
         "isMagicWeapon": false
       },
+      "expectedClassFeatures": {
+        "magicalCunning": {
+          "present": true,
+          "resourceMaxUses": 1,
+          "resourceResetOn": "long",
+          "slotsRecovered": 1,
+          "note": "Warlock 2: 2 pact slots, recover ceil(2/2)=1 slot per use"
+        },
+        "pactOfTheBlade": {
+          "present": true,
+          "bondedWeapon": "Pact Weapon (conjured)",
+          "isMagicWeapon": false,
+          "charismaSubstitution": true,
+          "note": "CHA 17 (+3) > STR 8 (-1), Charisma substitution applies for attack and damage"
+        }
+      },
       "expectedFeatSpeciesEffects": {
         "species": "Drow",
         "speciesEffects": [
@@ -480,7 +496,8 @@
           "Skilled: 3 chosen skill proficiencies (Perception, Persuasion, Stealth)"
         ],
         "expectedResources": [
-          { "name": "Drow Faerie Fire Free Cast", "maxUses": 1, "resetOn": "long", "note": "One free Faerie Fire casting per long rest" }
+          { "name": "Drow Faerie Fire Free Cast", "maxUses": 1, "resetOn": "long", "note": "One free Faerie Fire casting per long rest" },
+          { "name": "Magical Cunning", "maxUses": 1, "resetOn": "long", "note": "One use of Magical Cunning per long rest" }
         ]
       },
       "xpLedger": [],
@@ -609,6 +626,15 @@
           "slot": "carried"
         }
       ],
+      "expectedClassFeatures": {
+        "bardicInspiration": {
+          "present": true,
+          "dieSize": "d6",
+          "maxUses": 3,
+          "resetOn": "short",
+          "note": "CHA 17 (+3) = 3 uses. Musician feat changes reset from long to short rest. Die is d6 at Bard level 2."
+        }
+      },
       "expectedFeatSpeciesEffects": {
         "species": "Wood Elf",
         "speciesEffects": [
@@ -622,7 +648,9 @@
         "featEffects": [
           "Musician: Bardic Inspiration recovery on short rest"
         ],
-        "expectedResources": [],
+        "expectedResources": [
+          { "name": "Bardic Inspiration", "maxUses": 3, "resetOn": "short", "note": "CHA +3 = 3 uses, short rest reset via Musician feat" }
+        ],
         "note": "Musician modifies Bardic Inspiration to also reset on short rest."
       },
       "xpLedger": [],
@@ -678,11 +706,22 @@
             ]
           },
           {
-            "id": "sorcerer-sheet-notes",
-            "label": "Sorcerer Sheet Notes",
+            "id": "font-of-magic",
+            "label": "Font of Magic",
             "sourceKind": "class-feature",
-            "sourceEntityId": "seed:feature:sorcerer-sheet-notes",
-            "description": "The class feature box mentions an inner source of magic, Sorcery Points, and metamagic choices that appear to include Subtle Spell and Twinned Spell.",
+            "sourceEntityId": "class-feature:font-of-magic",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Sorcery Points pool (2 at level 2) and spell slot conversion.",
+            "effects": [],
+            "notes": []
+          },
+          {
+            "id": "metamagic",
+            "label": "Metamagic",
+            "sourceKind": "class-feature",
+            "sourceEntityId": "class-feature:metamagic",
+            "sourcePackId": "srd-5e-2024",
+            "description": "Metamagic choices: Subtle Spell and Twinned Spell.",
             "effects": [],
             "notes": [
               "No matching back-page spell sheet has been confidently paired yet."
@@ -719,6 +758,21 @@
         { "metamagicOption": "Twinned Spell", "sourceLabel": "Sorcerer 2" }
       ],
       "equipment": [],
+      "expectedClassFeatures": {
+        "fontOfMagic": {
+          "present": true,
+          "sorceryPointsMax": 2,
+          "resetOn": "long",
+          "note": "Sorcerer level 2 = 2 sorcery points. Can convert points to slots and vice versa."
+        },
+        "metamagic": {
+          "present": true,
+          "chosenOptions": ["Subtle Spell", "Twinned Spell"],
+          "subtleSpellCost": 1,
+          "twinnedSpellCost": "spell level (minimum 1)",
+          "note": "Subtle Spell removes verbal/somatic components. Twinned Spell targets a second creature."
+        }
+      },
       "expectedFeatSpeciesEffects": {
         "species": null,
         "speciesEffects": [],
@@ -728,7 +782,8 @@
           "Magic Initiate Free Cast: 1 free casting of chosen level 1 spell per long rest"
         ],
         "expectedResources": [
-          { "name": "Magic Initiate Free Cast", "maxUses": 1, "resetOn": "long", "note": "One free casting of the chosen level 1 spell per long rest" }
+          { "name": "Magic Initiate Free Cast", "maxUses": 1, "resetOn": "long", "note": "One free casting of the chosen level 1 spell per long rest" },
+          { "name": "Sorcery Points", "maxUses": 2, "resetOn": "long", "note": "Sorcerer level 2 = 2 sorcery points" }
         ],
         "note": "Species text is faint and unresolved. Magic Initiate spell choices are not legible from photo."
       },

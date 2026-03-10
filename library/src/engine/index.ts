@@ -50,4 +50,27 @@ export {
   stonesEnduranceReduction,
 } from "./feats-and-species.ts";
 
+export {
+  applyPactBladeCharismaSubstitution,
+  buildBardicInspirationDieTrait,
+  buildBardicInspirationPool,
+  buildCasterClassFeatureEffects,
+  buildFontOfMagicConversionTrait,
+  buildFontOfMagicPool,
+  buildMagicalCunningTrait,
+  buildMetamagicTraits,
+  computeBardicInspirationMaxUses,
+  computeMagicalCunningRecovery,
+  computeSorceryPointsMax,
+  extractMetamagicChoices,
+  extractPactBladeBond,
+  getBardicInspirationDie,
+  getClassLevel,
+  getMetamagicCost,
+  hasMagicalCunning,
+  hasPactOfTheBlade,
+  METAMAGIC_OPTIONS,
+  SORCERY_POINT_SLOT_COST,
+} from "./class-features-casters.ts";
+
 export const ENGINE_VERSION = "0.1.0" as const;
