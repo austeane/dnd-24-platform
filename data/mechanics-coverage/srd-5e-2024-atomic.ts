@@ -169,7 +169,7 @@ const coreCharacter: AtomicMechanicsCoverageEntry[] = [
     "Expertise grants",
     "full",
     "Expertise doubles proficiency bonus and is reflected in passive perception. Tested with explicit expertise scenarios.",
-    { dependsOn: ["core-skill-choice-capture"], refs: [refs.engineProficiencies, refs.testsProficiencies], verificationGates: ["runtime", "tests", "live-roster"] },
+    { dependsOn: ["core-skill-choice-capture"], refs: [refs.engineProficiencies, refs.testsProficiencies, refs.testsLiveRoster, refs.testsFixtureRoster], verificationGates: ["runtime", "tests", "live-roster"] },
   ),
   atomic(
     "core-initiative-derivation",
@@ -526,7 +526,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Melee attack profile derivation",
     "full",
     "Melee attack profiles are derived from equipped weapons with ability selection, proficiency, damage dice, and properties. Tested for Longsword, Quarterstaff, Rapier, Javelin, Dagger.",
-    { dependsOn: ["action-weapon-effect-application"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster], verificationGates: ["runtime", "explainability", "tests", "fixtures", "live-roster"] },
+    { dependsOn: ["action-weapon-effect-application"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster, refs.testsFixtureRoster], verificationGates: ["runtime", "explainability", "tests", "fixtures", "live-roster"] },
   ),
   atomic(
     "action-ranged-attack-profiles",
@@ -535,7 +535,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Ranged attack profile derivation",
     "full",
     "Ranged attack profiles are derived with ability selection, proficiency, and damage dice. Tested for Longbow and thrown Javelin.",
-    { dependsOn: ["action-weapon-effect-application"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster], verificationGates: ["runtime", "explainability", "tests", "fixtures", "live-roster"] },
+    { dependsOn: ["action-weapon-effect-application"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster, refs.testsFixtureRoster], verificationGates: ["runtime", "explainability", "tests", "fixtures", "live-roster"] },
   ),
   atomic(
     "action-damage-package-projection",
@@ -544,7 +544,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Damage package projection",
     "full",
     "Damage dice, damage bonus, and damage type are projected on every attack profile. Tested for melee and ranged weapons.",
-    { dependsOn: ["action-melee-attack-profiles", "action-ranged-attack-profiles"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster], verificationGates: ["runtime", "tests", "fixtures"] },
+    { dependsOn: ["action-melee-attack-profiles", "action-ranged-attack-profiles"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster, refs.testsFixtureRoster], verificationGates: ["runtime", "tests", "fixtures"] },
   ),
   atomic(
     "action-weapon-mastery-choice-capture",
@@ -562,7 +562,7 @@ const actionsAndResources: AtomicMechanicsCoverageEntry[] = [
     "Weapon Mastery runtime resolution",
     "full",
     "Weapon Mastery properties appear on computed attack profiles with correct mastery names. Tested for Cleave and Graze.",
-    { dependsOn: ["action-weapon-mastery-choice-capture", "action-melee-attack-profiles"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster], verificationGates: ["runtime", "tests", "fixtures", "live-roster"] },
+    { dependsOn: ["action-weapon-mastery-choice-capture", "action-melee-attack-profiles"], refs: [refs.engineAttacks, refs.testsAttacks, refs.testsLiveRoster, refs.testsFixtureRoster], verificationGates: ["runtime", "tests", "fixtures", "live-roster"] },
   ),
 ];
 
@@ -673,7 +673,7 @@ const spellcasting: AtomicMechanicsCoverageEntry[] = [
     "Prepared spell capacity grants",
     "full",
     "Prepared capacity computed from class level + casting modifier. Tested for Druid and Cleric with correct formulas.",
-    { refs: [refs.engineSpellcasting, refs.testsSpellcasting, refs.testsLiveRoster], verificationGates: ["runtime", "tests", "fixtures", "live-roster"] },
+    { refs: [refs.engineSpellcasting, refs.testsSpellcasting, refs.testsLiveRoster, refs.testsFixtureRoster], verificationGates: ["runtime", "tests", "fixtures", "live-roster"] },
   ),
   atomic(
     "spell-known-capacity-grants",
@@ -682,7 +682,7 @@ const spellcasting: AtomicMechanicsCoverageEntry[] = [
     "Known spell capacity grants",
     "full",
     "Known spell capacity computed from class progression tables. Tested for Bard, Sorcerer, and Warlock with level-based limits.",
-    { refs: [refs.engineSpellcasting, refs.testsSpellcasting], verificationGates: ["runtime", "tests", "fixtures"] },
+    { refs: [refs.engineSpellcasting, refs.testsSpellcasting, refs.testsFixtureRoster], verificationGates: ["runtime", "tests", "fixtures"] },
   ),
   atomic(
     "spell-capacity-enforcement",
