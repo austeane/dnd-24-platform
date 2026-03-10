@@ -93,3 +93,15 @@ export {
   listActiveConditions,
   listConditionEvents,
 } from "./condition-state.ts";
+export {
+  getSpellSlotState,
+  hasFreeCastAvailable,
+  initializeSpellSlotPools,
+  restoreSpellSlot,
+  spendFreeCast,
+  spendSpellSlot,
+} from "./spell-slot-state.ts";
+export type {
+  RestoreSpellSlotInput,
+  SpendSpellSlotInput,
+} from "./spell-slot-state.ts";
