@@ -2,7 +2,8 @@ import type {
   CharacterComputationInput,
   CharacterState,
 } from "../types/character.ts";
-import { buildArmorClass } from "./defenses.ts";
+import { buildACBreakdown, buildArmorClass } from "./defenses.ts";
+import { buildAttackProfiles } from "./attack-profiles.ts";
 import { getCharacterLevel } from "./levels.ts";
 import { getAbilityModifier, getProficiencyBonusForLevel } from "./math.ts";
 import { buildPassivePerception, buildProficiencies, buildSkillState } from "./proficiencies.ts";
@@ -57,6 +58,8 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
     maxHP: input.base.baseMaxHP + sumContributors(hpContributors),
     maxHPExplanation: createExplanation("Base HP", input.base.baseMaxHP, hpContributors),
     armorClass: buildArmorClass(input, effects),
+    acBreakdown: buildACBreakdown(input, effects),
+    attackProfiles: buildAttackProfiles(input, effects, proficiencyBonus, proficiencies),
     initiative: createExplanation("Dexterity", dexterityModifier, initiativeContributors),
     speed:
       input.base.baseSpeed +

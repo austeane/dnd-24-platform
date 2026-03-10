@@ -148,6 +148,19 @@ export interface CharacterSpellcastingState {
   spellSaveExplanation: ModifierExplanation;
 }
 
+/**
+ * A definition for a spell slot pool that can be initialized as a
+ * persistent resource pool. Each slot level is a separate pool entry
+ * (e.g., "Spell Slot (Level 1)", "Pact Magic Slot (Level 1)").
+ */
+export interface SpellSlotPoolDefinition {
+  slotLevel: number;
+  total: number;
+  resetOn: "short" | "long";
+  source: string;
+  resourceName: string;
+}
+
 export interface PrerequisiteCheck {
   prerequisite: AAPrerequisite;
   passed: boolean;
@@ -179,6 +192,43 @@ export interface ConditionMechanicalEffect {
   tags: string[];
 }
 
+/** Breakdown of AC showing base, armor, shield, and Dex contributions */
+export interface ACBreakdown {
+  explanation: ModifierExplanation;
+  base: number;
+  armorName: string | undefined;
+  armorBase: number | undefined;
+  shieldBonus: number | undefined;
+  dexBonus: number | undefined;
+  dexCap: number | undefined;
+  otherBonuses: Array<{
+    sourceName: string;
+    value: number;
+  }>;
+}
+
+/** Which ability is used for the attack roll */
+export type AttackAbility = "strength" | "dexterity" | "charisma";
+
+/** A computed attack profile for a weapon or similar attack */
+export interface AttackProfile {
+  name: string;
+  weaponEntityId: string | undefined;
+  attackType: "melee" | "ranged";
+  ability: AttackAbility;
+  attackBonus: number;
+  attackExplanation: ModifierExplanation;
+  damageDice: string;
+  damageBonus: number;
+  damageType: string;
+  /** Range string for ranged/thrown weapons, e.g. "30/120" */
+  range: string | undefined;
+  properties: string[];
+  /** Weapon Mastery property, if the character has the feature and weapon qualifies */
+  masteryProperty: string | undefined;
+  isProficient: boolean;
+}
+
 /** The fully computed state of a character, derived from all stored sources */
 export interface CharacterState {
   name: string;
@@ -191,6 +241,8 @@ export interface CharacterState {
   maxHP: number;
   maxHPExplanation: ModifierExplanation;
   armorClass: ModifierExplanation;
+  acBreakdown: ACBreakdown;
+  attackProfiles: AttackProfile[];
   initiative: ModifierExplanation;
   speed: number;
   passivePerception: ModifierExplanation;

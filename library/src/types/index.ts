@@ -81,6 +81,9 @@ export type {
 
 export type {
   AbilityName,
+  ACBreakdown,
+  AttackAbility,
+  AttackProfile,
   CharacterBaseSnapshot,
   CharacterComputationInput,
   CharacterState,
@@ -94,6 +97,7 @@ export type {
   EvaluatedSense,
   EvaluatedTrait,
   ResourcePoolDefinition,
+  SpellSlotPoolDefinition,
   XPLedgerEntry,
   ModifierExplanation,
   PrerequisiteCheck,

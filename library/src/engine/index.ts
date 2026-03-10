@@ -15,4 +15,21 @@ export {
   getActiveConditionTags,
 } from "./conditions.ts";
 
+export {
+  buildSpellSlotPoolDefinitions,
+  computePreparedSpellCapacity,
+  derivePactMagicSlots,
+  deriveStandardSlots,
+  getCantripCount,
+  getCasterType,
+  getKnownSpellCount,
+  getSpellLearningMode,
+  FULL_CASTER_SLOT_TABLE,
+  HALF_CASTER_SLOT_TABLE,
+  PACT_MAGIC_TABLE,
+} from "./spellcasting.ts";
+
+export { buildACBreakdown } from "./defenses.ts";
+export { buildAttackProfiles, getWeaponData } from "./attack-profiles.ts";
+
 export const ENGINE_VERSION = "0.1.0" as const;
