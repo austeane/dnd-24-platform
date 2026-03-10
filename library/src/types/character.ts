@@ -42,6 +42,7 @@ export interface CharacterComputationInput {
   base: CharacterBaseSnapshot;
   sources: SourceWithEffects[];
   xpLedger: XPLedgerEntry[];
+  activeConditions?: ActiveCondition[];
 }
 
 export interface XPLedgerEntry {
@@ -70,6 +71,27 @@ export interface CharacterProficiencySet {
   armors: string[];
   tools: string[];
   languages: string[];
+}
+
+/** The ability associated with a D&D skill */
+export type SkillAbilityName = AbilityName;
+
+/** Computed state for a single skill: bonus, proficiency, expertise, and source citations */
+export interface ComputedSkill {
+  skillName: string;
+  ability: SkillAbilityName;
+  abilityModifier: number;
+  proficient: boolean;
+  expertise: boolean;
+  proficiencyBonus: number;
+  bonus: number;
+  sources: string[];
+}
+
+/** Full computed skill state for a character */
+export interface ComputedSkillState {
+  skills: ComputedSkill[];
+  passivePerception: ModifierExplanation;
 }
 
 export interface EvaluatedAction extends GrantedAction {
@@ -137,6 +159,26 @@ export interface PrerequisiteEvaluation {
   checks: PrerequisiteCheck[];
 }
 
+/** A condition name recognized by the rules engine */
+export type ConditionName = "charmed" | "incapacitated";
+
+/** An active condition on a character, as input to the engine */
+export interface ActiveCondition {
+  conditionName: ConditionName;
+  appliedAt: string;
+  appliedByLabel: string;
+  /** For conditions like Charmed that target a specific creature */
+  sourceCreature?: string;
+  note?: string;
+}
+
+/** Mechanical effects produced by an active condition */
+export interface ConditionMechanicalEffect {
+  conditionName: ConditionName;
+  description: string;
+  tags: string[];
+}
+
 /** The fully computed state of a character, derived from all stored sources */
 export interface CharacterState {
   name: string;
@@ -160,12 +202,19 @@ export interface CharacterState {
   senses: EvaluatedSense[];
   notes: string[];
   proficiencies: CharacterProficiencySet;
+  skillState: ComputedSkillState;
   resistances: Array<{
     damageType: string;
     condition: string | undefined;
   }>;
   immunities: string[];
   extraAttackCount: number;
+
+  /** Active conditions and their mechanical effects */
+  conditions: {
+    active: ActiveCondition[];
+    effects: ConditionMechanicalEffect[];
+  };
 
   /** All sources contributing to this character */
   sources: SourceWithEffects[];

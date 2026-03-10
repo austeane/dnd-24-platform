@@ -5,7 +5,7 @@ import type {
 import { buildArmorClass } from "./defenses.ts";
 import { getCharacterLevel } from "./levels.ts";
 import { getAbilityModifier, getProficiencyBonusForLevel } from "./math.ts";
-import { buildPassivePerception, buildProficiencies } from "./proficiencies.ts";
+import { buildPassivePerception, buildProficiencies, buildSkillState } from "./proficiencies.ts";
 import { buildSpellcastingState } from "./spellcasting.ts";
 import {
   buildNotes,
@@ -21,6 +21,7 @@ import {
   uniqueSorted,
 } from "./shared.ts";
 import { buildXpSummary } from "./xp.ts";
+import { computeConditionEffects } from "./conditions.ts";
 
 export { getAbilityModifier } from "./math.ts";
 
@@ -82,6 +83,7 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
     senses: buildSenses(effects),
     notes: buildNotes(input.sources, effects),
     proficiencies,
+    skillState: buildSkillState(input.base.abilityScores, proficiencyBonus, effects),
     resistances: effects.flatMap((entry) =>
       entry.effect.type === "resistance"
         ? [{
@@ -102,6 +104,10 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
 
       return Math.max(maxCount, entry.effect.count);
     }, 0),
+    conditions: {
+      active: input.activeConditions ?? [],
+      effects: computeConditionEffects(input.activeConditions ?? []),
+    },
     sources: input.sources,
     xp: buildXpSummary(input.xpLedger),
   };

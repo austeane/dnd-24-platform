@@ -85,6 +85,14 @@
           }
         ]
       },
+      "expectedSkills": {
+        "proficientSkills": [
+          { "skillName": "Athletics", "bonus": 3, "ability": "strength", "source": "Fighter" },
+          { "skillName": "Intimidation", "bonus": 1, "ability": "charisma", "source": "Fighter" }
+        ],
+        "passivePerception": 10,
+        "passivePerceptionNote": "Computed: 10 + WIS mod (+0) = 10. Matches table value."
+      },
       "skillChoices": [
         { "skillName": "Athletics", "source": "class", "sourceLabel": "Fighter" },
         { "skillName": "Intimidation", "source": "class", "sourceLabel": "Fighter" }
@@ -142,7 +150,7 @@
       "xpLedger": [],
       "notes": [
         "Species appears to be Goliath.",
-        "Passive Perception cell is faint; seeded as 10 from Wisdom 10 pending later confirmation."
+        "Passive Perception computed as 10 (10 + WIS +0). Matches table value."
       ]
     },
     {
@@ -258,6 +266,14 @@
             "notes": []
           }
         ]
+      },
+      "expectedSkills": {
+        "proficientSkills": [
+          { "skillName": "Nature", "bonus": 4, "ability": "intelligence", "source": "Druid" },
+          { "skillName": "Perception", "bonus": 5, "ability": "wisdom", "source": "Druid" }
+        ],
+        "passivePerception": 15,
+        "passivePerceptionNote": "Computed: 10 + WIS mod (+3) + prof (+2) = 15. Sheet says 13, likely a sheet calculation error (omitted proficiency bonus)."
       },
       "skillChoices": [
         { "skillName": "Nature", "source": "class", "sourceLabel": "Druid" },
@@ -382,6 +398,17 @@
           }
         ]
       },
+      "expectedSkills": {
+        "proficientSkills": [
+          { "skillName": "Arcana", "bonus": 2, "ability": "intelligence", "source": "Warlock" },
+          { "skillName": "Deception", "bonus": 5, "ability": "charisma", "source": "Warlock" },
+          { "skillName": "Perception", "bonus": 4, "ability": "wisdom", "source": "Skilled" },
+          { "skillName": "Persuasion", "bonus": 5, "ability": "charisma", "source": "Skilled" },
+          { "skillName": "Stealth", "bonus": 3, "ability": "dexterity", "source": "Skilled" }
+        ],
+        "passivePerception": 14,
+        "passivePerceptionNote": "Computed: 10 + WIS mod (+2) + prof (+2) = 14. Sheet says 13, likely a sheet calculation error."
+      },
       "skillChoices": [
         { "skillName": "Arcana", "source": "class", "sourceLabel": "Warlock" },
         { "skillName": "Deception", "source": "class", "sourceLabel": "Warlock" },
@@ -416,7 +443,7 @@
       "xpLedger": [],
       "notes": [
         "Species is written as Half-Elf Drow.",
-        "Passive Perception is taken from the sheet rather than recomputed from fully modeled skills."
+        "Sheet passive Perception was 13; engine computes 14 (10 + WIS +2 + Perception prof +2). Sheet value likely omitted Perception proficiency bonus from Skilled feat."
       ]
     },
     {
@@ -493,6 +520,15 @@
             "notes": []
           }
         ]
+      },
+      "expectedSkills": {
+        "proficientSkills": [
+          { "skillName": "Acrobatics", "bonus": 6, "ability": "dexterity", "source": "Bard" },
+          { "skillName": "Performance", "bonus": 5, "ability": "charisma", "source": "Bard" },
+          { "skillName": "Persuasion", "bonus": 5, "ability": "charisma", "source": "Bard" }
+        ],
+        "passivePerception": 10,
+        "passivePerceptionNote": "Computed: 10 + WIS mod (+0) = 10. Matches table value."
       },
       "skillChoices": [
         { "skillName": "Acrobatics", "source": "class", "sourceLabel": "Bard" },
@@ -594,6 +630,14 @@
             ]
           }
         ]
+      },
+      "expectedSkills": {
+        "proficientSkills": [
+          { "skillName": "Arcana", "bonus": 5, "ability": "intelligence", "source": "Sorcerer" },
+          { "skillName": "Insight", "bonus": 3, "ability": "wisdom", "source": "Sorcerer" }
+        ],
+        "passivePerception": 11,
+        "passivePerceptionNote": "Computed: 10 + WIS mod (+1) = 11. Matches table value."
       },
       "skillChoices": [
         { "skillName": "Arcana", "source": "class", "sourceLabel": "Sorcerer" },

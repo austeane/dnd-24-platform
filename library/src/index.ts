@@ -8,12 +8,20 @@ export { parseMarkdown, splitByHeading, nodeText, isPageNumberLine } from "./par
 
 // Engine
 export {
+  ALL_CONDITION_NAMES,
   ENGINE_VERSION,
   buildResourcePoolDefinitions,
+  buildSkillState,
+  canAttackTarget,
+  canTakeActions,
+  canTakeReactions,
   computeCharacterState,
+  computeConditionEffects,
   evaluatePrerequisites,
   getAbilityModifier,
+  getActiveConditionTags,
   getPoolsForRestType,
+  SKILL_ABILITY_MAP,
 } from "./engine/index.ts";
 
 // Catalog helpers
