@@ -4,6 +4,7 @@ import type {
   CharacterSourceKind,
   CharacterSpendPlanKind,
   CharacterSpendPlanState,
+  ConditionName,
   EquipmentSlot,
   ResourceEventChange,
   ResourceEventKind,
@@ -11,6 +12,7 @@ import type {
   XpTransactionCategory,
 } from "../db/schema/index.ts";
 import {
+  characterConditions,
   characterEquipment,
   characterFeatChoices,
   characterMetamagicChoices,
@@ -20,6 +22,7 @@ import {
   characterSources,
   characterSpendPlans,
   characterWeaponMasteries,
+  conditionEvents,
   resourceEvents,
   xpTransactions,
 } from "../db/schema/index.ts";
@@ -275,4 +278,42 @@ export interface RecordResourceEventInput {
   changes: ResourceEventChange[];
   note?: string;
   createdByLabel: string;
+}
+
+// --- Condition State Record Types ---
+
+export type CharacterConditionRecord = InferSelectModel<typeof characterConditions>;
+export type ConditionEventRecord = InferSelectModel<typeof conditionEvents>;
+
+// --- Condition State Input Types ---
+
+export interface ApplyConditionInput {
+  id?: string;
+  characterId: string;
+  conditionName: ConditionName;
+  sourceCreature?: string | null;
+  note?: string | null;
+  appliedByLabel: string;
+  appliedAt?: Date;
+  sessionId?: string | null;
+}
+
+export interface RemoveConditionInput {
+  conditionId: string;
+  removedByLabel: string;
+  removedAt?: Date;
+  note?: string | null;
+  sessionId?: string | null;
+}
+
+export interface OverrideConditionInput {
+  conditionId: string;
+  correctedByLabel: string;
+  note?: string | null;
+  sessionId?: string | null;
+  replacement?: {
+    conditionName: ConditionName;
+    sourceCreature?: string | null;
+    note?: string | null;
+  } | null;
 }

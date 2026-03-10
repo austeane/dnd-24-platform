@@ -38,6 +38,12 @@ export {
   restTypes,
   skillChoiceSourceEnum,
   skillChoiceSources,
+  characterConditions,
+  conditionEventKindEnum,
+  conditionEventKinds,
+  conditionEvents,
+  conditionNameEnum,
+  conditionNames,
   xpTransactionCategories,
   xpTransactionCategoryEnum,
   xpTransactions,
@@ -79,3 +85,7 @@ export type {
   XpTransactionCategory,
 } from "./progression.ts";
 export type { ResourceEventChange } from "./progression.ts";
+export type {
+  ConditionEventKind,
+  ConditionName,
+} from "./progression.ts";

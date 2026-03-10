@@ -1,4 +1,6 @@
 export type {
+  ApplyConditionInput,
+  CharacterConditionRecord,
   CharacterEquipmentRecord,
   CharacterFeatChoiceRecord,
   CharacterMetamagicChoiceRecord,
@@ -15,12 +17,14 @@ export type {
   CharacterWeaponMasteryRecord,
   CharacterXpLedgerSummary,
   CommitCharacterSpendPlanInput,
+  ConditionEventRecord,
   CreateCharacterSpendPlanInput,
   CreateXpTransactionInput,
   InitializeResourcePoolsInput,
   NewCharacterSourceRecord,
   NewCharacterSpendPlanRecord,
   NewXpTransactionRecord,
+  OverrideConditionInput,
   RecordCharacterSourceInput,
   RecordEquipmentInput,
   RecordFeatChoiceInput,
@@ -29,6 +33,7 @@ export type {
   RecordResourceEventInput,
   RecordSkillChoiceInput,
   RecordWeaponMasteryInput,
+  RemoveConditionInput,
   ResourceEventRecord,
   RestInput,
   RestoreResourceInput,
@@ -81,3 +86,10 @@ export {
   recordResourceEvent,
   listCharacterResourceEvents,
 } from "./resource-state.ts";
+export {
+  applyCondition,
+  removeCondition,
+  overrideCondition,
+  listActiveConditions,
+  listConditionEvents,
+} from "./condition-state.ts";
