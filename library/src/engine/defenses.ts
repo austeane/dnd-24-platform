@@ -35,21 +35,32 @@ export function buildACBreakdown(
   const shieldBonus = shieldContributors.reduce((sum, c) => sum + c.value, 0) || undefined;
   const acModTotal = acContributors.reduce((sum, c) => sum + c.value, 0);
 
-  const baseAc = createExplanation("Base AC", input.base.baseArmorClass, acContributors);
-
   const formulaCandidates = effects.filter(
     (entry): entry is EffectEnvelope & { effect: Extract<Effect, { type: "set-ac-formula" }> } =>
       entry.effect.type === "set-ac-formula",
   );
 
+  const UNARMORED_BASE = 10;
+
   if (formulaCandidates.length === 0) {
+    // Unarmored: AC = 10 + DEX modifier (+ any modifiers like shield)
+    const dexMod = getAbilityModifier(input.base.abilityScores.dexterity);
+    const unarmoredTotal = UNARMORED_BASE + dexMod + acModTotal;
+    const unarmoredExplanation: ModifierExplanation = {
+      total: unarmoredTotal,
+      contributors: [
+        { sourceName: "Base AC", value: UNARMORED_BASE, condition: undefined },
+        { sourceName: "Dexterity", value: dexMod, condition: undefined },
+        ...acContributors,
+      ],
+    };
     return {
-      explanation: baseAc,
-      base: input.base.baseArmorClass,
+      explanation: unarmoredExplanation,
+      base: UNARMORED_BASE,
       armorName: undefined,
       armorBase: undefined,
       shieldBonus,
-      dexBonus: undefined,
+      dexBonus: dexMod,
       dexCap: undefined,
       otherBonuses: otherContributors.map((c) => ({
         sourceName: c.sourceName,
@@ -125,14 +136,25 @@ export function buildACBreakdown(
       candidate.explanation.total > bestSoFar.explanation.total ? candidate : bestSoFar,
   );
 
-  if (best.explanation.total < baseAc.total) {
+  // Compare formula result against unarmored (10 + DEX + modifiers)
+  const dexMod = getAbilityModifier(input.base.abilityScores.dexterity);
+  const unarmoredTotal = UNARMORED_BASE + dexMod + acModTotal;
+  if (best.explanation.total < unarmoredTotal) {
+    const unarmoredExplanation: ModifierExplanation = {
+      total: unarmoredTotal,
+      contributors: [
+        { sourceName: "Base AC", value: UNARMORED_BASE, condition: undefined },
+        { sourceName: "Dexterity", value: dexMod, condition: undefined },
+        ...acContributors,
+      ],
+    };
     return {
-      explanation: baseAc,
-      base: input.base.baseArmorClass,
+      explanation: unarmoredExplanation,
+      base: UNARMORED_BASE,
       armorName: undefined,
       armorBase: undefined,
       shieldBonus,
-      dexBonus: undefined,
+      dexBonus: dexMod,
       dexCap: undefined,
       otherBonuses: otherContributors.map((c) => ({
         sourceName: c.sourceName,

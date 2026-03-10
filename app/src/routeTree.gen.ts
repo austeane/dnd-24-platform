@@ -10,33 +10,114 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as CharactersCharacterIdRouteRouteImport } from './routes/characters/$characterId/route'
+import { Route as CharactersCharacterIdIndexRouteImport } from './routes/characters/$characterId/index'
+import { Route as CharactersCharacterIdSpellbookRouteImport } from './routes/characters/$characterId/spellbook'
+import { Route as CharactersCharacterIdJournalRouteImport } from './routes/characters/$characterId/journal'
+import { Route as CharactersCharacterIdInventoryRouteImport } from './routes/characters/$characterId/inventory'
+import { Route as CharactersCharacterIdCompendiumRouteImport } from './routes/characters/$characterId/compendium'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CharactersCharacterIdRouteRoute =
+  CharactersCharacterIdRouteRouteImport.update({
+    id: '/characters/$characterId',
+    path: '/characters/$characterId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const CharactersCharacterIdIndexRoute =
+  CharactersCharacterIdIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => CharactersCharacterIdRouteRoute,
+  } as any)
+const CharactersCharacterIdSpellbookRoute =
+  CharactersCharacterIdSpellbookRouteImport.update({
+    id: '/spellbook',
+    path: '/spellbook',
+    getParentRoute: () => CharactersCharacterIdRouteRoute,
+  } as any)
+const CharactersCharacterIdJournalRoute =
+  CharactersCharacterIdJournalRouteImport.update({
+    id: '/journal',
+    path: '/journal',
+    getParentRoute: () => CharactersCharacterIdRouteRoute,
+  } as any)
+const CharactersCharacterIdInventoryRoute =
+  CharactersCharacterIdInventoryRouteImport.update({
+    id: '/inventory',
+    path: '/inventory',
+    getParentRoute: () => CharactersCharacterIdRouteRoute,
+  } as any)
+const CharactersCharacterIdCompendiumRoute =
+  CharactersCharacterIdCompendiumRouteImport.update({
+    id: '/compendium',
+    path: '/compendium',
+    getParentRoute: () => CharactersCharacterIdRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/characters/$characterId': typeof CharactersCharacterIdRouteRouteWithChildren
+  '/characters/$characterId/compendium': typeof CharactersCharacterIdCompendiumRoute
+  '/characters/$characterId/inventory': typeof CharactersCharacterIdInventoryRoute
+  '/characters/$characterId/journal': typeof CharactersCharacterIdJournalRoute
+  '/characters/$characterId/spellbook': typeof CharactersCharacterIdSpellbookRoute
+  '/characters/$characterId/': typeof CharactersCharacterIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/characters/$characterId/compendium': typeof CharactersCharacterIdCompendiumRoute
+  '/characters/$characterId/inventory': typeof CharactersCharacterIdInventoryRoute
+  '/characters/$characterId/journal': typeof CharactersCharacterIdJournalRoute
+  '/characters/$characterId/spellbook': typeof CharactersCharacterIdSpellbookRoute
+  '/characters/$characterId': typeof CharactersCharacterIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/characters/$characterId': typeof CharactersCharacterIdRouteRouteWithChildren
+  '/characters/$characterId/compendium': typeof CharactersCharacterIdCompendiumRoute
+  '/characters/$characterId/inventory': typeof CharactersCharacterIdInventoryRoute
+  '/characters/$characterId/journal': typeof CharactersCharacterIdJournalRoute
+  '/characters/$characterId/spellbook': typeof CharactersCharacterIdSpellbookRoute
+  '/characters/$characterId/': typeof CharactersCharacterIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/characters/$characterId'
+    | '/characters/$characterId/compendium'
+    | '/characters/$characterId/inventory'
+    | '/characters/$characterId/journal'
+    | '/characters/$characterId/spellbook'
+    | '/characters/$characterId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/characters/$characterId/compendium'
+    | '/characters/$characterId/inventory'
+    | '/characters/$characterId/journal'
+    | '/characters/$characterId/spellbook'
+    | '/characters/$characterId'
+  id:
+    | '__root__'
+    | '/'
+    | '/characters/$characterId'
+    | '/characters/$characterId/compendium'
+    | '/characters/$characterId/inventory'
+    | '/characters/$characterId/journal'
+    | '/characters/$characterId/spellbook'
+    | '/characters/$characterId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CharactersCharacterIdRouteRoute: typeof CharactersCharacterIdRouteRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +129,76 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/characters/$characterId': {
+      id: '/characters/$characterId'
+      path: '/characters/$characterId'
+      fullPath: '/characters/$characterId'
+      preLoaderRoute: typeof CharactersCharacterIdRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/characters/$characterId/': {
+      id: '/characters/$characterId/'
+      path: '/'
+      fullPath: '/characters/$characterId/'
+      preLoaderRoute: typeof CharactersCharacterIdIndexRouteImport
+      parentRoute: typeof CharactersCharacterIdRouteRoute
+    }
+    '/characters/$characterId/spellbook': {
+      id: '/characters/$characterId/spellbook'
+      path: '/spellbook'
+      fullPath: '/characters/$characterId/spellbook'
+      preLoaderRoute: typeof CharactersCharacterIdSpellbookRouteImport
+      parentRoute: typeof CharactersCharacterIdRouteRoute
+    }
+    '/characters/$characterId/journal': {
+      id: '/characters/$characterId/journal'
+      path: '/journal'
+      fullPath: '/characters/$characterId/journal'
+      preLoaderRoute: typeof CharactersCharacterIdJournalRouteImport
+      parentRoute: typeof CharactersCharacterIdRouteRoute
+    }
+    '/characters/$characterId/inventory': {
+      id: '/characters/$characterId/inventory'
+      path: '/inventory'
+      fullPath: '/characters/$characterId/inventory'
+      preLoaderRoute: typeof CharactersCharacterIdInventoryRouteImport
+      parentRoute: typeof CharactersCharacterIdRouteRoute
+    }
+    '/characters/$characterId/compendium': {
+      id: '/characters/$characterId/compendium'
+      path: '/compendium'
+      fullPath: '/characters/$characterId/compendium'
+      preLoaderRoute: typeof CharactersCharacterIdCompendiumRouteImport
+      parentRoute: typeof CharactersCharacterIdRouteRoute
+    }
   }
 }
 
+interface CharactersCharacterIdRouteRouteChildren {
+  CharactersCharacterIdCompendiumRoute: typeof CharactersCharacterIdCompendiumRoute
+  CharactersCharacterIdInventoryRoute: typeof CharactersCharacterIdInventoryRoute
+  CharactersCharacterIdJournalRoute: typeof CharactersCharacterIdJournalRoute
+  CharactersCharacterIdSpellbookRoute: typeof CharactersCharacterIdSpellbookRoute
+  CharactersCharacterIdIndexRoute: typeof CharactersCharacterIdIndexRoute
+}
+
+const CharactersCharacterIdRouteRouteChildren: CharactersCharacterIdRouteRouteChildren =
+  {
+    CharactersCharacterIdCompendiumRoute: CharactersCharacterIdCompendiumRoute,
+    CharactersCharacterIdInventoryRoute: CharactersCharacterIdInventoryRoute,
+    CharactersCharacterIdJournalRoute: CharactersCharacterIdJournalRoute,
+    CharactersCharacterIdSpellbookRoute: CharactersCharacterIdSpellbookRoute,
+    CharactersCharacterIdIndexRoute: CharactersCharacterIdIndexRoute,
+  }
+
+const CharactersCharacterIdRouteRouteWithChildren =
+  CharactersCharacterIdRouteRoute._addFileChildren(
+    CharactersCharacterIdRouteRouteChildren,
+  )
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CharactersCharacterIdRouteRoute: CharactersCharacterIdRouteRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

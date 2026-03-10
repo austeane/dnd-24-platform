@@ -304,8 +304,8 @@ describe("AC computation", () => {
       (s) => s.source.kind !== "equipment" || s.source.entityId === "equipment:longsword" || s.source.entityId === "equipment:javelin",
     );
     const state = computeCharacterState(input);
-    // Base AC of 10
-    expect(state.armorClass.total).toBe(10);
+    // Unarmored AC = 10 + DEX modifier (DEX 17 = +3) = 13
+    expect(state.armorClass.total).toBe(13);
     expect(state.acBreakdown.armorName).toBeUndefined();
   });
 

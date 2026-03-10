@@ -1,0 +1,92 @@
+/* Tavern component CSS — patterns too complex for Tailwind inline */
+
+/* Card: gradient background with inset highlight */
+.tavern-card {
+  background: linear-gradient(180deg, rgba(255, 252, 246, 0.97), rgba(247, 239, 225, 0.96));
+  border: 1px solid rgba(171, 133, 84, 0.22);
+  border-radius: var(--radius-card);
+  overflow: hidden;
+  box-shadow:
+    var(--shadow-tavern-lg),
+    inset 0 1px 0 rgba(255, 255, 255, 0.92);
+  position: relative;
+}
+
+.tavern-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.4), transparent 40%);
+  pointer-events: none;
+}
+
+.tavern-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Nav: wood-grain gradient with striations */
+.tavern-nav {
+  background: linear-gradient(90deg, #351d14 0%, #59311d 46%, #6f3c1f 62%, #351d14 100%);
+  color: var(--color-cream);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-tavern-nav);
+  overflow: hidden;
+}
+
+.tavern-nav::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(105deg, rgba(255, 255, 255, 0.04) 0 16px, transparent 16px 42px);
+  pointer-events: none;
+  opacity: 0.35;
+}
+
+.tavern-nav::after {
+  content: "";
+  position: absolute;
+  left: 2rem;
+  right: 2rem;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(245, 225, 187, 0.55), transparent);
+  pointer-events: none;
+}
+
+/* Content grid with template areas */
+.content-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(280px, 0.95fr);
+  grid-template-areas:
+    "combat skills features"
+    "spells spells features";
+  gap: 1.1rem;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .content-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "combat skills"
+      "features features"
+      "spells spells";
+  }
+}
+
+@media (max-width: 480px) {
+  .content-grid {
+    grid-template-columns: 1fr;
+    grid-template-areas: none;
+    gap: 0.75rem;
+  }
+}
+
+/* Fade-up animation with staggerable delay */
+.animate-fade-up {
+  animation: fadeUp 0.4s ease-out both;
+  animation-delay: var(--delay, 0s);
+}
