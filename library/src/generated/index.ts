@@ -15,14 +15,14 @@ import type {
 import type { Spell } from "../types/spell.ts";
 
 export const generatedContentManifest = {
-  "totalEntities": 83,
+  "totalEntities": 103,
   "packs": {
     "srd-5e-2024": 71,
-    "advanced-adventurers": 12,
+    "advanced-adventurers": 32,
     "campaign-private": 0
   },
   "byType": {
-    "spell": 30,
+    "spell": 32,
     "rule": 4,
     "condition": 2,
     "equipment": 8,
@@ -30,11 +30,33 @@ export const generatedContentManifest = {
     "species": 3,
     "class": 5,
     "class-feature": 20,
-    "aa-ability": 6
+    "aa-ability": 24
   }
 } satisfies CanonicalContentManifest;
 
 export const allCanonEntities = [
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-action-surge",
+    "slug": "aa-action-surge",
+    "name": "Action Surge",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image15:Action Surge"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Take one additional action on your turn, once per short or long rest.",
+    "bodyMd": "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again.",
+    "expCost": 12,
+    "category": "general-utility",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
   {
     "type": "aa-ability",
     "id": "aa-ability-agonizing-blast",
@@ -60,6 +82,290 @@ export const allCanonEntities = [
         "value": "Eldritch Blast cantrip"
       }
     ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-bardic-inspiration",
+    "slug": "aa-bardic-inspiration",
+    "name": "Bardic Inspiration",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Bardic Inspiration"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Use a bonus action to grant an ally a Bardic Inspiration die they can add to an ability check, attack roll, or saving throw.",
+    "bodyMd": "You can inspire others through stirring words or music. As a bonus action, choose one creature other than yourself within 60 feet who can hear you. That creature gains one Bardic Inspiration die, a d6. Within the next 10 minutes, the creature can roll the die and add the number rolled to one ability check, attack roll, or saving throw. The creature can wait until after the d20 roll before deciding to use it, but must decide before the DM says whether the roll succeeds or fails. A creature can have only one Bardic Inspiration die at a time.\n\nYou can use this feature a number of times equal to your Charisma modifier (minimum once). You regain all expended uses on a long rest.\n\nThe die can be upgraded: d6 (8 exp), d8 (+3 exp), d10 (+3 exp), d12 (+3 exp).",
+    "expCost": 8,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-combat-inspiration",
+    "slug": "aa-combat-inspiration",
+    "name": "Combat Inspiration",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Combat Inspiration"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Bardic Inspiration recipients can add the die to weapon damage or AC against an attack.",
+    "bodyMd": "A creature that has a Bardic Inspiration die from you can roll that die and add the number rolled to a weapon damage roll it just made. Alternatively, when an attack roll is made against that creature, it can use its reaction to roll the Bardic Inspiration die and add the number rolled to its AC against that attack, after seeing the roll but before knowing whether it hits or misses.",
+    "expCost": 5,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Bardic Inspiration"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-cunning-action",
+    "slug": "aa-cunning-action",
+    "name": "Cunning Action",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image15:Cunning Action"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Use a bonus action to Dash, Disengage, or Hide on each of your turns in combat.",
+    "bodyMd": "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action.",
+    "expCost": 12,
+    "category": "general-utility",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-cutting-words",
+    "slug": "aa-cutting-words",
+    "name": "Cutting Words",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Cutting Words"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Expend Bardic Inspiration to subtract from an enemy's attack roll, ability check, or damage roll.",
+    "bodyMd": "When a creature you can see within 60 feet makes an attack roll, ability check, or damage roll, you can use your reaction to expend one Bardic Inspiration use, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this after the creature rolls but before the DM determines the result or damage is dealt. The creature is immune if it cannot hear you or is immune to being charmed.",
+    "expCost": 6,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Bardic Inspiration"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-devils-sight",
+    "slug": "aa-devils-sight",
+    "name": "Devil's Sight",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Devil's Sight"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "See normally in darkness, both magical and nonmagical, to a distance of 120 feet.",
+    "bodyMd": "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet. This lives inside the broader Eldritch Invocations purchase path rather than carrying a standalone exp cost.",
+    "expCost": 0,
+    "category": "spellcasting",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-divine-smite",
+    "slug": "aa-divine-smite",
+    "name": "Divine Smite",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image41:Divine Smite"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Expend a spell slot before a melee weapon attack to deal extra radiant damage (2d8 + 1d8 per slot level above 1st, max 5d8; +1d8 vs undead/fiends).",
+    "bodyMd": "Before making a melee weapon attack, you can expend one spell slot to charge your weapon with radiant energy. If you hit, the target takes extra radiant damage in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend, to a maximum of 6d8.",
+    "expCost": 12,
+    "category": "offensive-combat",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-eldritch-invocations",
+    "slug": "aa-eldritch-invocations",
+    "name": "Eldritch Invocations",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Eldritch Invocations"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Gain eldritch invocations: fragments of forbidden knowledge that grant abiding magical abilities. Choose two on first purchase, one per additional purchase.",
+    "bodyMd": "In your study of occult lore, you have unearthed eldritch invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability.\n\nWhen you choose this ability for the first time it costs 17 exp and you choose two invocations from the list. You may acquire this ability additional times; it costs 7 additional experience each time after the first and you gain one more invocation.\n\nIndividual invocations (such as Agonizing Blast, Repelling Blast, Devil's Sight) are tracked as separate AA abilities linked to this purchase path.",
+    "expCost": 17,
+    "category": "ability-tree",
+    "repeatable": true,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Otherworldly Patron"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-evasion",
+    "slug": "aa-evasion",
+    "name": "Evasion",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image31:Evasion"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Take no damage on a successful DEX save (half on failure) against effects that allow a DEX save for half damage.",
+    "bodyMd": "Your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail.",
+    "expCost": 13,
+    "category": "defensive",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-extra-attack",
+    "slug": "aa-extra-attack",
+    "name": "Extra Attack",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image30:Extra Attack"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Attack an additional time when taking the Attack action. Can be purchased up to three times for escalating costs.",
+    "bodyMd": "When you take the Attack action you can attack an additional time. You may acquire this ability an additional time for 50 more experience, and a third time for 60 experience.",
+    "expCost": 30,
+    "category": "offensive-combat",
+    "repeatable": true,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-fighting-style",
+    "slug": "aa-fighting-style",
+    "name": "Fighting Style",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image13:Fighting Style"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Adopt a fighting style specialty. Choose Archery, Defense, Dueling, Great Weapon Fighting, Protection, or Two-Weapon Fighting.",
+    "bodyMd": "You adopt a particular style of fighting as your specialty. Choose one of the following options. You can take this ability multiple times but must choose a different style each time.\n\n- **Archery** - +2 bonus to attack rolls with ranged weapons.\n- **Defense** - +1 bonus to AC while wearing armor.\n- **Dueling** - +2 bonus to damage rolls when wielding a melee weapon in one hand and no other weapons.\n- **Great Weapon Fighting** - Reroll 1s and 2s on damage dice for two-handed or versatile melee weapons (must use new roll).\n- **Protection** - Use reaction to impose disadvantage on an attack against a target within 5 feet (requires shield).\n- **Two-Weapon Fighting** - Add ability modifier to the damage of the second attack when two-weapon fighting.",
+    "expCost": 8,
+    "category": "offensive-combat",
+    "repeatable": true,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-font-of-inspiration",
+    "slug": "aa-font-of-inspiration",
+    "name": "Font of Inspiration",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Font of Inspiration"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Regain all expended uses of Bardic Inspiration on a short or long rest instead of only a long rest.",
+    "bodyMd": "You regain all of your expended uses of Bardic Inspiration when you finish a short or long rest.",
+    "expCost": 5,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Bardic Inspiration"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-font-of-magic",
+    "slug": "aa-font-of-magic",
+    "name": "Font of Magic",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image36:Font of Magic"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Gain sorcery points that can be exchanged for spell slots and vice versa.",
+    "bodyMd": "You have 2 sorcery points when you acquire this ability and can spend 2 more experience any number of times to gain an additional sorcery point each time. You regain all spent sorcery points when you finish a long rest.\n\nYou can use your sorcery points to gain additional spell slots, or sacrifice spell slots to gain additional sorcery points.\n\n**Creating Spell Slots.** You can transform unexpended sorcery points into one spell slot as a bonus action on your turn. The cost is: 1st (2), 2nd (3), 3rd (5), 4th (6), 5th (7). You cannot create 6th level or higher spell slots in this way.",
+    "expCost": 5,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [],
     "effects": []
   },
   {
@@ -135,6 +441,114 @@ export const allCanonEntities = [
   },
   {
     "type": "aa-ability",
+    "id": "aa-ability-metamagic",
+    "slug": "aa-metamagic",
+    "name": "Metamagic",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image36:Metamagic"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Twist your spells to suit your needs using sorcery points for Metamagic options such as Twinned Spell, Subtle Spell, and Quickened Spell.",
+    "bodyMd": "You gain the ability to twist your spells to suit your needs. You can use only one Metamagic option on a spell when you cast it, unless otherwise noted. The first time you take this ability it costs 6 exp and you choose two options; each additional option costs 2 exp.\n\n**Careful Spell** Spend 1 sorcery point; choose a number of creatures up to your Charisma modifier. They automatically succeed on the spell's saving throw.\n\n**Distant Spell** Spend 1 sorcery point to double range (5 ft+), or make touch spells 30 ft range.\n\n**Empowered Spell** Spend 1 sorcery point to reroll up to Charisma modifier damage dice (must use new rolls). Can combine with another Metamagic option.\n\n**Extended Spell** Spend 1 sorcery point to double a spell's duration (max 24 hours).\n\n**Heightened Spell** Spend 3 sorcery points to give one target disadvantage on its first saving throw against the spell.\n\n**Quickened Spell** Spend 2 sorcery points to change a 1 action casting time to 1 bonus action.\n\n**Subtle Spell** Spend 1 sorcery point to cast without verbal or somatic components.\n\n**Twinned Spell** Spend sorcery points equal to the spell's level (1 for cantrips) to target a second creature with a single-target spell.",
+    "expCost": 6,
+    "category": "ability-tree",
+    "repeatable": true,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Font of Magic"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-pact-of-the-blade",
+    "slug": "aa-pact-of-the-blade",
+    "name": "Pact of the Blade",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Pact of the Blade"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Create a magical pact weapon in your empty hand, or bond a magic weapon as your pact weapon.",
+    "bodyMd": "You can use your action to create a pact weapon in your empty hand. You can choose the form that this melee weapon takes each time you create it. This weapon counts as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage.\n\nYour pact weapon disappears if it is more than 5 feet away from you for 1 minute or more. It also disappears if you use this feature again, if you dismiss the weapon (no action required), or if you die.\n\nYou can transform one magic weapon into your pact weapon by performing a ritual over 1 hour (which can be done during a short rest). You can then dismiss the weapon into an extradimensional space, and it appears whenever you create your pact weapon thereafter. You cannot affect an artifact or a sentient weapon in this way.",
+    "expCost": 6,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Otherworldly Patron"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-pact-of-the-chain",
+    "slug": "aa-pact-of-the-chain",
+    "name": "Pact of the Chain",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Pact of the Chain"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Learn Find Familiar as a ritual with expanded familiar forms (imp, pseudodragon, quasit, sprite) and familiar attack capability.",
+    "bodyMd": "You learn the Find Familiar spell and can cast it as a ritual. When you cast the spell, you can choose one of the normal forms for your familiar or one of the following special forms: imp, pseudodragon, quasit, or sprite.\n\nAdditionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its reaction.",
+    "expCost": 4,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Otherworldly Patron"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-repelling-blast",
+    "slug": "aa-repelling-blast",
+    "name": "Repelling Blast",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image20:Repelling Blast"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "When you hit a creature with Eldritch Blast, push it up to 10 feet away in a straight line.",
+    "bodyMd": "When you hit a creature with Eldritch Blast, you can push the creature up to 10 feet away from you in a straight line. This lives inside the broader Eldritch Invocations purchase path rather than carrying a standalone exp cost.",
+    "expCost": 0,
+    "category": "spellcasting",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "spellcasting",
+        "value": "Eldritch Blast cantrip"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
     "id": "aa-ability-spell-stealer",
     "slug": "aa-spell-stealer",
     "name": "Spell Stealer",
@@ -151,6 +565,28 @@ export const allCanonEntities = [
     "bodyMd": "When you successfully counter a spell using Counterspell, you may immediately cast that spell as part of your reaction by expending a spell slot of the same level. You do not require any material components the spell normally needs, because they were already used in the initial casting.",
     "expCost": 8,
     "category": "spellcasting",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-uncanny-dodge",
+    "slug": "aa-uncanny-dodge",
+    "name": "Uncanny Dodge",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image31:Uncanny Dodge"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Use your reaction to halve an attack's damage against you when hit by an attacker you can see.",
+    "bodyMd": "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you.",
+    "expCost": 15,
+    "category": "defensive",
     "repeatable": false,
     "prerequisites": [],
     "effects": []
@@ -383,6 +819,123 @@ export const allCanonEntities = [
     ],
     "interactionTypes": [
       "prerequisite",
+      "modifier"
+    ]
+  },
+  {
+    "type": "spell",
+    "id": "aa-spell-find-familiar",
+    "slug": "find-familiar-aa",
+    "name": "Find Familiar",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2024-adapted",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Pact of the Chain"
+    },
+    "adaptationMode": "ported-with-judgement",
+    "judgement": {
+      "isJudgementCall": true,
+      "judgementBasis": "AA's Pact of the Chain assumes the 2014-style Find Familiar with special familiar forms (imp, pseudodragon, quasit, sprite) and the ability to forgo an attack for a familiar attack. This overlay keeps the 2024 SRD Find Familiar text as the baseline and carries the AA Pact of the Chain expanded familiar options as overlay metadata.",
+      "derivedFrom": [
+        {
+          "label": "2024 SRD Find Familiar",
+          "sourceEdition": "srd-2024",
+          "sourceReference": {
+            "sourceTitle": "System Reference Document 5.2.1",
+            "locator": "chapter-08:Find Familiar"
+          },
+          "packId": "srd-5e-2024",
+          "entityId": "spell-find-familiar"
+        },
+        {
+          "label": "AA Pact of the Chain",
+          "sourceEdition": "aa-2014",
+          "sourceReference": {
+            "sourceTitle": "Advanced Adventurers",
+            "locator": "combined.md:image9:Pact of the Chain"
+          }
+        }
+      ]
+    },
+    "reviewStatus": "llm-judgement",
+    "summary": "AA universal-access overlay for Find Familiar using 2024 wording. Pact of the Chain enables special familiar forms and familiar attacks.",
+    "tags": [
+      "aa",
+      "conjuration",
+      "familiar"
+    ],
+    "bodyMd": "You gain the service of a familiar, a spirit that takes an animal form you choose. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a Celestial, Fey, or Fiend (your choice) instead of a Beast.\n\nWith the Pact of the Chain ability, you can choose one of the following special forms in addition to normal options: imp, pseudodragon, quasit, or sprite. Additionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its reaction.",
+    "level": 1,
+    "school": "Conjuration",
+    "classes": [],
+    "availability": "aa-universal",
+    "castingTime": "1 hour",
+    "ritual": true,
+    "range": "10 feet",
+    "components": {
+      "verbal": true,
+      "somatic": true,
+      "material": "burning incense worth 10+ GP, which the spell consumes"
+    },
+    "duration": "Instantaneous",
+    "concentration": false,
+    "overlayTarget": {
+      "packId": "srd-5e-2024",
+      "entityId": "spell-find-familiar"
+    },
+    "aaSection": "Pact of the Chain",
+    "linkedAaAbilityIds": [
+      "aa-ability-pact-of-the-chain"
+    ],
+    "interactionTypes": [
+      "modifier"
+    ]
+  },
+  {
+    "type": "spell",
+    "id": "aa-spell-hex",
+    "slug": "hex-aa",
+    "name": "Hex",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2024-adapted",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:spellcasting:Universal Spell Learning"
+    },
+    "adaptationMode": "ported-unchanged",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "AA universal-access overlay for Hex. In AA, any character with spell slots can learn Hex for 1 exp.",
+    "tags": [
+      "aa",
+      "enchantment",
+      "curse"
+    ],
+    "bodyMd": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell. The target has Disadvantage on ability checks made with the chosen ability. If the target drops to 0 Hit Points before this spell ends, you can take a Bonus Action on a later turn to curse a new creature.",
+    "level": 1,
+    "school": "Enchantment",
+    "classes": [],
+    "availability": "aa-universal",
+    "castingTime": "Bonus Action",
+    "ritual": false,
+    "range": "90 feet",
+    "components": {
+      "verbal": true,
+      "somatic": true,
+      "material": "the petrified eye of a newt"
+    },
+    "duration": "up to 1 hour",
+    "concentration": true,
+    "higherLevelsLabel": "Using a Higher-Level Spell Slot",
+    "higherLevelsMd": "Your Concentration can last longer with a spell slot of level 2 (up to 4 hours), 3-4 (up to 8 hours), or 5+ (24 hours).",
+    "overlayTarget": {
+      "packId": "srd-5e-2024",
+      "entityId": "spell-hex"
+    },
+    "aaSection": "Universal Spell Learning",
+    "linkedAaAbilityIds": [],
+    "interactionTypes": [
       "modifier"
     ]
   },
@@ -3982,6 +4535,76 @@ export const allCanonSpells = [
   },
   {
     "type": "spell",
+    "id": "aa-spell-find-familiar",
+    "slug": "find-familiar-aa",
+    "name": "Find Familiar",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2024-adapted",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Pact of the Chain"
+    },
+    "adaptationMode": "ported-with-judgement",
+    "judgement": {
+      "isJudgementCall": true,
+      "judgementBasis": "AA's Pact of the Chain assumes the 2014-style Find Familiar with special familiar forms (imp, pseudodragon, quasit, sprite) and the ability to forgo an attack for a familiar attack. This overlay keeps the 2024 SRD Find Familiar text as the baseline and carries the AA Pact of the Chain expanded familiar options as overlay metadata.",
+      "derivedFrom": [
+        {
+          "label": "2024 SRD Find Familiar",
+          "sourceEdition": "srd-2024",
+          "sourceReference": {
+            "sourceTitle": "System Reference Document 5.2.1",
+            "locator": "chapter-08:Find Familiar"
+          },
+          "packId": "srd-5e-2024",
+          "entityId": "spell-find-familiar"
+        },
+        {
+          "label": "AA Pact of the Chain",
+          "sourceEdition": "aa-2014",
+          "sourceReference": {
+            "sourceTitle": "Advanced Adventurers",
+            "locator": "combined.md:image9:Pact of the Chain"
+          }
+        }
+      ]
+    },
+    "reviewStatus": "llm-judgement",
+    "summary": "AA universal-access overlay for Find Familiar using 2024 wording. Pact of the Chain enables special familiar forms and familiar attacks.",
+    "tags": [
+      "aa",
+      "conjuration",
+      "familiar"
+    ],
+    "bodyMd": "You gain the service of a familiar, a spirit that takes an animal form you choose. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a Celestial, Fey, or Fiend (your choice) instead of a Beast.\n\nWith the Pact of the Chain ability, you can choose one of the following special forms in addition to normal options: imp, pseudodragon, quasit, or sprite. Additionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its reaction.",
+    "level": 1,
+    "school": "Conjuration",
+    "classes": [],
+    "availability": "aa-universal",
+    "castingTime": "1 hour",
+    "ritual": true,
+    "range": "10 feet",
+    "components": {
+      "verbal": true,
+      "somatic": true,
+      "material": "burning incense worth 10+ GP, which the spell consumes"
+    },
+    "duration": "Instantaneous",
+    "concentration": false,
+    "overlayTarget": {
+      "packId": "srd-5e-2024",
+      "entityId": "spell-find-familiar"
+    },
+    "aaSection": "Pact of the Chain",
+    "linkedAaAbilityIds": [
+      "aa-ability-pact-of-the-chain"
+    ],
+    "interactionTypes": [
+      "modifier"
+    ]
+  },
+  {
+    "type": "spell",
     "id": "spell-find-familiar",
     "slug": "find-familiar",
     "name": "Find Familiar",
@@ -4095,6 +4718,53 @@ export const allCanonSpells = [
     "concentration": false,
     "higherLevelsLabel": "Using a Higher-Level Spell Slot",
     "higherLevelsMd": "The damage increases by 1d10 for each spell slot level above 1."
+  },
+  {
+    "type": "spell",
+    "id": "aa-spell-hex",
+    "slug": "hex-aa",
+    "name": "Hex",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2024-adapted",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:spellcasting:Universal Spell Learning"
+    },
+    "adaptationMode": "ported-unchanged",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "AA universal-access overlay for Hex. In AA, any character with spell slots can learn Hex for 1 exp.",
+    "tags": [
+      "aa",
+      "enchantment",
+      "curse"
+    ],
+    "bodyMd": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell. The target has Disadvantage on ability checks made with the chosen ability. If the target drops to 0 Hit Points before this spell ends, you can take a Bonus Action on a later turn to curse a new creature.",
+    "level": 1,
+    "school": "Enchantment",
+    "classes": [],
+    "availability": "aa-universal",
+    "castingTime": "Bonus Action",
+    "ritual": false,
+    "range": "90 feet",
+    "components": {
+      "verbal": true,
+      "somatic": true,
+      "material": "the petrified eye of a newt"
+    },
+    "duration": "up to 1 hour",
+    "concentration": true,
+    "higherLevelsLabel": "Using a Higher-Level Spell Slot",
+    "higherLevelsMd": "Your Concentration can last longer with a spell slot of level 2 (up to 4 hours), 3-4 (up to 8 hours), or 5+ (24 hours).",
+    "overlayTarget": {
+      "packId": "srd-5e-2024",
+      "entityId": "spell-hex"
+    },
+    "aaSection": "Universal Spell Learning",
+    "linkedAaAbilityIds": [],
+    "interactionTypes": [
+      "modifier"
+    ]
   },
   {
     "type": "spell",
@@ -6594,6 +7264,28 @@ export const allCanonClassFeatures = [
 export const allCanonAaAbilities = [
   {
     "type": "aa-ability",
+    "id": "aa-ability-action-surge",
+    "slug": "aa-action-surge",
+    "name": "Action Surge",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image15:Action Surge"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Take one additional action on your turn, once per short or long rest.",
+    "bodyMd": "You can push yourself beyond your normal limits for a moment. On your turn, you can take one additional action. Once you use this feature, you must finish a short or long rest before you can use it again.",
+    "expCost": 12,
+    "category": "general-utility",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
     "id": "aa-ability-agonizing-blast",
     "slug": "aa-agonizing-blast",
     "name": "Agonizing Blast",
@@ -6617,6 +7309,290 @@ export const allCanonAaAbilities = [
         "value": "Eldritch Blast cantrip"
       }
     ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-bardic-inspiration",
+    "slug": "aa-bardic-inspiration",
+    "name": "Bardic Inspiration",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Bardic Inspiration"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Use a bonus action to grant an ally a Bardic Inspiration die they can add to an ability check, attack roll, or saving throw.",
+    "bodyMd": "You can inspire others through stirring words or music. As a bonus action, choose one creature other than yourself within 60 feet who can hear you. That creature gains one Bardic Inspiration die, a d6. Within the next 10 minutes, the creature can roll the die and add the number rolled to one ability check, attack roll, or saving throw. The creature can wait until after the d20 roll before deciding to use it, but must decide before the DM says whether the roll succeeds or fails. A creature can have only one Bardic Inspiration die at a time.\n\nYou can use this feature a number of times equal to your Charisma modifier (minimum once). You regain all expended uses on a long rest.\n\nThe die can be upgraded: d6 (8 exp), d8 (+3 exp), d10 (+3 exp), d12 (+3 exp).",
+    "expCost": 8,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-combat-inspiration",
+    "slug": "aa-combat-inspiration",
+    "name": "Combat Inspiration",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Combat Inspiration"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Bardic Inspiration recipients can add the die to weapon damage or AC against an attack.",
+    "bodyMd": "A creature that has a Bardic Inspiration die from you can roll that die and add the number rolled to a weapon damage roll it just made. Alternatively, when an attack roll is made against that creature, it can use its reaction to roll the Bardic Inspiration die and add the number rolled to its AC against that attack, after seeing the roll but before knowing whether it hits or misses.",
+    "expCost": 5,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Bardic Inspiration"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-cunning-action",
+    "slug": "aa-cunning-action",
+    "name": "Cunning Action",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image15:Cunning Action"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Use a bonus action to Dash, Disengage, or Hide on each of your turns in combat.",
+    "bodyMd": "Your quick thinking and agility allow you to move and act quickly. You can take a bonus action on each of your turns in combat. This action can be used only to take the Dash, Disengage, or Hide action.",
+    "expCost": 12,
+    "category": "general-utility",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-cutting-words",
+    "slug": "aa-cutting-words",
+    "name": "Cutting Words",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Cutting Words"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Expend Bardic Inspiration to subtract from an enemy's attack roll, ability check, or damage roll.",
+    "bodyMd": "When a creature you can see within 60 feet makes an attack roll, ability check, or damage roll, you can use your reaction to expend one Bardic Inspiration use, rolling a Bardic Inspiration die and subtracting the number rolled from the creature's roll. You can choose to use this after the creature rolls but before the DM determines the result or damage is dealt. The creature is immune if it cannot hear you or is immune to being charmed.",
+    "expCost": 6,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Bardic Inspiration"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-devils-sight",
+    "slug": "aa-devils-sight",
+    "name": "Devil's Sight",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Devil's Sight"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "See normally in darkness, both magical and nonmagical, to a distance of 120 feet.",
+    "bodyMd": "You can see normally in darkness, both magical and nonmagical, to a distance of 120 feet. This lives inside the broader Eldritch Invocations purchase path rather than carrying a standalone exp cost.",
+    "expCost": 0,
+    "category": "spellcasting",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-divine-smite",
+    "slug": "aa-divine-smite",
+    "name": "Divine Smite",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image41:Divine Smite"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Expend a spell slot before a melee weapon attack to deal extra radiant damage (2d8 + 1d8 per slot level above 1st, max 5d8; +1d8 vs undead/fiends).",
+    "bodyMd": "Before making a melee weapon attack, you can expend one spell slot to charge your weapon with radiant energy. If you hit, the target takes extra radiant damage in addition to the weapon's damage. The extra damage is 2d8 for a 1st-level spell slot, plus 1d8 for each spell level higher than 1st, to a maximum of 5d8. The damage increases by 1d8 if the target is an undead or a fiend, to a maximum of 6d8.",
+    "expCost": 12,
+    "category": "offensive-combat",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-eldritch-invocations",
+    "slug": "aa-eldritch-invocations",
+    "name": "Eldritch Invocations",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Eldritch Invocations"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Gain eldritch invocations: fragments of forbidden knowledge that grant abiding magical abilities. Choose two on first purchase, one per additional purchase.",
+    "bodyMd": "In your study of occult lore, you have unearthed eldritch invocations, fragments of forbidden knowledge that imbue you with an abiding magical ability.\n\nWhen you choose this ability for the first time it costs 17 exp and you choose two invocations from the list. You may acquire this ability additional times; it costs 7 additional experience each time after the first and you gain one more invocation.\n\nIndividual invocations (such as Agonizing Blast, Repelling Blast, Devil's Sight) are tracked as separate AA abilities linked to this purchase path.",
+    "expCost": 17,
+    "category": "ability-tree",
+    "repeatable": true,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Otherworldly Patron"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-evasion",
+    "slug": "aa-evasion",
+    "name": "Evasion",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image31:Evasion"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Take no damage on a successful DEX save (half on failure) against effects that allow a DEX save for half damage.",
+    "bodyMd": "Your instinctive agility lets you dodge out of the way of certain area effects, such as a blue dragon's lightning breath or a fireball spell. When you are subjected to an effect that allows you to make a Dexterity saving throw to take only half damage, you instead take no damage if you succeed on the saving throw, and only half damage if you fail.",
+    "expCost": 13,
+    "category": "defensive",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-extra-attack",
+    "slug": "aa-extra-attack",
+    "name": "Extra Attack",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image30:Extra Attack"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Attack an additional time when taking the Attack action. Can be purchased up to three times for escalating costs.",
+    "bodyMd": "When you take the Attack action you can attack an additional time. You may acquire this ability an additional time for 50 more experience, and a third time for 60 experience.",
+    "expCost": 30,
+    "category": "offensive-combat",
+    "repeatable": true,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-fighting-style",
+    "slug": "aa-fighting-style",
+    "name": "Fighting Style",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image13:Fighting Style"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Adopt a fighting style specialty. Choose Archery, Defense, Dueling, Great Weapon Fighting, Protection, or Two-Weapon Fighting.",
+    "bodyMd": "You adopt a particular style of fighting as your specialty. Choose one of the following options. You can take this ability multiple times but must choose a different style each time.\n\n- **Archery** - +2 bonus to attack rolls with ranged weapons.\n- **Defense** - +1 bonus to AC while wearing armor.\n- **Dueling** - +2 bonus to damage rolls when wielding a melee weapon in one hand and no other weapons.\n- **Great Weapon Fighting** - Reroll 1s and 2s on damage dice for two-handed or versatile melee weapons (must use new roll).\n- **Protection** - Use reaction to impose disadvantage on an attack against a target within 5 feet (requires shield).\n- **Two-Weapon Fighting** - Add ability modifier to the damage of the second attack when two-weapon fighting.",
+    "expCost": 8,
+    "category": "offensive-combat",
+    "repeatable": true,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-font-of-inspiration",
+    "slug": "aa-font-of-inspiration",
+    "name": "Font of Inspiration",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image46:Font of Inspiration"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Regain all expended uses of Bardic Inspiration on a short or long rest instead of only a long rest.",
+    "bodyMd": "You regain all of your expended uses of Bardic Inspiration when you finish a short or long rest.",
+    "expCost": 5,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Bardic Inspiration"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-font-of-magic",
+    "slug": "aa-font-of-magic",
+    "name": "Font of Magic",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image36:Font of Magic"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Gain sorcery points that can be exchanged for spell slots and vice versa.",
+    "bodyMd": "You have 2 sorcery points when you acquire this ability and can spend 2 more experience any number of times to gain an additional sorcery point each time. You regain all spent sorcery points when you finish a long rest.\n\nYou can use your sorcery points to gain additional spell slots, or sacrifice spell slots to gain additional sorcery points.\n\n**Creating Spell Slots.** You can transform unexpended sorcery points into one spell slot as a bonus action on your turn. The cost is: 1st (2), 2nd (3), 3rd (5), 4th (6), 5th (7). You cannot create 6th level or higher spell slots in this way.",
+    "expCost": 5,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [],
     "effects": []
   },
   {
@@ -6692,6 +7668,114 @@ export const allCanonAaAbilities = [
   },
   {
     "type": "aa-ability",
+    "id": "aa-ability-metamagic",
+    "slug": "aa-metamagic",
+    "name": "Metamagic",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image36:Metamagic"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Twist your spells to suit your needs using sorcery points for Metamagic options such as Twinned Spell, Subtle Spell, and Quickened Spell.",
+    "bodyMd": "You gain the ability to twist your spells to suit your needs. You can use only one Metamagic option on a spell when you cast it, unless otherwise noted. The first time you take this ability it costs 6 exp and you choose two options; each additional option costs 2 exp.\n\n**Careful Spell** Spend 1 sorcery point; choose a number of creatures up to your Charisma modifier. They automatically succeed on the spell's saving throw.\n\n**Distant Spell** Spend 1 sorcery point to double range (5 ft+), or make touch spells 30 ft range.\n\n**Empowered Spell** Spend 1 sorcery point to reroll up to Charisma modifier damage dice (must use new rolls). Can combine with another Metamagic option.\n\n**Extended Spell** Spend 1 sorcery point to double a spell's duration (max 24 hours).\n\n**Heightened Spell** Spend 3 sorcery points to give one target disadvantage on its first saving throw against the spell.\n\n**Quickened Spell** Spend 2 sorcery points to change a 1 action casting time to 1 bonus action.\n\n**Subtle Spell** Spend 1 sorcery point to cast without verbal or somatic components.\n\n**Twinned Spell** Spend sorcery points equal to the spell's level (1 for cantrips) to target a second creature with a single-target spell.",
+    "expCost": 6,
+    "category": "ability-tree",
+    "repeatable": true,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Font of Magic"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-pact-of-the-blade",
+    "slug": "aa-pact-of-the-blade",
+    "name": "Pact of the Blade",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Pact of the Blade"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Create a magical pact weapon in your empty hand, or bond a magic weapon as your pact weapon.",
+    "bodyMd": "You can use your action to create a pact weapon in your empty hand. You can choose the form that this melee weapon takes each time you create it. This weapon counts as magical for the purpose of overcoming resistance and immunity to nonmagical attacks and damage.\n\nYour pact weapon disappears if it is more than 5 feet away from you for 1 minute or more. It also disappears if you use this feature again, if you dismiss the weapon (no action required), or if you die.\n\nYou can transform one magic weapon into your pact weapon by performing a ritual over 1 hour (which can be done during a short rest). You can then dismiss the weapon into an extradimensional space, and it appears whenever you create your pact weapon thereafter. You cannot affect an artifact or a sentient weapon in this way.",
+    "expCost": 6,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Otherworldly Patron"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-pact-of-the-chain",
+    "slug": "aa-pact-of-the-chain",
+    "name": "Pact of the Chain",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image9:Pact of the Chain"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Learn Find Familiar as a ritual with expanded familiar forms (imp, pseudodragon, quasit, sprite) and familiar attack capability.",
+    "bodyMd": "You learn the Find Familiar spell and can cast it as a ritual. When you cast the spell, you can choose one of the normal forms for your familiar or one of the following special forms: imp, pseudodragon, quasit, or sprite.\n\nAdditionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its reaction.",
+    "expCost": 4,
+    "category": "ability-tree",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "ability",
+        "value": "Otherworldly Patron"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-repelling-blast",
+    "slug": "aa-repelling-blast",
+    "name": "Repelling Blast",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image20:Repelling Blast"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "When you hit a creature with Eldritch Blast, push it up to 10 feet away in a straight line.",
+    "bodyMd": "When you hit a creature with Eldritch Blast, you can push the creature up to 10 feet away from you in a straight line. This lives inside the broader Eldritch Invocations purchase path rather than carrying a standalone exp cost.",
+    "expCost": 0,
+    "category": "spellcasting",
+    "repeatable": false,
+    "prerequisites": [
+      {
+        "type": "spellcasting",
+        "value": "Eldritch Blast cantrip"
+      }
+    ],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
     "id": "aa-ability-spell-stealer",
     "slug": "aa-spell-stealer",
     "name": "Spell Stealer",
@@ -6708,6 +7792,28 @@ export const allCanonAaAbilities = [
     "bodyMd": "When you successfully counter a spell using Counterspell, you may immediately cast that spell as part of your reaction by expending a spell slot of the same level. You do not require any material components the spell normally needs, because they were already used in the initial casting.",
     "expCost": 8,
     "category": "spellcasting",
+    "repeatable": false,
+    "prerequisites": [],
+    "effects": []
+  },
+  {
+    "type": "aa-ability",
+    "id": "aa-ability-uncanny-dodge",
+    "slug": "aa-uncanny-dodge",
+    "name": "Uncanny Dodge",
+    "packId": "advanced-adventurers",
+    "sourceEdition": "aa-2014",
+    "sourceReference": {
+      "sourceTitle": "Advanced Adventurers",
+      "locator": "combined.md:image31:Uncanny Dodge"
+    },
+    "adaptationMode": "original",
+    "judgement": null,
+    "reviewStatus": "reviewed",
+    "summary": "Use your reaction to halve an attack's damage against you when hit by an attacker you can see.",
+    "bodyMd": "When an attacker that you can see hits you with an attack, you can use your reaction to halve the attack's damage against you.",
+    "expCost": 15,
+    "category": "defensive",
     "repeatable": false,
     "prerequisites": [],
     "effects": []
@@ -6997,6 +8103,23 @@ export const allRuntimeSpells = [
     "name": "Find Familiar",
     "level": 1,
     "school": "Conjuration",
+    "classes": [],
+    "castingTime": "1 hour",
+    "ritual": true,
+    "range": "10 feet",
+    "components": {
+      "verbal": true,
+      "somatic": true,
+      "material": "burning incense worth 10+ GP, which the spell consumes"
+    },
+    "duration": "Instantaneous",
+    "concentration": false,
+    "description": "You gain the service of a familiar, a spirit that takes an animal form you choose. Appearing in an unoccupied space within range, the familiar has the statistics of the chosen form, though it is a Celestial, Fey, or Fiend (your choice) instead of a Beast.\n\nWith the Pact of the Chain ability, you can choose one of the following special forms in addition to normal options: imp, pseudodragon, quasit, or sprite. Additionally, when you take the Attack action, you can forgo one of your own attacks to allow your familiar to make one attack of its own with its reaction."
+  },
+  {
+    "name": "Find Familiar",
+    "level": 1,
+    "school": "Conjuration",
     "classes": [
       "Wizard"
     ],
@@ -7049,6 +8172,24 @@ export const allRuntimeSpells = [
     "concentration": false,
     "description": "The creature that damaged you is momentarily surrounded by green flames. It makes a Dexterity saving throw, taking 2d10 Fire damage on a failed save or half as much damage on a successful one.",
     "higherLevels": "The damage increases by 1d10 for each spell slot level above 1."
+  },
+  {
+    "name": "Hex",
+    "level": 1,
+    "school": "Enchantment",
+    "classes": [],
+    "castingTime": "Bonus Action",
+    "ritual": false,
+    "range": "90 feet",
+    "components": {
+      "verbal": true,
+      "somatic": true,
+      "material": "the petrified eye of a newt"
+    },
+    "duration": "up to 1 hour",
+    "concentration": true,
+    "description": "You place a curse on a creature that you can see within range. Until the spell ends, you deal an extra 1d6 Necrotic damage to the target whenever you hit it with an attack roll. Also, choose one ability when you cast the spell. The target has Disadvantage on ability checks made with the chosen ability. If the target drops to 0 Hit Points before this spell ends, you can take a Bonus Action on a later turn to curse a new creature.",
+    "higherLevels": "Your Concentration can last longer with a spell slot of level 2 (up to 4 hours), 3-4 (up to 8 hours), or 5+ (24 hours)."
   },
   {
     "name": "Hex",
