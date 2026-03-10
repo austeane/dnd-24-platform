@@ -46,15 +46,6 @@ This report is the handoff deck for parallel agent execution.
 | `resource-spend-and-rest-engine` | runtime | `progression-service-boundary-split` | `action-fixed-resource-pools`, `action-scaling-resource-pools`, `action-resource-spend-mutation`, `action-resource-restore-mutation`, `action-short-rest-reset-engine`, `action-long-rest-reset-engine`, `rules-rest-flow-event-recording` |
 | `runtime-skill-and-passive-loop` | runtime | `choice-state-and-equipment-persistence` | `core-skill-proficiency-grants`, `core-skill-bonus-derivation`, `core-expertise-grants`, `core-passive-perception-derivation` |
 
-### Wave 2 Write-Scope Collisions
-
-These batches can run in parallel but share write paths. Resolve before launching this wave by splitting files or serializing the batches.
-
-| Path A | Path B | Batch A | Batch B |
-| --- | --- | --- | --- |
-| `app/src/server/db/schema/progression.ts` | `app/src/server/db/schema/progression.ts` | `choice-state-and-equipment-persistence` | `resource-spend-and-rest-engine` |
-| `app/src/server/progression/` | `app/src/server/progression/` | `choice-state-and-equipment-persistence` | `resource-spend-and-rest-engine` |
-
 ## Wave 3
 
 | Batch | Lane | Depends On | Mechanics |
@@ -70,7 +61,8 @@ These batches can run in parallel but share write paths. Resolve before launchin
 | Path A | Path B | Batch A | Batch B |
 | --- | --- | --- | --- |
 | `library/src/types/character.ts` | `library/src/types/character.ts` | `condition-state-and-dm-overrides` | `runtime-ac-and-attack-foundation` |
-| `app/src/server/progression/` | `app/src/server/progression/` | `condition-state-and-dm-overrides` | `runtime-slot-capacity-and-cast-state` |
+| `app/src/server/progression/condition-service.ts` | `app/src/server/progression/` | `condition-state-and-dm-overrides` | `runtime-slot-capacity-and-cast-state` |
+| `app/src/server/progression/condition-state.ts` | `app/src/server/progression/` | `condition-state-and-dm-overrides` | `runtime-slot-capacity-and-cast-state` |
 | `library/src/types/character.ts` | `library/src/types/character.ts` | `condition-state-and-dm-overrides` | `runtime-slot-capacity-and-cast-state` |
 | `library/src/types/character.ts` | `library/src/types/character.ts` | `runtime-ac-and-attack-foundation` | `runtime-slot-capacity-and-cast-state` |
 
