@@ -472,3 +472,86 @@ describe("computeCharacterState integrates skillState", () => {
     expect(athletics.bonus).toBe(3);
   });
 });
+
+// ---------------------------------------------------------------------------
+// feature-primal-order-warden: Primal Order (Warden) proficiency grants
+// ---------------------------------------------------------------------------
+
+describe("Primal Order: Warden — Tali (Druid 2)", () => {
+  /** Tali's full fixture including Primal Order: Warden effects */
+  const taliWardenInput: CharacterComputationInput = {
+    base: {
+      name: "Tali",
+      progressionMode: "hybrid",
+      abilityScores: {
+        strength: 8,
+        dexterity: 12,
+        constitution: 14,
+        intelligence: 14,
+        wisdom: 17,
+        charisma: 10,
+      },
+      baseArmorClass: 13,
+      baseMaxHP: 19,
+      baseSpeed: 30,
+      spellcastingAbility: "wisdom",
+    },
+    sources: [
+      {
+        source: { id: "class-level-druid", kind: "class-level", name: "Druid 2", rank: 2 },
+        effects: [
+          { type: "proficiency", category: "skill", value: "Nature" },
+          { type: "proficiency", category: "skill", value: "Perception" },
+        ],
+      },
+      {
+        source: {
+          id: "primal-order-warden",
+          kind: "class-feature",
+          name: "Primal Order: Warden",
+          entityId: "class-feature:primal-order-warden",
+          packId: "srd-5e-2024",
+        },
+        effects: [
+          { type: "proficiency", category: "weapon", value: "Martial weapons" },
+          { type: "proficiency", category: "armor", value: "Medium armor" },
+        ],
+      },
+    ],
+    xpLedger: [],
+  };
+
+  it("grants martial weapon proficiency", () => {
+    const state = computeCharacterState(taliWardenInput);
+    expect(state.proficiencies.weapons).toContain("Martial weapons");
+  });
+
+  it("grants medium armor proficiency", () => {
+    const state = computeCharacterState(taliWardenInput);
+    expect(state.proficiencies.armors).toContain("Medium armor");
+  });
+
+  it("retains base druid skill proficiencies alongside warden grants", () => {
+    const state = computeCharacterState(taliWardenInput);
+    expect(state.proficiencies.skills).toContain("Nature");
+    expect(state.proficiencies.skills).toContain("Perception");
+  });
+
+  it("Primal Order: Warden canon entity has correct effects", () => {
+    const { getCanonicalEntity } = require("../../src/index.ts");
+    const entity = getCanonicalEntity("srd-5e-2024", "class-feature:primal-order-warden");
+    expect(entity).toBeDefined();
+    expect(entity?.type).toBe("class-feature");
+    if (entity?.type !== "class-feature") return;
+    const weaponProf = entity.effects.find(
+      (e: { type: string; category?: string; value?: string }) =>
+        e.type === "proficiency" && e.category === "weapon",
+    );
+    expect(weaponProf).toBeDefined();
+    const armorProf = entity.effects.find(
+      (e: { type: string; category?: string; value?: string }) =>
+        e.type === "proficiency" && e.category === "armor",
+    );
+    expect(armorProf).toBeDefined();
+  });
+});
