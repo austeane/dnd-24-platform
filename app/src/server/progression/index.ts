@@ -17,14 +17,18 @@ export type {
   XpTransactionRecord,
 } from "./types.ts";
 export {
-  commitCharacterSpendPlan,
-  createCharacterSpendPlan,
-  getCharacterRuntimeState,
-  getCharacterXpLedgerSummary,
-  listCharacterSources,
-  listCharacterSpendPlans,
-  listCharacterXpTransactions,
-  previewCharacterSpendPlan,
-  recordCharacterSource,
   recordXpTransaction,
-} from "./service.ts";
+  listCharacterXpTransactions,
+  getCharacterXpLedgerSummary,
+} from "./xp-transactions.ts";
+export {
+  recordCharacterSource,
+  listCharacterSources,
+} from "./character-sources.ts";
+export { getCharacterRuntimeState } from "./character-state.ts";
+export {
+  previewCharacterSpendPlan,
+  createCharacterSpendPlan,
+  listCharacterSpendPlans,
+  commitCharacterSpendPlan,
+} from "./spend-plan-lifecycle.ts";

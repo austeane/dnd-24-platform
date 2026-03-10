@@ -1,180 +1,48 @@
-import { randomUUID } from "node:crypto";
 import {
-  computeCharacterState,
-  type CharacterBaseSnapshot,
   type CharacterState,
   type Effect,
   evaluatePrerequisites,
-  getCanonicalEffectsForSource,
   getCanonicalEntity,
   getCanonicalMechanicalEntity,
   getCanonicalSpellByName,
   normalizeCanonicalEntityId,
   type PackId,
-  type SourceWithEffects,
-  type XPLedgerEntry,
 } from "@dnd/library";
-import { and, asc, desc, eq, sql } from "drizzle-orm";
+import { eq } from "drizzle-orm";
 import { db } from "../db/index.ts";
 import {
   campaigns,
   type CharacterSourceKind,
   characterSources,
-  characterSpendPlans,
   xpTransactions,
 } from "../db/schema/index.ts";
+import { extractBaseSnapshot } from "./character-sources.ts";
+import { listCharacterSources } from "./character-sources.ts";
+import { buildCharacterState } from "./character-state.ts";
 import {
   getCharacterSpendPlanTotalXpCost,
   parseCharacterSpendPlanDocument,
 } from "./plan-document.ts";
+import { listCharacterXpTransactions } from "./xp-transactions.ts";
 import type {
+  CanonicalSourceSpendPlanOperation,
   CharacterSourceRecord,
   CharacterSpendPlanDocument,
   CharacterSpendPlanPreview,
-  CharacterRuntimeState,
-  CharacterSpendPlanRecord,
-  CharacterSpendPlanSummary,
-  CharacterXpLedgerSummary,
-  CommitCharacterSpendPlanInput,
-  CreateCharacterSpendPlanInput,
-  CreateXpTransactionInput,
-  RecordCharacterSourceInput,
+  ClassLevelSpendPlanOperation,
   SpellAccessSpendPlanOperation,
   XpTransactionRecord,
-  CanonicalSourceSpendPlanOperation,
-  ClassLevelSpendPlanOperation,
 } from "./types.ts";
 
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
-}
-
-function isEffectArray(value: unknown): value is Effect[] {
-  return Array.isArray(value);
-}
-
-function mergeEffects(
-  canonicalEffects: Effect[],
-  inlineEffects: Effect[],
-): Effect[] {
-  const merged = [...canonicalEffects, ...inlineEffects];
-  const seen = new Set<string>();
-
-  return merged.filter((effect) => {
-    const key = JSON.stringify(effect);
-    if (seen.has(key)) {
-      return false;
-    }
-
-    seen.add(key);
-    return true;
-  });
-}
-
-function isAbilityScoreSet(value: unknown): value is CharacterBaseSnapshot["abilityScores"] {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return ["strength", "dexterity", "constitution", "intelligence", "wisdom", "charisma"]
-    .every((ability) => typeof value[ability] === "number");
-}
-
-function isCharacterBaseSnapshot(value: unknown): value is CharacterBaseSnapshot {
-  if (!isRecord(value)) {
-    return false;
-  }
-
-  return (
-    typeof value.name === "string" &&
-    typeof value.progressionMode === "string" &&
-    typeof value.baseArmorClass === "number" &&
-    typeof value.baseMaxHP === "number" &&
-    typeof value.baseSpeed === "number" &&
-    isAbilityScoreSet(value.abilityScores)
-  );
-}
-
-function extractBaseSnapshot(
-  records: CharacterSourceRecord[],
-): CharacterBaseSnapshot | null {
-  for (const record of records) {
-    if (record.sourceKind !== "override" || !isRecord(record.payloadJson)) {
-      continue;
-    }
-
-    const baseSnapshot = record.payloadJson.baseSnapshot;
-    if (isCharacterBaseSnapshot(baseSnapshot)) {
-      return baseSnapshot;
-    }
-  }
-
-  return null;
-}
-
-function mapCharacterSourcesToRuntime(
-  records: CharacterSourceRecord[],
-): SourceWithEffects[] {
-  return records.map((record) => {
-    const payload = isRecord(record.payloadJson) ? record.payloadJson : undefined;
-    const rawEffects = payload?.effects;
-    const canonicalEffects = payload?.disableCanonicalEffects === true
-      ? []
-      : getCanonicalEffectsForSource(
-          record.sourcePackId ?? undefined,
-          record.sourceEntityId,
-        );
-    const inlineEffects = isEffectArray(rawEffects) ? rawEffects : [];
-
-    return {
-      source: {
-        id: record.id,
-        kind: record.sourceKind,
-        name: record.label,
-        description:
-          typeof payload?.description === "string" ? payload.description : undefined,
-        entityId: record.sourceEntityId,
-        packId: record.sourcePackId ?? undefined,
-        rank: record.rank,
-        payload,
-      },
-      effects: mergeEffects(canonicalEffects, inlineEffects),
-    } satisfies SourceWithEffects;
-  });
-}
-
-function mapXpLedger(records: XpTransactionRecord[]): XPLedgerEntry[] {
-  return records.map((record) => ({
-    id: record.id,
-    timestamp: record.createdAt.toISOString(),
-    amount: record.amount,
-    category: record.category,
-    note: record.note,
-    sessionId: record.sessionId ?? undefined,
-  }));
-}
-
-interface PreparedSpendPlanOperation {
+export interface PreparedSpendPlanOperation {
   sourceInsert: typeof characterSources.$inferInsert;
   xpInsert: typeof xpTransactions.$inferInsert | null;
 }
 
-interface PreparedSpendPlan {
+export interface PreparedSpendPlan {
   document: CharacterSpendPlanDocument;
   operations: PreparedSpendPlanOperation[];
   publicPreview: CharacterSpendPlanPreview;
-}
-
-function buildCharacterState(
-  baseSnapshot: CharacterBaseSnapshot,
-  sourceRecords: CharacterSourceRecord[],
-  xpRecords: XpTransactionRecord[],
-): CharacterState {
-  return computeCharacterState({
-    base: baseSnapshot,
-    sources: mapCharacterSourcesToRuntime(sourceRecords),
-    xpLedger: mapXpLedger(xpRecords),
-  }) satisfies CharacterState;
 }
 
 function buildSourcePayload(
@@ -497,7 +365,7 @@ function prepareSpellAccessOperation(
   };
 }
 
-async function prepareSpendPlan(
+export async function prepareSpendPlan(
   planId: string,
   campaignId: string,
   characterId: string,
@@ -593,256 +461,4 @@ async function prepareSpendPlan(
       normalizedOperationCount: preparedOperations.length,
     },
   };
-}
-
-export async function previewCharacterSpendPlan(
-  campaignId: string,
-  characterId: string,
-  planJson: unknown,
-): Promise<CharacterSpendPlanPreview> {
-  const prepared = await prepareSpendPlan(
-    `preview:${characterId}`,
-    campaignId,
-    characterId,
-    null,
-    "preview",
-    planJson,
-  );
-
-  return prepared.publicPreview;
-}
-
-export async function recordXpTransaction(
-  input: CreateXpTransactionInput,
-): Promise<XpTransactionRecord> {
-  const [row] = await db
-    .insert(xpTransactions)
-    .values({
-      id: input.id ?? randomUUID(),
-      campaignId: input.campaignId,
-      characterId: input.characterId,
-      sessionId: input.sessionId ?? null,
-      category: input.category,
-      amount: input.amount,
-      note: input.note.trim(),
-      createdByLabel: input.createdByLabel.trim(),
-    })
-    .returning();
-
-  return row;
-}
-
-export async function listCharacterXpTransactions(
-  characterId: string,
-): Promise<XpTransactionRecord[]> {
-  return db
-    .select()
-    .from(xpTransactions)
-    .where(eq(xpTransactions.characterId, characterId))
-    .orderBy(desc(xpTransactions.createdAt), desc(xpTransactions.id));
-}
-
-export async function getCharacterXpLedgerSummary(
-  characterId: string,
-): Promise<CharacterXpLedgerSummary> {
-  const [row] = await db
-    .select({
-      characterId: xpTransactions.characterId,
-      totalAwarded: sql<number>`coalesce(sum(case when ${xpTransactions.category} = 'award' then ${xpTransactions.amount} else 0 end), 0)`,
-      totalSpentOnAa: sql<number>`coalesce(sum(case when ${xpTransactions.category} = 'spend-aa' then ${xpTransactions.amount} else 0 end), 0)`,
-      totalSpentOnLevels: sql<number>`coalesce(sum(case when ${xpTransactions.category} = 'spend-level' then ${xpTransactions.amount} else 0 end), 0)`,
-      totalRefunded: sql<number>`coalesce(sum(case when ${xpTransactions.category} = 'refund' then ${xpTransactions.amount} else 0 end), 0)`,
-      totalAdjusted: sql<number>`coalesce(sum(case when ${xpTransactions.category} = 'adjustment' then ${xpTransactions.amount} else 0 end), 0)`,
-      bankedXp: sql<number>`coalesce(sum(
-        case
-          when ${xpTransactions.category} in ('award', 'refund', 'adjustment') then ${xpTransactions.amount}
-          when ${xpTransactions.category} in ('spend-aa', 'spend-level') then -${xpTransactions.amount}
-          else 0
-        end
-      ), 0)`,
-    })
-    .from(xpTransactions)
-    .where(eq(xpTransactions.characterId, characterId))
-    .groupBy(xpTransactions.characterId);
-
-  if (!row) {
-    return {
-      characterId,
-      totalAwarded: 0,
-      totalSpentOnAa: 0,
-      totalSpentOnLevels: 0,
-      totalRefunded: 0,
-      totalAdjusted: 0,
-      bankedXp: 0,
-    };
-  }
-
-  return {
-    characterId: row.characterId,
-    totalAwarded: Number(row.totalAwarded),
-    totalSpentOnAa: Number(row.totalSpentOnAa),
-    totalSpentOnLevels: Number(row.totalSpentOnLevels),
-    totalRefunded: Number(row.totalRefunded),
-    totalAdjusted: Number(row.totalAdjusted),
-    bankedXp: Number(row.bankedXp),
-  };
-}
-
-export async function recordCharacterSource(
-  input: RecordCharacterSourceInput,
-): Promise<CharacterSourceRecord> {
-  const [row] = await db
-    .insert(characterSources)
-    .values({
-      id: input.id ?? randomUUID(),
-      characterId: input.characterId,
-      sourceKind: input.sourceKind,
-      sourceEntityId: input.sourceEntityId,
-      sourcePackId: input.sourcePackId ?? null,
-      label: input.label.trim(),
-      rank: input.rank ?? 1,
-      payloadJson: input.payloadJson ?? null,
-    })
-    .returning();
-
-  return row;
-}
-
-export async function listCharacterSources(
-  characterId: string,
-): Promise<CharacterSourceRecord[]> {
-  return db
-    .select()
-    .from(characterSources)
-    .where(eq(characterSources.characterId, characterId))
-    .orderBy(asc(characterSources.sourceKind), asc(characterSources.rank));
-}
-
-export async function createCharacterSpendPlan(
-  input: CreateCharacterSpendPlanInput,
-): Promise<CharacterSpendPlanRecord> {
-  const preview = await previewCharacterSpendPlan(
-    input.campaignId,
-    input.characterId,
-    input.planJson,
-  );
-
-  const [row] = await db
-    .insert(characterSpendPlans)
-    .values({
-      id: input.id ?? randomUUID(),
-      campaignId: input.campaignId,
-      characterId: input.characterId,
-      sessionId: input.sessionId ?? null,
-      kind: input.kind,
-      summary: input.summary.trim(),
-      notes: input.notes ?? null,
-      totalXpCost: preview.totalXpCost,
-      planJson: preview.document as unknown as Record<string, unknown>,
-      createdByLabel: input.createdByLabel.trim(),
-    })
-    .returning();
-
-  return row;
-}
-
-export async function listCharacterSpendPlans(
-  characterId: string,
-  state?: CharacterSpendPlanRecord["state"],
-): Promise<CharacterSpendPlanSummary[]> {
-  const rows = await db
-    .select({
-      id: characterSpendPlans.id,
-      state: characterSpendPlans.state,
-      kind: characterSpendPlans.kind,
-      summary: characterSpendPlans.summary,
-      totalXpCost: characterSpendPlans.totalXpCost,
-      createdAt: characterSpendPlans.createdAt,
-      committedAt: characterSpendPlans.committedAt,
-    })
-    .from(characterSpendPlans)
-    .where(
-      state
-        ? and(
-            eq(characterSpendPlans.characterId, characterId),
-            eq(characterSpendPlans.state, state),
-          )
-        : eq(characterSpendPlans.characterId, characterId),
-    )
-    .orderBy(desc(characterSpendPlans.createdAt));
-
-  return rows.map((row) => ({
-    ...row,
-    totalXpCost: Number(row.totalXpCost),
-  }));
-}
-
-export async function commitCharacterSpendPlan(
-  input: CommitCharacterSpendPlanInput,
-): Promise<CharacterSpendPlanRecord | null> {
-  const [plan] = await db
-    .select()
-    .from(characterSpendPlans)
-    .where(eq(characterSpendPlans.id, input.planId))
-    .limit(1);
-
-  if (!plan) {
-    return null;
-  }
-  if (plan.state !== "draft") {
-    throw new Error(`Spend plan ${input.planId} is already ${plan.state}`);
-  }
-
-  const prepared = await prepareSpendPlan(
-    plan.id,
-    plan.campaignId,
-    plan.characterId,
-    plan.sessionId,
-    input.actorLabel,
-    plan.planJson,
-  );
-  const committedAt = input.committedAt ?? new Date();
-
-  return db.transaction(async (tx) => {
-    for (const operation of prepared.operations) {
-      await tx.insert(characterSources).values(operation.sourceInsert);
-      if (operation.xpInsert) {
-        await tx.insert(xpTransactions).values(operation.xpInsert);
-      }
-    }
-
-    const [row] = await tx
-      .update(characterSpendPlans)
-      .set({
-        totalXpCost: prepared.publicPreview.totalXpCost,
-        planJson: prepared.document as unknown as Record<string, unknown>,
-        state: "committed",
-        committedAt,
-        updatedAt: committedAt,
-      })
-      .where(eq(characterSpendPlans.id, input.planId))
-      .returning();
-
-    return row ?? null;
-  });
-}
-
-export async function getCharacterRuntimeState(
-  characterId: string,
-): Promise<CharacterRuntimeState | null> {
-  const [sources, xpLedger] = await Promise.all([
-    listCharacterSources(characterId),
-    listCharacterXpTransactions(characterId),
-  ]);
-
-  const baseSnapshot = extractBaseSnapshot(sources);
-  if (!baseSnapshot) {
-    return null;
-  }
-
-  return computeCharacterState({
-    base: baseSnapshot,
-    sources: mapCharacterSourcesToRuntime(sources),
-    xpLedger: mapXpLedger(xpLedger),
-  }) satisfies CharacterState;
 }
