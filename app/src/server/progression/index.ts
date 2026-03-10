@@ -77,6 +77,15 @@ export {
   unbondPactBlade,
 } from "./choice-state.ts";
 export {
+  validateSkillChoice,
+  validateFeatChoice,
+  recordEquipmentBulk,
+  validateAndRecordWeaponMastery,
+  validateAndRecordMetamagicChoice,
+  validateAndRecordPactBladeBond,
+  commitSpendPlanChoices,
+} from "./choice-service.ts";
+export {
   listCharacterResourcePools,
   getCharacterResourcePool,
   initializeResourcePools,
@@ -95,6 +104,13 @@ export {
   listConditionEvents,
 } from "./condition-state.ts";
 export {
+  applyConditionWithEffects,
+  removeConditionWithEffects,
+  overrideConditionWithEffects,
+  getActiveConditionsWithEffects,
+  checkConditionImmunity,
+} from "./condition-service.ts";
+export {
   getSpellSlotState,
   hasFreeCastAvailable,
   initializeSpellSlotPools,
@@ -106,3 +122,15 @@ export type {
   RestoreSpellSlotInput,
   SpendSpellSlotInput,
 } from "./spell-slot-state.ts";
+export {
+  syncResourcePoolsFromState,
+  spendResourceWithValidation,
+  restoreResourceWithValidation,
+  orchestrateShortRest,
+  orchestrateLongRest,
+} from "./resource-service.ts";
+export {
+  executeShortRest,
+  executeLongRest,
+  previewRestReset,
+} from "./rest-service.ts";

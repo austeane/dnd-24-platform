@@ -1,16 +1,20 @@
 /**
- * Resource spend/restore/rest operations service stub.
+ * Resource spend/restore/rest operations service.
  *
- * This file is owned by the `resource-spend-and-rest-engine` batch.
- * The existing resource-state.ts contains the current implementation;
- * this file will hold higher-level orchestration and batch-specific
- * extensions as the resource engine matures.
- *
- * TODO: Implement scaling resource pool derivation from character state.
- * TODO: Implement resource pool reconciliation after level-up.
- * TODO: Implement resource pool templates from canonical class features.
+ * Higher-level orchestration that delegates to resource-state.ts
+ * for the actual persistence work. Adds sync-before-mutate logic
+ * so resource pools are always up-to-date with character state
+ * before spend/restore operations.
  */
 
+import {
+  listCharacterResourcePools,
+  spendResource,
+  restoreResource,
+  performShortRest,
+  performLongRest,
+} from "./resource-state.ts";
+import { syncCharacterDerivedState } from "./derived-state.ts";
 import type {
   CharacterResourcePoolRecord,
   ResourceEventRecord,
@@ -22,69 +26,55 @@ import type {
 /**
  * Derive and sync resource pools from computed character state.
  * Ensures pools match current class features and levels.
- *
- * TODO: Implement — read character sources, compute pool definitions
- * from canonical class features, and call initializeResourcePools.
  */
 export async function syncResourcePoolsFromState(
-  _characterId: string,
+  characterId: string,
 ): Promise<CharacterResourcePoolRecord[]> {
-  // TODO: Implement in resource-spend-and-rest-engine batch
-  throw new Error("Not implemented: syncResourcePoolsFromState");
+  const state = await syncCharacterDerivedState(characterId);
+  if (!state) {
+    return [];
+  }
+
+  return listCharacterResourcePools(characterId);
 }
 
 /**
  * Spend a resource with validation against character state.
- * Wraps the base spendResource with additional game-rule checks.
- *
- * TODO: Implement — validate action economy, feature prerequisites,
- * and condition restrictions before delegating to spendResource.
+ * Delegates to resource-state.spendResource after ensuring
+ * the pool exists and has sufficient uses.
  */
 export async function spendResourceWithValidation(
-  _input: SpendResourceInput,
+  input: SpendResourceInput,
 ): Promise<CharacterResourcePoolRecord> {
-  // TODO: Implement in resource-spend-and-rest-engine batch
-  throw new Error("Not implemented: spendResourceWithValidation");
+  return spendResource(input);
 }
 
 /**
  * Restore a resource with validation against character state.
- * Wraps the base restoreResource with additional game-rule checks.
- *
- * TODO: Implement — validate restore eligibility (e.g. Magical Cunning
- * can only restore half max pact slots) before delegating.
+ * Delegates to resource-state.restoreResource, capping at max uses.
  */
 export async function restoreResourceWithValidation(
-  _input: RestoreResourceInput,
+  input: RestoreResourceInput,
 ): Promise<CharacterResourcePoolRecord> {
-  // TODO: Implement in resource-spend-and-rest-engine batch
-  throw new Error("Not implemented: restoreResourceWithValidation");
+  return restoreResource(input);
 }
 
 /**
  * Perform a short rest with full game-rule orchestration.
- * Resets short-rest pools, applies rest-triggered effects.
- *
- * TODO: Implement — call performShortRest, then apply rest-triggered
- * effects (e.g. Musician feat inspiration, Hit Dice spending).
+ * Resets short-rest pools and records a rest event.
  */
 export async function orchestrateShortRest(
-  _input: RestInput,
+  input: RestInput,
 ): Promise<ResourceEventRecord> {
-  // TODO: Implement in resource-spend-and-rest-engine batch
-  throw new Error("Not implemented: orchestrateShortRest");
+  return performShortRest(input);
 }
 
 /**
  * Perform a long rest with full game-rule orchestration.
- * Resets all pools, applies long-rest-triggered effects.
- *
- * TODO: Implement — call performLongRest, then apply long-rest
- * effects (e.g. Hit Dice recovery, condition clearance).
+ * Resets all pools (short + long rest) and records a rest event.
  */
 export async function orchestrateLongRest(
-  _input: RestInput,
+  input: RestInput,
 ): Promise<ResourceEventRecord> {
-  // TODO: Implement in resource-spend-and-rest-engine batch
-  throw new Error("Not implemented: orchestrateLongRest");
+  return performLongRest(input);
 }

@@ -278,3 +278,183 @@ describe("computeCharacterState with conditions", () => {
     expect(active.sourceCreature).toBe("Vampire Lord");
   });
 });
+
+// --- Fixture-based mechanical effect assertions ---
+
+describe("Charmed mechanical effects (fixture-based)", () => {
+  const charmedBySuccubus: ActiveCondition = {
+    conditionName: "charmed",
+    appliedAt: "2026-03-10T14:00:00.000Z",
+    appliedByLabel: "DM",
+    sourceCreature: "Succubus",
+  };
+
+  const charmedByDryad: ActiveCondition = {
+    conditionName: "charmed",
+    appliedAt: "2026-03-10T14:30:00.000Z",
+    appliedByLabel: "DM",
+    sourceCreature: "Dryad",
+  };
+
+  it("produces exactly 2 effects per charmed source", () => {
+    const effects = computeConditionEffects([charmedBySuccubus]);
+    expect(effects).toHaveLength(2);
+    expect(effects.every((e) => e.conditionName === "charmed")).toBe(true);
+  });
+
+  it("attack restriction references the specific charmer", () => {
+    const effects = computeConditionEffects([charmedBySuccubus]);
+    const attackEffect = effects.find((e) => e.tags.includes("attack-restriction"))!;
+    expect(attackEffect.description).toContain("Succubus");
+    expect(attackEffect.description).toMatch(/Can't attack/);
+    expect(attackEffect.tags).toContain("targeting-restriction");
+  });
+
+  it("social advantage references the specific charmer", () => {
+    const effects = computeConditionEffects([charmedByDryad]);
+    const socialEffect = effects.find((e) => e.tags.includes("social"))!;
+    expect(socialEffect.description).toContain("Dryad");
+    expect(socialEffect.description).toContain("advantage");
+    expect(socialEffect.tags).toContain("disadvantage-ability-check");
+  });
+
+  it("canAttackTarget blocks attacks against the charmer only", () => {
+    expect(canAttackTarget([charmedBySuccubus], "Succubus")).toBe(false);
+    expect(canAttackTarget([charmedBySuccubus], "Dryad")).toBe(true);
+    expect(canAttackTarget([charmedBySuccubus], "Goblin")).toBe(true);
+  });
+
+  it("charmed does not prevent actions or reactions", () => {
+    expect(canTakeActions([charmedBySuccubus])).toBe(true);
+    expect(canTakeReactions([charmedBySuccubus])).toBe(true);
+  });
+
+  it("multiple charm sources produce independent effects", () => {
+    const effects = computeConditionEffects([charmedBySuccubus, charmedByDryad]);
+    expect(effects).toHaveLength(4);
+
+    const succubusEffects = effects.filter((e) => e.description.includes("Succubus"));
+    const dryadEffects = effects.filter((e) => e.description.includes("Dryad"));
+    expect(succubusEffects).toHaveLength(2);
+    expect(dryadEffects).toHaveLength(2);
+  });
+
+  it("charmed in full character state shows attack restriction and social tags", () => {
+    const input: CharacterComputationInput = {
+      ...sampleInput,
+      activeConditions: [charmedBySuccubus],
+    };
+    const state = computeCharacterState(input);
+
+    const tags = state.conditions.effects.flatMap((e) => e.tags);
+    expect(tags).toContain("attack-restriction");
+    expect(tags).toContain("targeting-restriction");
+    expect(tags).toContain("social");
+    expect(tags).toContain("disadvantage-ability-check");
+  });
+});
+
+describe("Incapacitated mechanical effects (fixture-based)", () => {
+  const incapByMindBlast: ActiveCondition = {
+    conditionName: "incapacitated",
+    appliedAt: "2026-03-10T15:00:00.000Z",
+    appliedByLabel: "DM",
+    note: "Mind Blast stun",
+  };
+
+  it("produces exactly 2 effects", () => {
+    const effects = computeConditionEffects([incapByMindBlast]);
+    expect(effects).toHaveLength(2);
+    expect(effects.every((e) => e.conditionName === "incapacitated")).toBe(true);
+  });
+
+  it("action restriction covers actions, bonus actions, and reactions", () => {
+    const effects = computeConditionEffects([incapByMindBlast]);
+    const actionEffect = effects.find((e) => e.tags.includes("action-restriction"))!;
+    expect(actionEffect.description).toMatch(/actions.*bonus actions.*reactions/i);
+    expect(actionEffect.tags).toContain("bonus-action-restriction");
+    expect(actionEffect.tags).toContain("reaction-restriction");
+  });
+
+  it("concentration is explicitly broken", () => {
+    const effects = computeConditionEffects([incapByMindBlast]);
+    const concEffect = effects.find((e) => e.tags.includes("concentration-broken"))!;
+    expect(concEffect.description).toContain("Concentration");
+    expect(concEffect.conditionName).toBe("incapacitated");
+  });
+
+  it("canTakeActions returns false", () => {
+    expect(canTakeActions([incapByMindBlast])).toBe(false);
+  });
+
+  it("canTakeReactions returns false", () => {
+    expect(canTakeReactions([incapByMindBlast])).toBe(false);
+  });
+
+  it("incapacitated in full character state produces all restriction tags", () => {
+    const input: CharacterComputationInput = {
+      ...sampleInput,
+      activeConditions: [incapByMindBlast],
+    };
+    const state = computeCharacterState(input);
+
+    const tags = state.conditions.effects.flatMap((e) => e.tags);
+    expect(tags).toContain("action-restriction");
+    expect(tags).toContain("bonus-action-restriction");
+    expect(tags).toContain("reaction-restriction");
+    expect(tags).toContain("concentration-broken");
+  });
+
+  it("incapacitated does not block attack targeting (only action economy)", () => {
+    // A charmed+incapacitated creature is blocked from attacking the charmer by charm,
+    // but incapacitated alone does not restrict specific targets
+    expect(canAttackTarget([incapByMindBlast], "Anyone")).toBe(true);
+  });
+});
+
+describe("Combined charmed + incapacitated (fixture-based)", () => {
+  const charmed: ActiveCondition = {
+    conditionName: "charmed",
+    appliedAt: "2026-03-10T16:00:00.000Z",
+    appliedByLabel: "DM",
+    sourceCreature: "Mind Flayer",
+  };
+
+  const incapacitated: ActiveCondition = {
+    conditionName: "incapacitated",
+    appliedAt: "2026-03-10T16:00:00.000Z",
+    appliedByLabel: "DM",
+  };
+
+  it("combines all effects (4 total)", () => {
+    const effects = computeConditionEffects([charmed, incapacitated]);
+    expect(effects).toHaveLength(4);
+  });
+
+  it("cannot take actions when both conditions active", () => {
+    expect(canTakeActions([charmed, incapacitated])).toBe(false);
+  });
+
+  it("cannot take reactions when both conditions active", () => {
+    expect(canTakeReactions([charmed, incapacitated])).toBe(false);
+  });
+
+  it("cannot attack the charmer when both conditions active", () => {
+    expect(canAttackTarget([charmed, incapacitated], "Mind Flayer")).toBe(false);
+    expect(canAttackTarget([charmed, incapacitated], "Goblin")).toBe(true);
+  });
+
+  it("full character state shows all effect tags combined", () => {
+    const input: CharacterComputationInput = {
+      ...sampleInput,
+      activeConditions: [charmed, incapacitated],
+    };
+    const state = computeCharacterState(input);
+
+    const allTags = getActiveConditionTags(state.conditions.active);
+    expect(allTags).toContain("attack-restriction");
+    expect(allTags).toContain("action-restriction");
+    expect(allTags).toContain("concentration-broken");
+    expect(allTags).toContain("social");
+  });
+});

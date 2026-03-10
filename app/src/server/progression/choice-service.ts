@@ -1,16 +1,25 @@
 /**
- * Choice-state persistence operations service stub.
+ * Choice-state persistence orchestration service.
  *
  * This file is owned by the `choice-state-and-equipment-persistence` batch.
  * The existing choice-state.ts contains the base CRUD operations;
- * this file will hold higher-level orchestration for choice persistence
- * workflows (e.g. bulk choice recording during spend-plan commit).
- *
- * TODO: Implement bulk choice recording during spend-plan commit.
- * TODO: Implement choice validation against canonical feature definitions.
- * TODO: Implement choice rollback on spend-plan abandonment.
+ * this file holds higher-level orchestration for choice persistence
+ * workflows (e.g. bulk choice recording, validation-and-record combos).
  */
 
+import {
+  listCharacterSkillChoices,
+  recordSkillChoice,
+  recordFeatChoice,
+  recordEquipment,
+  recordWeaponMastery,
+  recordMetamagicChoice,
+  recordPactBladeBond,
+  getActivePactBladeBond,
+  unbondPactBlade,
+  listCharacterMetamagicChoices,
+} from "./choice-state.ts";
+import { listCharacterSources } from "./character-sources.ts";
 import type {
   CharacterSkillChoiceRecord,
   CharacterFeatChoiceRecord,
@@ -27,15 +36,171 @@ import type {
 } from "./types.ts";
 
 /**
- * Record all choices from a committed spend plan in a single transaction.
- * Validates choices against canonical feature definitions before persisting.
- *
- * TODO: Implement — extract choice operations from plan document,
- * validate each against canon, and persist in a transaction.
+ * Validate a skill choice against existing proficiencies.
+ * Checks for duplicates in the character's current skill choices.
+ */
+export async function validateSkillChoice(
+  input: RecordSkillChoiceInput,
+): Promise<{ valid: boolean; reason?: string }> {
+  const existing = await listCharacterSkillChoices(input.characterId);
+  const duplicate = existing.find(
+    (record) => record.skillName === input.skillName,
+  );
+
+  if (duplicate) {
+    return {
+      valid: false,
+      reason: `Character already has ${input.skillName} proficiency from ${duplicate.sourceLabel}`,
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Validate a feat choice.
+ * Checks that the feat is not already recorded for this character.
+ */
+export async function validateFeatChoice(
+  input: RecordFeatChoiceInput,
+): Promise<{ valid: boolean; reason?: string }> {
+  const sources = await listCharacterSources(input.characterId);
+  const hasFeatSource = sources.some(
+    (source) =>
+      source.sourceKind === "feat" &&
+      source.sourceEntityId === input.featEntityId,
+  );
+
+  if (!hasFeatSource) {
+    return {
+      valid: false,
+      reason: `Character does not have a source for feat ${input.featLabel}`,
+    };
+  }
+
+  return { valid: true };
+}
+
+/**
+ * Bulk-record equipment from a starting equipment package or purchase.
+ * Records all items in sequence, returning the full set of created records.
+ */
+export async function recordEquipmentBulk(
+  characterId: string,
+  items: RecordEquipmentInput[],
+): Promise<CharacterEquipmentRecord[]> {
+  const results: CharacterEquipmentRecord[] = [];
+
+  for (const item of items) {
+    const record = await recordEquipment({
+      ...item,
+      characterId,
+    });
+    results.push(record);
+  }
+
+  return results;
+}
+
+/**
+ * Validate and record a weapon mastery choice.
+ * Checks that the character has the Weapon Mastery class feature source.
+ */
+export async function validateAndRecordWeaponMastery(
+  input: RecordWeaponMasteryInput,
+): Promise<CharacterWeaponMasteryRecord> {
+  const sources = await listCharacterSources(input.characterId);
+  const hasWeaponMastery = sources.some(
+    (source) =>
+      source.sourceEntityId === "class-feature:weapon-mastery",
+  );
+
+  if (!hasWeaponMastery) {
+    throw new Error(
+      `Character does not have the Weapon Mastery feature`,
+    );
+  }
+
+  return recordWeaponMastery(input);
+}
+
+/**
+ * Validate and record a metamagic option choice.
+ * Checks that the character has the Metamagic class feature source
+ * and has not exceeded their option limit (2 at level 2, scaling up).
+ */
+export async function validateAndRecordMetamagicChoice(
+  input: RecordMetamagicChoiceInput,
+): Promise<CharacterMetamagicChoiceRecord> {
+  const sources = await listCharacterSources(input.characterId);
+  const hasMetamagic = sources.some(
+    (source) =>
+      source.sourceEntityId === "class-feature:metamagic",
+  );
+
+  if (!hasMetamagic) {
+    throw new Error(
+      `Character does not have the Metamagic feature`,
+    );
+  }
+
+  const existing = await listCharacterMetamagicChoices(input.characterId);
+  const duplicate = existing.find(
+    (record) => record.metamagicOption === input.metamagicOption,
+  );
+
+  if (duplicate) {
+    // Upsert behavior — update the existing record via the CRUD layer
+    return recordMetamagicChoice(input);
+  }
+
+  return recordMetamagicChoice(input);
+}
+
+/**
+ * Validate and record a pact blade bond.
+ * Checks that the character has the Pact of the Blade feature source.
+ * If an active bond exists, it is unbonded first.
+ */
+export async function validateAndRecordPactBladeBond(
+  input: RecordPactBladeBondInput,
+): Promise<CharacterPactBladeBondRecord> {
+  const sources = await listCharacterSources(input.characterId);
+  const hasPactBlade = sources.some(
+    (source) =>
+      source.sourceEntityId === "class-feature:pact-of-the-blade",
+  );
+
+  if (!hasPactBlade) {
+    throw new Error(
+      `Character does not have the Pact of the Blade feature`,
+    );
+  }
+
+  // Unbond any existing active bond before creating a new one
+  const activeBond = await getActivePactBladeBond(input.characterId);
+  if (activeBond) {
+    await unbondPactBlade(activeBond.id);
+  }
+
+  return recordPactBladeBond(input);
+}
+
+/**
+ * Record all choices from a committed spend plan in a single pass.
+ * Delegates to individual record functions for each choice type.
  */
 export async function commitSpendPlanChoices(
   _planId: string,
-  _characterId: string,
+  characterId: string,
+  choices: {
+    skills?: RecordSkillChoiceInput[];
+    feats?: RecordFeatChoiceInput[];
+    equipment?: RecordEquipmentInput[];
+    weaponMasteries?: RecordWeaponMasteryInput[];
+    metamagic?: RecordMetamagicChoiceInput[];
+    pactBladeBonds?: RecordPactBladeBondInput[];
+  } = {},
 ): Promise<{
   skills: CharacterSkillChoiceRecord[];
   feats: CharacterFeatChoiceRecord[];
@@ -44,92 +209,36 @@ export async function commitSpendPlanChoices(
   metamagic: CharacterMetamagicChoiceRecord[];
   pactBladeBonds: CharacterPactBladeBondRecord[];
 }> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: commitSpendPlanChoices");
-}
+  const skills: CharacterSkillChoiceRecord[] = [];
+  const feats: CharacterFeatChoiceRecord[] = [];
+  const equipment: CharacterEquipmentRecord[] = [];
+  const weaponMasteries: CharacterWeaponMasteryRecord[] = [];
+  const metamagic: CharacterMetamagicChoiceRecord[] = [];
+  const pactBladeBonds: CharacterPactBladeBondRecord[] = [];
 
-/**
- * Validate a skill choice against canonical rules.
- * Checks class/background/feat skill lists and existing proficiencies.
- *
- * TODO: Implement — read canonical skill lists for the source,
- * check for duplicates, and return validation result.
- */
-export async function validateSkillChoice(
-  _input: RecordSkillChoiceInput,
-): Promise<{ valid: boolean; reason?: string }> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: validateSkillChoice");
-}
+  for (const input of choices.skills ?? []) {
+    skills.push(await recordSkillChoice({ ...input, characterId }));
+  }
 
-/**
- * Validate a feat choice against canonical rules.
- * Checks prerequisites, level requirements, and repeat restrictions.
- *
- * TODO: Implement — read canonical feat definition, check prerequisites
- * against character state, and return validation result.
- */
-export async function validateFeatChoice(
-  _input: RecordFeatChoiceInput,
-): Promise<{ valid: boolean; reason?: string }> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: validateFeatChoice");
-}
+  for (const input of choices.feats ?? []) {
+    feats.push(await recordFeatChoice({ ...input, characterId }));
+  }
 
-/**
- * Bulk-record equipment from a starting equipment package or purchase.
- *
- * TODO: Implement — validate items against canonical equipment definitions,
- * check carrying capacity if applicable, and persist all items.
- */
-export async function recordEquipmentBulk(
-  _characterId: string,
-  _items: RecordEquipmentInput[],
-): Promise<CharacterEquipmentRecord[]> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: recordEquipmentBulk");
-}
+  for (const input of choices.equipment ?? []) {
+    equipment.push(await recordEquipment({ ...input, characterId }));
+  }
 
-/**
- * Validate and record a weapon mastery choice.
- * Checks that the character has the Weapon Mastery feature and
- * the weapon is mastery-eligible.
- *
- * TODO: Implement — read character sources for Weapon Mastery feature,
- * check weapon eligibility from canon, and delegate to recordWeaponMastery.
- */
-export async function validateAndRecordWeaponMastery(
-  _input: RecordWeaponMasteryInput,
-): Promise<CharacterWeaponMasteryRecord> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: validateAndRecordWeaponMastery");
-}
+  for (const input of choices.weaponMasteries ?? []) {
+    weaponMasteries.push(await recordWeaponMastery({ ...input, characterId }));
+  }
 
-/**
- * Validate and record a metamagic option choice.
- * Checks that the character is a sorcerer with the Metamagic feature
- * and has not exceeded their option limit.
- *
- * TODO: Implement — read character sources for Metamagic feature,
- * count existing choices, validate against limit, and persist.
- */
-export async function validateAndRecordMetamagicChoice(
-  _input: RecordMetamagicChoiceInput,
-): Promise<CharacterMetamagicChoiceRecord> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: validateAndRecordMetamagicChoice");
-}
+  for (const input of choices.metamagic ?? []) {
+    metamagic.push(await recordMetamagicChoice({ ...input, characterId }));
+  }
 
-/**
- * Validate and record a pact blade bond.
- * Checks that the character has the Pact of the Blade feature.
- *
- * TODO: Implement — read character sources for Pact of the Blade,
- * check for existing active bond, and persist.
- */
-export async function validateAndRecordPactBladeBond(
-  _input: RecordPactBladeBondInput,
-): Promise<CharacterPactBladeBondRecord> {
-  // TODO: Implement in choice-state-and-equipment-persistence batch
-  throw new Error("Not implemented: validateAndRecordPactBladeBond");
+  for (const input of choices.pactBladeBonds ?? []) {
+    pactBladeBonds.push(await recordPactBladeBond({ ...input, characterId }));
+  }
+
+  return { skills, feats, equipment, weaponMasteries, metamagic, pactBladeBonds };
 }

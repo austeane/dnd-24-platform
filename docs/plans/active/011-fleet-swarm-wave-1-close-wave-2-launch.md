@@ -1,20 +1,24 @@
-# Plan 011: Fleet Swarm — Wave 1 Close & Wave 2 Launch
+# Plan 011: Fleet Swarm — Backend Close Through Tavern Launch
 
 ## Current State
 
-- Atomic: 39 full / 39 partial / 33 none (111 total)
-- Wave 1: 4 batches "ready now", all substantially started, none formally closed
-- Wave 2: 3 batches blocked on Wave 1, write-path collisions unresolved
-- 21 of the 39 partial mechanics are implemented but auto-downgraded by evidence audit
+- Atomic: 68 full / 20 partial / 23 none (111 total) — post-Wave 2
+- Wave 1: 4 batches closed (Rounds 1-2 complete)
+- Wave 2: 3 batches closed (Round 3 complete) — choice-state, resource/rest, conditions
+- Wave 3-4: backend mechanics remaining (AC/equipment, spell state, class features, feat/species)
+- Tavern frontend: zero routes, zero components, zero test infra (see [constraint register](014-tavern-frontend-constraint-register.md))
 
 ## Goal
 
-1. Close Wave 1 by recovering evidence and finishing remaining test/canon gaps
-2. Resolve Wave 2 write-path collisions
-3. Launch Wave 2 as a parallel swarm
-4. Pull `condition-state-and-dm-overrides` (Wave 3) forward since its only dependency is `progression-service-boundary-split`
+1. ~~Close Wave 1 by recovering evidence and finishing remaining test/canon gaps~~ ✓
+2. ~~Resolve Wave 2 write-path collisions~~ ✓
+3. ~~Launch Wave 2 as a parallel swarm~~ ✓ (in-flight)
+4. Close Wave 3 backend mechanics needed for truthful Tavern display (AC, equipment effects, spell state)
+5. Scaffold frontend foundation (design system, test infra, read models, conventions)
+6. Build the Tavern UI surfaces per [Plan 013](013-tavern-front-end-architecture.md)
+7. Resolve every item in the [constraint register](014-tavern-frontend-constraint-register.md)
 
-Expected outcome: ~60 full, ~12 partial, ~26 none → ready for Wave 3/4.
+Expected outcome: ~80 full mechanics, Tavern rendering all 5 roster characters across 5 tabs with real data.
 
 ## Swarm Structure
 
@@ -320,6 +324,306 @@ Depends on `choice-state-and-equipment-persistence` completing first.
 
 ---
 
+---
+
+### Round 4: Wave 3 Backend — AC, Equipment & Spell State (2 parallel agents)
+
+These close the highest-value remaining backend mechanics that directly affect Tavern display quality. Both agents can run in parallel — no write-path collisions.
+
+---
+
+#### Agent J: AC & Equipment Effects
+
+**Batch:** `runtime-ac-and-attack-foundation`
+
+**Goal:** Derive AC from equipped armor/shield, apply equipment effects to attack profiles, and close the equipment-to-runtime projection loop. This makes the Tavern combat panel truthful for AC and the inventory tab truthful for weapon stats.
+
+**Target mechanics (up to 9, none/partial → full):**
+
+| Mechanic | Current | Tavern Impact |
+|----------|---------|---------------|
+| `core-equipped-armor-and-shield-ac` | none | Combat panel AC is wrong without this |
+| `action-armor-effect-application` | none | Inventory shows armor but no AC contribution |
+| `action-weapon-effect-application` | none | Inventory shows weapons but no attack stats |
+| `core-ac-base-fallback` | partial | AC falls back to 10+DEX without equipment |
+| `core-ac-formula-selection` | partial | Unarmored Defense, etc. |
+| `action-melee-attack-profiles` | full | Maintain |
+| `action-ranged-attack-profiles` | full | Maintain |
+| `action-damage-package-projection` | full | Maintain |
+| `action-weapon-mastery-runtime` | full | Maintain |
+
+**Owned paths:** (per batch definition in `srd-fleet-batches.ts`)
+- `library/src/engine/defenses.ts`
+- `library/src/engine/attack-profiles.ts`
+- `library/src/types/character.ts`
+- `library/tests/engine/attacks.test.ts`
+- `content/canon/packs/srd-5e-2024/equipment/`
+
+**Verification:**
+- AC is fully explained from equipped items and formulas for roster characters
+- Weapon attacks show derived attack bonus, damage, and relevant tags
+- `pnpm check && pnpm test && pnpm build` pass
+
+---
+
+#### Agent K: Spell Slot, Capacity & Cast State
+
+**Batch:** `runtime-slot-capacity-and-cast-state`
+
+**Goal:** Model spell capacities, slot spend, and concentration so the Tavern spellbook tab can show real slot availability and casting constraints.
+
+**Target mechanics (up to 9, none/partial → full):**
+
+| Mechanic | Current | Tavern Impact |
+|----------|---------|---------------|
+| `spell-capacity-enforcement` | none | Spellbook can't show prepared/known limits |
+| `spell-slot-spend-mutation` | none | Can't track which slots are used |
+| `spell-free-cast-state` | none | Racial/feat free casts not tracked |
+| `spell-concentration-state-tracking` | none | Can't show what spell is being concentrated on |
+| `spell-concentration-save-flow` | none | No concentration break mechanics |
+| `spell-resolution-engine` | none | No cast execution |
+| `spell-access-grants` | partial | |
+| `spell-origin-choice-capture` | partial | |
+| `spell-slot-pools-from-class-features` | partial | |
+
+**Owned paths:** (per batch definition)
+- `library/src/engine/spellcasting.ts`
+- `library/src/types/character.ts`
+- `app/src/server/progression/`
+- `library/tests/engine/spellcasting.test.ts`
+- `content/canon/packs/srd-5e-2024/class-features/`
+- `content/canon/packs/srd-5e-2024/spells/`
+
+**Verification:**
+- Known/prepared capacities are derived for roster classes
+- Slot spend consumes the right slot type
+- At least one character proves pact slots, one proves standard slots
+- `pnpm check && pnpm test && pnpm build` pass
+
+---
+
+### Round 5: Frontend Foundation (1 agent, serial)
+
+**Goal:** Lay all infrastructure that Plans 012 and 013 assume exists. This is the bridge between backend-complete and UI-buildable. Resolves the hard constraints in the [constraint register](014-tavern-frontend-constraint-register.md).
+
+#### Agent L: Frontend Infrastructure Scaffold
+
+**What gets built:**
+
+1. **Dependencies** — install `react-markdown`, `@testing-library/react`, `@testing-library/jest-dom`, `@testing-library/user-event`, `jsdom`
+2. **Tailwind v4 `@theme` tokens** — all Tavern colors, shadows, fonts, border-radius in `app/src/styles/app.css` (Plan 012 Phase 1a)
+3. **Global atmosphere CSS** — body gradients, noise texture overlay, vignette in `app/src/styles/app.css` (Plan 012 Phase 1b)
+4. **Component CSS** — `.tavern-card`, `.tavern-nav`, `.content-grid`, `.animate-fade-up` in `app/src/styles/tavern.css` (Plan 012 Phase 1c)
+5. **Font loading** — Google Fonts preconnect + stylesheet links in `app/src/routes/__root.tsx` (Plan 012 Phase 1d)
+6. **Page-state primitives** — `Loading`, `Skeleton`, `ErrorCard`, `EmptyState`, `NotFound` under `app/src/components/tavern/ui/`
+7. **Frontend test setup** — update `app/vitest.unit.config.ts` to include `*.test.tsx`, add jsdom environment, create setup file with Testing Library matchers
+8. **`createServerFn` convention** — establish the pattern with one reference implementation (e.g., roster list) showing server fn → route-local adapter → component
+9. **Read model stubs** — create `app/src/server/tavern/` directory with typed stubs for `home.ts`, `character-shell.ts`, `spellbook.ts`, `inventory.ts`, `journal.ts`, `compendium.ts`
+10. **Markdown component** — `app/src/components/tavern/ui/ProseContent.tsx` wrapping `react-markdown` with Tavern prose styling
+
+**Owned paths:**
+- `app/src/styles/app.css`
+- `app/src/styles/tavern.css` (new)
+- `app/src/routes/__root.tsx`
+- `app/src/components/tavern/` (new tree)
+- `app/src/server/tavern/` (new tree)
+- `app/vitest.unit.config.ts`
+- `app/src/test-setup.ts` (new)
+- `app/package.json` (new deps only)
+
+**Verification:**
+- `pnpm check && pnpm test && pnpm lint && pnpm build` pass
+- `pnpm -F @dnd/app dev` starts, homepage loads with Tavern body background + fonts
+- At least one `.test.tsx` file exists and passes with jsdom
+- Page-state primitives render in isolation
+- `ProseContent` renders markdown safely
+- One `createServerFn` endpoint works end-to-end
+
+**Constraint register items closed:**
+- Front-end baseline → design tokens, layout primitives, component system
+- TanStack Start UI data conventions → createServerFn reference implementation
+- Page-state primitives → loading, skeleton, empty, error, not-found components
+- App markdown rendering → ProseContent component with react-markdown
+- Front-end unit test infrastructure → jsdom, Testing Library, .test.tsx support
+
+---
+
+### Round 6: Tavern Surface Build (3 parallel agents)
+
+After foundation exists, build the actual UI surfaces per [Plan 013](013-tavern-front-end-architecture.md). Each agent owns a set of routes and their server read models. All agents can run in parallel — each owns distinct route files and read model modules.
+
+---
+
+#### Agent M: Home/Roster + Character Shell
+
+**Goal:** Build the campaign home page, roster cards, and the character shell (nested route layout with tab navigation). This is the skeleton that all other tabs plug into.
+
+**Surfaces:**
+- `/` — campaign list with roster cards per campaign
+- `/characters/$characterId` — character shell route with shared loader
+- `/characters/$characterId/` (index) — character tab: hero card, XP, abilities, combat panel, skills, features
+
+**Owned paths:**
+- `app/src/routes/index.tsx` (rewrite)
+- `app/src/routes/index/-server.ts` (new)
+- `app/src/routes/index/-adapters.ts` (new)
+- `app/src/routes/characters/$characterId/route.tsx` (new)
+- `app/src/routes/characters/$characterId/index.tsx` (new)
+- `app/src/routes/characters/$characterId/-server.ts` (new)
+- `app/src/routes/characters/$characterId/-adapters.ts` (new)
+- `app/src/components/tavern/layout/` (TavernNav, TavernLayout)
+- `app/src/components/tavern/character/` (CharacterCard, AbilityScoreRow, CombatPanel, SkillsPanel, FeaturesPanel, XPProgressBar)
+- `app/src/server/tavern/home.ts`
+- `app/src/server/tavern/character-shell.ts`
+
+**Key decisions:**
+- `CombatPanelProps` accepts `currentHp?: number` and `maxHp: number` — renders truth-preserving max-only state until currentHP is modeled
+- Hero action buttons (Level Up, Long Rest) are visually present but `aria-disabled` with explanatory copy
+- Data flows: server read model → `createServerFn` → route loader → adapter → component props
+
+**Verification:**
+- Home page lists campaigns with clickable roster cards
+- Character shell renders with real data for all roster characters
+- Responsive at 480px, 768px, 1024px breakpoints
+- `pnpm check && pnpm build` pass
+
+---
+
+#### Agent N: Spellbook + Inventory Tabs
+
+**Goal:** Build the two most mechanically rich character tabs. These require dedicated read models that join runtime state against canonical data and DB records.
+
+**Surfaces:**
+- `/characters/$characterId/spellbook` — spells grouped by level, slot pools, casting ability info
+- `/characters/$characterId/inventory` — equipped items, carried/stowed items, attack profiles, tracked resources
+
+**Owned paths:**
+- `app/src/routes/characters/$characterId/spellbook.tsx` (new)
+- `app/src/routes/characters/$characterId/inventory.tsx` (new)
+- `app/src/components/tavern/character/SpellsPanel.tsx`
+- `app/src/components/tavern/character/InventoryPanel.tsx`
+- `app/src/components/tavern/ui/SlotDots.tsx`
+- `app/src/server/tavern/spellbook.ts` (read model: joins grantedSpells → canonical spell metadata)
+- `app/src/server/tavern/inventory.ts` (read model: joins equipment records + runtime attack profiles + resources)
+
+**Key decisions:**
+- Spellbook groups spells by canonical spell level, not by access source
+- Spellbook read model enriches `grantedSpells` with `level`, `school`, `castingTime`, `concentration` from canonical spell entities
+- Inventory read model joins `character_equipment` (owned items) + `runtime.attackProfiles` (derived stats) + `runtime.resources` (tracked resources)
+- Both tabs share the parent character shell loader for base character data
+
+**Constraint register items closed:**
+- Spellbook enrichment → dedicated read model joining canonical spell data
+- Inventory composition → dedicated read model joining equipment + runtime + resources
+
+**Verification:**
+- Spellbook renders spell groups with slot availability for caster characters
+- Spellbook renders empty state for non-caster characters
+- Inventory shows equipped vs. carried items for all roster characters
+- `pnpm check && pnpm build` pass
+
+---
+
+#### Agent O: Journal + Compendium Tabs
+
+**Goal:** Build the two content-focused tabs. These are simpler mechanically but require markdown rendering and search/filter UX.
+
+**Surfaces:**
+- `/characters/$characterId/journal` — player communication cards with markdown bodies
+- `/characters/$characterId/compendium` — browse/search/filter enabled-pack canonical entities
+
+**Owned paths:**
+- `app/src/routes/characters/$characterId/journal.tsx` (new)
+- `app/src/routes/characters/$characterId/compendium.tsx` (new)
+- `app/src/components/tavern/character/JournalPanel.tsx`
+- `app/src/components/tavern/character/CompendiumPanel.tsx`
+- `app/src/server/tavern/journal.ts` (read model: `listPlayerCommunicationCards`)
+- `app/src/server/tavern/compendium.ts` (read model: browse/search/filter canonical entities)
+
+**Key decisions:**
+- Journal uses `ProseContent` component for markdown rendering
+- Journal has first-class empty state design (not a fallback placeholder)
+- Compendium uses URL search params (`q`, `type`, `pack`, `entry`) for filter state
+- Compendium detail view renders `bodyMd` through `ProseContent`
+- Compendium browses existing `CanonicalEntity` records directly — no new normalization layer
+
+**Constraint register items closed:**
+- Journal demo content → designed empty state
+- Compendium app surface → browse/search/filter/detail query layer with URL-state
+
+**Verification:**
+- Journal renders communication cards or empty state
+- Compendium lists entities filterable by type and pack
+- Compendium detail renders markdown body
+- `pnpm check && pnpm build` pass
+
+---
+
+### Round 7: Polish & Accessibility (1 agent, serial, after Round 6)
+
+#### Agent P: Polish Pass
+
+**Goal:** Close the remaining quality gaps from the constraint register.
+
+**Actions:**
+1. **Animations** — `fadeUp` with staggered `--delay` per component (Plan 012 Phase 4)
+2. **Responsive tuning** — verify all breakpoints, fix layout issues across tablets/phones
+3. **Accessibility pass** — skip links, focus-visible styles, `role="progressbar"` on HP/XP bars, `aria-label` on ability cards, semantic nav, live-region patterns
+4. **Loading states** — `CharacterSheetSkeleton` with `animate-pulse` in Tavern palette
+5. **Error states** — themed error cards for missing/failed character loads
+6. **Disabled-state messaging** — not-yet-built actions (Level Up, Long Rest, spell cast) have clear explanatory copy
+7. **Render tests** — add adapter tests + component render tests for key surfaces using Testing Library
+
+**Constraint register items closed:**
+- Browser acceptance tooling → basic Lighthouse checks added
+- App-level accessibility primitives → skip links, focus management, live regions
+- Seeded front-end fixtures → render tests with fixture data
+- Query/cache convention → documented decision (use TanStack Start loader caching for v1; add react-query only when needed)
+
+**Verification:**
+- Lighthouse accessibility score ≥ 90 on character sheet route
+- All components have render tests
+- `pnpm check && pnpm test && pnpm lint && pnpm build` pass
+- All 5 roster characters render correctly on all tabs
+
+---
+
+## Constraint Register Cross-Reference
+
+Every item from [014-tavern-frontend-constraint-register.md](014-tavern-frontend-constraint-register.md) mapped to its resolution:
+
+### Hard Constraints
+
+| Constraint | Resolution |
+|------------|-----------|
+| Front-end baseline missing | Round 5 (Agent L): design tokens, layout primitives, component tree |
+| TanStack Start data conventions not established | Round 5 (Agent L): createServerFn reference impl + adapter pattern |
+| Page-state primitives missing | Round 5 (Agent L): Loading, Skeleton, ErrorCard, EmptyState, NotFound |
+| App markdown rendering missing | Round 5 (Agent L): ProseContent component with react-markdown |
+| Front-end unit test infrastructure missing | Round 5 (Agent L): jsdom, Testing Library, .test.tsx config |
+| Browser acceptance tooling missing | Round 7 (Agent P): Lighthouse checks; full Playwright deferred to post-Tavern |
+
+### Domain and Data-Model Constraints
+
+| Constraint | Resolution |
+|------------|-----------|
+| Current HP not modeled | Round 4 (Agent J): HP derivation path improved. Round 6 (Agent M): truth-preserving max-only display per Plan 013 |
+| Spellbook requires enrichment | Round 6 (Agent N): dedicated read model joining grantedSpells → canonical spell metadata |
+| Inventory requires multi-source composition | Round 6 (Agent N): dedicated read model joining equipment + runtime + resources |
+| Journal demo content absent | Round 6 (Agent O): designed empty state as intentional UX |
+| Compendium app surface absent | Round 6 (Agent O): browse/search/filter over canonical entities with URL-state |
+
+### Quality Gaps
+
+| Constraint | Resolution |
+|------------|-----------|
+| No UI architecture boundary | Round 5 (Agent L): `app/src/server/tavern/` read models + route-local adapters |
+| No query/cache convention | Round 7 (Agent P): documented decision — TanStack Start loaders for v1, react-query when needed |
+| No accessibility primitives | Round 7 (Agent P): skip links, focus management, live regions, ARIA patterns |
+| No front-end fixtures | Round 7 (Agent P): render tests with Testing Library + fixture data |
+
+---
+
 ## Timeline Summary
 
 ```
@@ -327,28 +631,47 @@ Round 1 (parallel):  A + B + C + D  →  Wave 1 closed, ~18 mechanics recovered
 Round 2 (serial):    E              →  Wave 2 collisions resolved
 Round 3 (parallel):  F + G + H      →  Wave 2 + conditions, ~20 mechanics closed
 Round 3.1 (serial):  I              →  Skill loop closed
+Round 4 (parallel):  J + K          →  Wave 3 backend: AC/equipment + spell state
+Round 5 (serial):    L              →  Frontend foundation scaffolded
+Round 6 (parallel):  M + N + O      →  Tavern surfaces built
+Round 7 (serial):    P              →  Polish + accessibility + test coverage
 ```
 
 ## Expected Final Counts
 
-After all rounds: ~65-70 full / ~8-12 partial / ~26-28 none
+After Round 3.1: ~65-70 full / ~8-12 partial / ~23 none
 
-Remaining `none` mechanics would be concentrated in:
-- Spell cast resolution (slot spend, free-cast, concentration)
-- Equipment effects on AC/attacks (armor, shield, weapon application)
-- Specific feat execution (Savage Attacker, Musician, Magic Initiate free-cast)
-- HP level-by-level derivation
-- Alternate movement modes
-- Study action availability
+After Round 4: ~75-80 full / ~8-10 partial / ~15 none
 
-These are all Wave 3-4 work and none block the intentionally plain proof UI.
+After Round 7: Tavern fully rendered with real data for all roster characters. Remaining `none` mechanics concentrated in:
+- Class feature execution (Bardic Inspiration, Font of Magic, Metamagic, Wild Shape)
+- Feat execution (Savage Attacker, Musician)
+- Species edge cases (Stone's Endurance, Wood Elf Trance)
+- Study action
+
+These are Wave 4-5 work and do not block the Tavern — they add interactivity to features that are already displayed read-only.
 
 ## Acceptance Criteria
 
+### Rounds 1-3 (Backend Mechanics)
 1. `pnpm check && pnpm test && pnpm lint && pnpm build` all pass
-2. `pnpm test:integration` passes with the new DB-backed tests
+2. `pnpm test:integration` passes with new DB-backed tests
 3. `pnpm report:fleet-readiness --strict` passes
-4. Wave 1 batches are formally closed (moved to completed or marked done)
-5. Wave 2 write-path collisions are resolved in fleet batch definitions
+4. Wave 1 batches formally closed
+5. Wave 2 write-path collisions resolved
 6. Atomic report shows ≥60 full mechanics
-7. Worklog updated with final counts and next-wave assignments
+7. Worklog updated with final counts
+
+### Round 4 (Wave 3 Backend)
+8. AC is derived from equipped items for roster characters
+9. Spell slot spend and concentration tracking work for at least one caster
+10. Atomic report shows ≥75 full mechanics
+
+### Rounds 5-7 (Tavern Frontend)
+11. All constraint register items from Plan 014 are resolved or explicitly deferred with rationale
+12. Home page lists campaigns with roster cards linking to character sheets
+13. Character sheet renders 5 tabs (character, spellbook, inventory, journal, compendium) with real data
+14. All 5 roster characters render correctly across all tabs
+15. Responsive layout works at 480px, 768px, 1024px
+16. Lighthouse accessibility score ≥ 90
+17. Frontend test suite passes with adapter + render tests
