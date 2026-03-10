@@ -20,8 +20,9 @@
     {
       "type": "grant-trait",
       "trait": {
-        "name": "Initiative Proficiency",
-        "description": "Add your Proficiency Bonus to initiative rolls and you may swap initiative with a willing ally immediately after rolling."
+        "name": "Alert",
+        "description": "You add your Proficiency Bonus to initiative rolls. You can also swap initiative with a willing ally immediately after rolling.",
+        "tags": ["initiative-proficiency-bonus"]
       }
     }
   ]

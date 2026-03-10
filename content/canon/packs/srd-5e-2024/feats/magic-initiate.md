@@ -21,7 +21,16 @@
       "type": "grant-trait",
       "trait": {
         "name": "Magic Initiate",
-        "description": "Choose a Cleric, Druid, or Wizard list, learn two cantrips, and always have one chosen level 1 spell prepared with one free casting per long rest."
+        "description": "You learn two cantrips and one level 1 spell from a chosen class's spell list (Cleric, Druid, or Wizard). You always have the level 1 spell prepared and can cast it once per Long Rest without expending a spell slot.",
+        "tags": ["choice-capture", "free-cast-tracking"]
+      }
+    },
+    {
+      "type": "grant-resource",
+      "resource": {
+        "name": "Magic Initiate Free Cast",
+        "maxUses": 1,
+        "resetOn": "long"
       }
     }
   ]

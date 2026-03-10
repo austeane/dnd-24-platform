@@ -1,7 +1,7 @@
 ---
 {
   "type": "feat",
-  "id": "feat-musician",
+  "id": "feat:musician",
   "slug": "musician",
   "name": "Musician",
   "packId": "srd-5e-2024",
@@ -18,8 +18,12 @@
   "prerequisites": [],
   "effects": [
     {
-      "type": "unmodeled",
-      "description": "Musician affects party-rest behavior rather than a single-character numeric stat block, so it is tracked as a known feat pending party-rest automation."
+      "type": "grant-trait",
+      "trait": {
+        "name": "Musician",
+        "description": "When you finish a Short or Long Rest, you can play a song on a musical instrument and give Bardic Inspiration to allies who hear it. The number of allies equals your Proficiency Bonus.",
+        "tags": ["short-rest-benefit", "bardic-inspiration-recovery"]
+      }
     }
   ]
 }

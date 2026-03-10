@@ -32,4 +32,22 @@ export {
 export { buildACBreakdown } from "./defenses.ts";
 export { buildAttackProfiles, getWeaponData } from "./attack-profiles.ts";
 
+export {
+  buildAlertInitiativeModifier,
+  buildFeatAndSpeciesDynamicEffects,
+  buildMagicInitiateEffects,
+  buildSavageAttackerTrait,
+  buildSkilledProficiencies,
+  getBardicInspirationResetType,
+  hasDrowDancingLights,
+  hasDrowFaerieFireFreeCast,
+  hasDrowFeyAncestry,
+  hasMusicianFeat,
+  hasStoneEndurance,
+  hasWoodElfDruidcraft,
+  hasWoodElfSpeedBonus,
+  hasWoodElfTrance,
+  stonesEnduranceReduction,
+} from "./feats-and-species.ts";
+
 export const ENGINE_VERSION = "0.1.0" as const;

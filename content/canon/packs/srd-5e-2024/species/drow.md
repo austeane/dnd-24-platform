@@ -31,14 +31,34 @@
       "type": "grant-trait",
       "trait": {
         "name": "Fey Ancestry",
-        "description": "You have advantage on saving throws you make to avoid or end the Charmed condition."
+        "description": "You have advantage on saving throws you make to avoid or end the Charmed condition.",
+        "tags": ["advantage-vs-charmed"]
       }
     },
     {
       "type": "grant-trait",
       "trait": {
         "name": "Trance",
-        "description": "You do not need to sleep, magic cannot put you to sleep, and you can finish a Long Rest in 4 hours of meditation."
+        "description": "You do not need to sleep, magic cannot put you to sleep, and you can finish a Long Rest in 4 hours of meditation.",
+        "tags": ["4-hour-long-rest"]
+      }
+    },
+    {
+      "type": "grant-spell-access",
+      "spell": {
+        "spellName": "Faerie Fire",
+        "spellEntityId": "spell-faerie-fire",
+        "spellPackId": "srd-5e-2024",
+        "alwaysPrepared": true,
+        "source": "Drow Lineage"
+      }
+    },
+    {
+      "type": "grant-resource",
+      "resource": {
+        "name": "Drow Faerie Fire Free Cast",
+        "maxUses": 1,
+        "resetOn": "long"
       }
     }
   ]

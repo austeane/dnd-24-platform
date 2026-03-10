@@ -147,6 +147,20 @@
           "masteryProperty": "Slow"
         }
       ],
+      "expectedFeatSpeciesEffects": {
+        "species": "Goliath",
+        "speciesEffects": [
+          "Stone's Endurance: reaction, 1d12+CON damage reduction, PB uses/long rest",
+          "Giant Ancestry trait"
+        ],
+        "feat": "Savage Attacker",
+        "featEffects": [
+          "Savage Attacker: once per turn, reroll weapon damage dice and use either roll"
+        ],
+        "expectedResources": [
+          { "name": "Stone's Endurance", "maxUses": 2, "resetOn": "long", "note": "PB (2) uses at level 2" }
+        ]
+      },
       "xpLedger": [],
       "notes": [
         "Species appears to be Goliath.",
@@ -303,6 +317,18 @@
           "slot": "off-hand"
         }
       ],
+      "expectedFeatSpeciesEffects": {
+        "species": "Custom (reviewed sheet species)",
+        "speciesEffects": [
+          "Darkvision 60 ft",
+          "Feerie Tollen trait: telepathic message and remote viewing",
+          "Hex Magic trait: Disguise Self and Hex"
+        ],
+        "feat": null,
+        "featEffects": [],
+        "expectedResources": [],
+        "note": "Tali's species is a reviewed custom lineage. The handwritten species name is not fully legible. Species effects are preserved as sheet-derived traits."
+      },
       "xpLedger": [],
       "notes": [
         "The back-page spell list includes a mix of druid and species-origin magic; it is stored as known spell access for now.",
@@ -440,6 +466,23 @@
         "weaponLabel": "Pact Weapon (conjured)",
         "isMagicWeapon": false
       },
+      "expectedFeatSpeciesEffects": {
+        "species": "Drow",
+        "speciesEffects": [
+          "Darkvision 120 ft",
+          "Dancing Lights cantrip (Drow Lineage)",
+          "Faerie Fire: always prepared, 1 free cast/long rest (Drow Lineage)",
+          "Fey Ancestry: advantage on saves vs charmed",
+          "Trance: 4-hour long rest"
+        ],
+        "feat": "Skilled",
+        "featEffects": [
+          "Skilled: 3 chosen skill proficiencies (Perception, Persuasion, Stealth)"
+        ],
+        "expectedResources": [
+          { "name": "Drow Faerie Fire Free Cast", "maxUses": 1, "resetOn": "long", "note": "One free Faerie Fire casting per long rest" }
+        ]
+      },
       "xpLedger": [],
       "notes": [
         "Species is written as Half-Elf Drow.",
@@ -566,6 +609,22 @@
           "slot": "carried"
         }
       ],
+      "expectedFeatSpeciesEffects": {
+        "species": "Wood Elf",
+        "speciesEffects": [
+          "Darkvision 60 ft",
+          "+5 walking speed",
+          "Druidcraft cantrip (Wood Elf Lineage)",
+          "Fey Ancestry: advantage on saves vs charmed",
+          "Trance: 4-hour long rest"
+        ],
+        "feat": "Musician",
+        "featEffects": [
+          "Musician: Bardic Inspiration recovery on short rest"
+        ],
+        "expectedResources": [],
+        "note": "Musician modifies Bardic Inspiration to also reset on short rest."
+      },
       "xpLedger": [],
       "notes": [
         "Species is written as Wood Elf.",
@@ -660,6 +719,19 @@
         { "metamagicOption": "Twinned Spell", "sourceLabel": "Sorcerer 2" }
       ],
       "equipment": [],
+      "expectedFeatSpeciesEffects": {
+        "species": null,
+        "speciesEffects": [],
+        "feat": "Magic Initiate (Wizard)",
+        "featEffects": [
+          "Magic Initiate: 2 wizard cantrips + 1 level 1 wizard spell always prepared",
+          "Magic Initiate Free Cast: 1 free casting of chosen level 1 spell per long rest"
+        ],
+        "expectedResources": [
+          { "name": "Magic Initiate Free Cast", "maxUses": 1, "resetOn": "long", "note": "One free casting of the chosen level 1 spell per long rest" }
+        ],
+        "note": "Species text is faint and unresolved. Magic Initiate spell choices are not legible from photo."
+      },
       "xpLedger": [],
       "notes": [
         "Species text is faint and remains unresolved.",
