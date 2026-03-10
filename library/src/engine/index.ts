@@ -73,4 +73,42 @@ export {
   SORCERY_POINT_SLOT_COST,
 } from "./class-features-casters.ts";
 
+export {
+  BEAST_FORM_LIBRARY,
+  buildWildShapePoolDefinition,
+  buildWildShapeTrait,
+  computeWildShapeDuration,
+  computeWildShapeMaxUses,
+  createIdleWildShapeState,
+  getAvailableBeastForms,
+  hasWildShape,
+  revertFromBeast,
+  transformIntoBeast,
+} from "./wild-shape.ts";
+
+export type {
+  BeastFormAttack,
+  BeastFormStats,
+  WildShapeTransformState,
+} from "./wild-shape.ts";
+
+export {
+  buildWildCompanionTrait,
+  createEmptyFamiliarState,
+  dismissFamiliar,
+  FAMILIAR_FORMS,
+  handleFamiliarLongRest,
+  hasWildCompanion,
+  removeFamiliar,
+  resummonFamiliar,
+  summonSpellFamiliar,
+  summonWildCompanionFamiliar,
+} from "./familiars.ts";
+
+export type {
+  FamiliarForm,
+  FamiliarState,
+  FamiliarStatus,
+} from "./familiars.ts";
+
 export const ENGINE_VERSION = "0.1.0" as const;

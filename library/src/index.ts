@@ -71,9 +71,31 @@ export {
   SKILL_ABILITY_MAP,
   SORCERY_POINT_SLOT_COST,
   stonesEnduranceReduction,
+  BEAST_FORM_LIBRARY,
+  buildWildShapePoolDefinition,
+  buildWildShapeTrait,
+  computeWildShapeDuration,
+  computeWildShapeMaxUses,
+  createIdleWildShapeState,
+  getAvailableBeastForms,
+  hasWildShape,
+  revertFromBeast,
+  transformIntoBeast,
+  buildWildCompanionTrait,
+  createEmptyFamiliarState,
+  dismissFamiliar,
+  FAMILIAR_FORMS,
+  handleFamiliarLongRest,
+  hasWildCompanion,
+  removeFamiliar,
+  resummonFamiliar,
+  summonSpellFamiliar,
+  summonWildCompanionFamiliar,
 } from "./engine/index.ts";
 
 export type { CasterType, SpellLearningMode } from "./engine/spellcasting.ts";
+export type { BeastFormAttack, BeastFormStats, WildShapeTransformState } from "./engine/wild-shape.ts";
+export type { FamiliarForm, FamiliarState, FamiliarStatus } from "./engine/familiars.ts";
 
 // Catalog helpers
 export {
