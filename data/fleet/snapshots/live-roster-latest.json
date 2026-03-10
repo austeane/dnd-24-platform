@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-03-10T06:42:26.488Z",
+  "generatedAt": "2026-03-10T07:58:30.296Z",
   "engineVersion": "0.1.0",
   "characterCount": 5,
   "characters": [
@@ -28,6 +28,7 @@
           ]
         }
       ],
+      "attackProfileNames": [],
       "actionNames": [
         "Create Spell Slot"
       ],
@@ -37,13 +38,19 @@
       "traitNames": [
         "Convert Spell Slot to Sorcery Points",
         "Magic Initiate",
-        "Metamagic",
-        "Sorcerer Sheet Notes"
+        "Metamagic"
       ],
       "senseNames": [],
+      "proficientSkillNames": [
+        "Arcana",
+        "Insight"
+      ],
       "proficiencies": {
         "savingThrows": [],
-        "skills": [],
+        "skills": [
+          "Arcana",
+          "Insight"
+        ],
         "weapons": [],
         "armors": [],
         "tools": [],
@@ -51,7 +58,7 @@
       },
       "resistances": [],
       "immunities": [],
-      "noteCount": 2,
+      "noteCount": 3,
       "xpBanked": 0
     },
     {
@@ -79,6 +86,7 @@
           ]
         }
       ],
+      "attackProfileNames": [],
       "actionNames": [
         "Magical Cunning",
         "Pact of the Blade"
@@ -96,9 +104,22 @@
       "senseNames": [
         "Darkvision 120ft"
       ],
+      "proficientSkillNames": [
+        "Arcana",
+        "Deception",
+        "Perception",
+        "Persuasion",
+        "Stealth"
+      ],
       "proficiencies": {
         "savingThrows": [],
-        "skills": [],
+        "skills": [
+          "Arcana",
+          "Deception",
+          "Perception",
+          "Persuasion",
+          "Stealth"
+        ],
         "weapons": [],
         "armors": [],
         "tools": [],
@@ -123,6 +144,9 @@
       "spellSaveDc": null,
       "spellCount": 0,
       "slotPools": [],
+      "attackProfileNames": [
+        "Longsword"
+      ],
       "actionNames": [
         "Second Wind",
         "Stone's Endurance"
@@ -138,9 +162,16 @@
         "Weapon Mastery"
       ],
       "senseNames": [],
+      "proficientSkillNames": [
+        "Athletics",
+        "Intimidation"
+      ],
       "proficiencies": {
         "savingThrows": [],
-        "skills": [],
+        "skills": [
+          "Athletics",
+          "Intimidation"
+        ],
         "weapons": [],
         "armors": [],
         "tools": [],
@@ -176,6 +207,9 @@
           ]
         }
       ],
+      "attackProfileNames": [
+        "Quarterstaff"
+      ],
       "actionNames": [
         "Wild Companion",
         "Wild Shape"
@@ -187,15 +221,23 @@
         "Feerie Tollen",
         "Hex Magic",
         "Primal Order: Warden",
+        "Quarterstaff",
         "Wild Companion Familiar",
         "Wild Shape Forms"
       ],
       "senseNames": [
         "Darkvision 60ft"
       ],
+      "proficientSkillNames": [
+        "Nature",
+        "Perception"
+      ],
       "proficiencies": {
         "savingThrows": [],
-        "skills": [],
+        "skills": [
+          "Nature",
+          "Perception"
+        ],
         "weapons": [
           "Martial weapons"
         ],
@@ -235,6 +277,9 @@
           ]
         }
       ],
+      "attackProfileNames": [
+        "Rapier"
+      ],
       "actionNames": [
         "Bardic Inspiration"
       ],
@@ -251,9 +296,18 @@
       "senseNames": [
         "Darkvision 60ft"
       ],
+      "proficientSkillNames": [
+        "Acrobatics",
+        "Performance",
+        "Persuasion"
+      ],
       "proficiencies": {
         "savingThrows": [],
-        "skills": [],
+        "skills": [
+          "Acrobatics",
+          "Performance",
+          "Persuasion"
+        ],
         "weapons": [],
         "armors": [],
         "tools": [],

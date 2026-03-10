@@ -34,6 +34,49 @@ const latestPath = path.join(snapshotDir, "live-roster-latest.json");
 
 // --- Character input building (mirrors seed-real-campaign.ts logic, no DB) ---
 
+interface SkillChoiceData {
+  skillName: string;
+  source: string;
+  sourceLabel: string;
+  hasExpertise?: boolean;
+}
+
+interface FeatChoiceData {
+  featEntityId: string;
+  featPackId?: string | null;
+  featLabel: string;
+  subChoicesJson?: Record<string, unknown> | null;
+  sourceLabel: string;
+}
+
+interface EquipmentData {
+  itemEntityId: string;
+  itemPackId?: string | null;
+  itemLabel: string;
+  quantity: number;
+  equipped: boolean;
+  slot?: string | null;
+}
+
+interface WeaponMasteryData {
+  weaponEntityId: string;
+  weaponPackId?: string | null;
+  weaponLabel: string;
+  masteryProperty: string;
+}
+
+interface MetamagicChoiceData {
+  metamagicOption: string;
+  sourceLabel: string;
+}
+
+interface PactBladeBondData {
+  weaponEntityId?: string | null;
+  weaponPackId?: string | null;
+  weaponLabel: string;
+  isMagicWeapon: boolean;
+}
+
 interface VerifiedCharacter {
   reviewStatus: string;
   identity: {
@@ -64,6 +107,12 @@ interface VerifiedCharacter {
   sourceLedger: {
     features: SeedFeature[];
   };
+  skillChoices?: SkillChoiceData[];
+  featChoices?: FeatChoiceData[];
+  equipment?: EquipmentData[];
+  weaponMasteries?: WeaponMasteryData[];
+  metamagicChoices?: MetamagicChoiceData[];
+  pactBladeBond?: PactBladeBondData | null;
   xpLedger: Array<{
     id: string;
     amount: number;
@@ -230,6 +279,27 @@ function buildComputationInput(
       feature.sourcePackId ?? undefined,
       feature.sourceEntityId,
     );
+    const payload: Record<string, unknown> = {};
+
+    if (feature.sourceKind === "feat" && character.featChoices) {
+      const matchingFeat = character.featChoices.find(
+        (fc) => fc.featEntityId === feature.sourceEntityId,
+      );
+      if (matchingFeat?.subChoicesJson) {
+        payload["subChoicesJson"] = matchingFeat.subChoicesJson;
+      }
+    }
+    if (feature.sourceEntityId === "class-feature:metamagic" && character.metamagicChoices) {
+      payload["metamagicChoices"] = character.metamagicChoices.map((m) => m.metamagicOption);
+    }
+    if (feature.sourceEntityId === "class-feature:pact-of-the-blade" && character.pactBladeBond) {
+      payload["pactBladeBond"] = {
+        weaponLabel: character.pactBladeBond.weaponLabel,
+        weaponEntityId: character.pactBladeBond.weaponEntityId ?? undefined,
+        isMagicWeapon: character.pactBladeBond.isMagicWeapon,
+      };
+    }
+
     sources.push({
       source: {
         id: `seed:${character.identity.slug}:feature:${feature.id}`,
@@ -239,9 +309,62 @@ function buildComputationInput(
         entityId: feature.sourceEntityId,
         packId: feature.sourcePackId ?? undefined,
         rank: feature.rank,
+        ...(Object.keys(payload).length > 0 ? { payload } : {}),
       },
       effects: mergeEffects(canonical, feature.effects),
     });
+  }
+
+  // Skill choices -> proficiency effects
+  if (character.skillChoices && character.skillChoices.length > 0) {
+    const skillEffects: Effect[] = character.skillChoices.flatMap((sc) => {
+      const effects: Effect[] = [
+        { type: "proficiency", category: "skill", value: sc.skillName },
+      ];
+      if (sc.hasExpertise) {
+        effects.push({ type: "expertise", skill: sc.skillName });
+      }
+      return effects;
+    });
+    sources.push({
+      source: {
+        id: `seed:${character.identity.slug}:skill-choices`,
+        kind: "override",
+        name: "Skill Proficiencies",
+      },
+      effects: skillEffects,
+    });
+  }
+
+  // Equipment: only equipped weapons for attack profiles (armor AC is in baseArmorClass)
+  if (character.equipment && character.equipment.length > 0) {
+    for (const item of character.equipment) {
+      if (!item.equipped) continue;
+      if (item.slot === "armor" || item.slot === "off-hand") continue;
+      sources.push({
+        source: {
+          id: `seed:${character.identity.slug}:equip:${item.itemEntityId}`,
+          kind: "equipment",
+          name: item.itemLabel,
+          entityId: item.itemEntityId,
+        },
+        effects: getCanonicalEffectsForSource("srd-5e-2024", item.itemEntityId),
+      });
+    }
+  }
+
+  // Weapon mastery choices -> attach to class-level source
+  if (character.weaponMasteries && character.weaponMasteries.length > 0) {
+    const classSource = sources.find((s) => s.source.kind === "class-level");
+    if (classSource) {
+      classSource.source.payload = {
+        ...classSource.source.payload,
+        weaponMasteries: character.weaponMasteries.map((m) => ({
+          weaponEntityId: m.weaponEntityId,
+          masteryProperty: m.masteryProperty,
+        })),
+      };
+    }
   }
 
   return {
@@ -273,10 +396,12 @@ interface CharacterSnapshot {
   spellSaveDc: number | null;
   spellCount: number;
   slotPools: Array<{ source: string; resetOn: string; slots: Array<{ level: number; total: number }> }>;
+  attackProfileNames: string[];
   actionNames: string[];
   resourceNames: string[];
   traitNames: string[];
   senseNames: string[];
+  proficientSkillNames: string[];
   proficiencies: {
     savingThrows: string[];
     skills: string[];
@@ -310,10 +435,15 @@ function snapshotFromState(slug: string, state: CharacterState): CharacterSnapsh
       resetOn: pool.resetOn,
       slots: pool.slots,
     })),
+    attackProfileNames: state.attackProfiles.map((ap) => ap.name).sort(),
     actionNames: state.actions.map((action) => action.name).sort(),
     resourceNames: state.resources.map((resource) => resource.name).sort(),
     traitNames: state.traits.map((trait) => trait.name).sort(),
     senseNames: state.senses.map((sense) => `${sense.sense} ${sense.range}ft`).sort(),
+    proficientSkillNames: state.skillState.skills
+      .filter((s) => s.proficient)
+      .map((s) => s.skillName)
+      .sort(),
     proficiencies: {
       savingThrows: [...state.proficiencies.savingThrows].sort(),
       skills: [...state.proficiencies.skills].sort(),

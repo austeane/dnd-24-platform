@@ -362,3 +362,42 @@ That order keeps persistence, session flow, and DM-to-player communication movin
 - `pnpm lint` passes (0 warnings, 0 errors)
 - `pnpm snapshot:live-roster` produces no drift from baseline
 - `pnpm report:fleet-readiness` produces no evidence gate violations
+
+## 2026-03-10
+
+### 01:01:06 Roster Normalization and Live Acceptance (Task #10)
+
+- Extended `data/fleet/fixture-patterns.ts` to consume all choice-state data from `verified-characters.json`:
+  - `skillChoices` → `proficiency` effects per skill
+  - `equipment` → equipment sources for equipped main-hand weapons (armor/shield skipped to avoid AC double-counting with `baseArmorClass`)
+  - `weaponMasteries` → class-level source payload
+  - `featChoices` → `subChoicesJson` attached to feat source payloads
+  - `metamagicChoices` → metamagic source payload
+  - `pactBladeBond` → pact-of-the-blade source payload
+- Mirrored the same choice-state pipeline in `scripts/snapshot-live-roster.ts`.
+- Expanded `library/tests/verification/live-roster-snapshot.test.ts` from 8 to 26 tests covering all 5 characters:
+  - Sheet baselines (AC, HP, speed, passive perception, spell DC)
+  - Skill proficiencies with exact bonus values
+  - Attack profiles (Longsword, Quarterstaff, Rapier) with ability, damage dice, damage type, mastery
+  - Resources (Second Wind, Stone's Endurance, Wild Shape, Magical Cunning, Bardic Inspiration, Sorcery Points)
+  - Species traits (Goliath, Drow, Wood Elf darkvision/speed/fey ancestry)
+  - Pact Magic short-rest slot pool
+- Updated `data/fleet/snapshots/live-roster-baseline.json` with `attackProfileNames`, `proficientSkillNames`, and populated `proficiencies.skills`.
+- Created `docs/reports/roster-acceptance.md` with character verification matrix and explicit residual gap documentation.
+
+#### Residual Gaps (documented, not blocking)
+
+- Class weapon/armor proficiency effects not yet modeled (attack `isProficient=false`)
+- Saving throw proficiencies empty for all characters
+- Metamagic/Font of Magic dynamic traits not in pure engine output (app-side progression service)
+- Language and tool proficiencies not modeled
+- Nara species unresolved; Tali species custom-reviewed with inline effects
+- Magic Initiate spell choices for Nara not legible from sheet
+- AC formula vs sheet baseline deferred (sheet value is authoritative)
+
+#### Validation
+
+- `pnpm check` passes
+- `pnpm test` passes (409 tests)
+- `pnpm lint` passes (0 errors)
+- `pnpm snapshot:live-roster --update` regenerated baseline successfully

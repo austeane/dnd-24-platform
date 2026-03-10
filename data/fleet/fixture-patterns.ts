@@ -36,6 +36,49 @@ export interface VerifiedRoster {
   characters: VerifiedCharacterData[];
 }
 
+export interface SkillChoiceData {
+  skillName: string;
+  source: string;
+  sourceLabel: string;
+  hasExpertise?: boolean;
+}
+
+export interface FeatChoiceData {
+  featEntityId: string;
+  featPackId?: string | null;
+  featLabel: string;
+  subChoicesJson?: Record<string, unknown> | null;
+  sourceLabel: string;
+}
+
+export interface EquipmentData {
+  itemEntityId: string;
+  itemPackId?: string | null;
+  itemLabel: string;
+  quantity: number;
+  equipped: boolean;
+  slot?: string | null;
+}
+
+export interface WeaponMasteryData {
+  weaponEntityId: string;
+  weaponPackId?: string | null;
+  weaponLabel: string;
+  masteryProperty: string;
+}
+
+export interface MetamagicChoiceData {
+  metamagicOption: string;
+  sourceLabel: string;
+}
+
+export interface PactBladeBondData {
+  weaponEntityId?: string | null;
+  weaponPackId?: string | null;
+  weaponLabel: string;
+  isMagicWeapon: boolean;
+}
+
 export interface VerifiedCharacterData {
   reviewStatus: string;
   identity: {
@@ -66,6 +109,12 @@ export interface VerifiedCharacterData {
   sourceLedger: {
     features: SeedFeature[];
   };
+  skillChoices?: SkillChoiceData[];
+  featChoices?: FeatChoiceData[];
+  equipment?: EquipmentData[];
+  weaponMasteries?: WeaponMasteryData[];
+  metamagicChoices?: MetamagicChoiceData[];
+  pactBladeBond?: PactBladeBondData | null;
   xpLedger: Array<{
     id: string;
     amount: number;
@@ -226,6 +275,32 @@ export function buildCharacterFixture(
 
   for (const feature of seedFeatures) {
     const canonical = getCanonicalEffectsForSource(feature.sourcePackId ?? undefined, feature.sourceEntityId);
+    const payload: Record<string, unknown> = {};
+
+    // Attach feat sub-choices to the source payload so engine functions can access them
+    if (feature.sourceKind === "feat" && character.featChoices) {
+      const matchingFeat = character.featChoices.find(
+        (fc) => fc.featEntityId === feature.sourceEntityId,
+      );
+      if (matchingFeat?.subChoicesJson) {
+        payload["subChoicesJson"] = matchingFeat.subChoicesJson;
+      }
+    }
+
+    // Attach metamagic choices to the metamagic source payload
+    if (feature.sourceEntityId === "class-feature:metamagic" && character.metamagicChoices) {
+      payload["metamagicChoices"] = character.metamagicChoices.map((m) => m.metamagicOption);
+    }
+
+    // Attach pact blade bond to the pact-of-the-blade source payload
+    if (feature.sourceEntityId === "class-feature:pact-of-the-blade" && character.pactBladeBond) {
+      payload["pactBladeBond"] = {
+        weaponLabel: character.pactBladeBond.weaponLabel,
+        weaponEntityId: character.pactBladeBond.weaponEntityId ?? undefined,
+        isMagicWeapon: character.pactBladeBond.isMagicWeapon,
+      };
+    }
+
     sources.push({
       source: {
         id: `fixture:${slug}:feature:${feature.id}`,
@@ -235,9 +310,66 @@ export function buildCharacterFixture(
         entityId: feature.sourceEntityId,
         packId: feature.sourcePackId ?? undefined,
         rank: feature.rank,
+        ...(Object.keys(payload).length > 0 ? { payload } : {}),
       },
       effects: mergeEffects(canonical, feature.effects),
     });
+  }
+
+  // --- Skill choice sources: translate to proficiency effects ---
+  if (character.skillChoices && character.skillChoices.length > 0) {
+    const skillEffects: Effect[] = character.skillChoices.flatMap((sc) => {
+      const effects: Effect[] = [
+        { type: "proficiency", category: "skill", value: sc.skillName },
+      ];
+      if (sc.hasExpertise) {
+        effects.push({ type: "expertise", skill: sc.skillName });
+      }
+      return effects;
+    });
+
+    sources.push({
+      source: {
+        id: `fixture:${slug}:skill-choices`,
+        kind: "override",
+        name: "Skill Proficiencies",
+      },
+      effects: skillEffects,
+    });
+  }
+
+  // --- Equipment sources: add equipped weapons as equipment sources for attack profiles ---
+  // Armor/shield AC is already captured in baseArmorClass from the sheet value.
+  // Only weapons need explicit equipment sources for the attack profile engine.
+  if (character.equipment && character.equipment.length > 0) {
+    for (const item of character.equipment) {
+      if (!item.equipped) continue;
+      // Skip armor and shields — their AC contribution is in baseArmorClass
+      if (item.slot === "armor" || item.slot === "off-hand") continue;
+      sources.push({
+        source: {
+          id: `fixture:${slug}:equip:${item.itemEntityId}`,
+          kind: "equipment",
+          name: item.itemLabel,
+          entityId: item.itemEntityId,
+        },
+        effects: getCanonicalEffectsForSource("srd-5e-2024", item.itemEntityId),
+      });
+    }
+  }
+
+  // --- Weapon mastery choices: attach to the class-level source payload ---
+  if (character.weaponMasteries && character.weaponMasteries.length > 0) {
+    const classSource = sources.find((s) => s.source.kind === "class-level");
+    if (classSource) {
+      classSource.source.payload = {
+        ...classSource.source.payload,
+        weaponMasteries: character.weaponMasteries.map((m) => ({
+          weaponEntityId: m.weaponEntityId,
+          masteryProperty: m.masteryProperty,
+        })),
+      };
+    }
   }
 
   return {
