@@ -11,22 +11,22 @@ Status rule:
 ## Summary
 
 - Total atomic mechanics: 111
-- Full: 39
-- Partial: 39
+- Full: 50
+- Partial: 28
 - None: 33
 
 ## Actions and Resources
 
 - Total: 18
-- Full: 2
-- Partial: 8
+- Full: 6
+- Partial: 4
 - None: 8
 
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
 | --- | --- | --- | --- | --- | --- |
-| Action / bonus action / reaction inventory | Action inventory | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/class-features/` |
-| Action / bonus action / reaction inventory | Bonus action inventory | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/class-features/` |
-| Action / bonus action / reaction inventory | Reaction inventory | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/species/` |
+| Action / bonus action / reaction inventory | Action inventory | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/class-features/`, `library/tests/engine/action-inventory.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `data/real-campaign-intake/verified-characters.json` |
+| Action / bonus action / reaction inventory | Bonus action inventory | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/class-features/`, `library/tests/engine/action-inventory.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `data/real-campaign-intake/verified-characters.json` |
+| Action / bonus action / reaction inventory | Reaction inventory | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/species/`, `library/tests/engine/action-inventory.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `data/real-campaign-intake/verified-characters.json` |
 | Resource pools | Fixed resource pools | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/traits-and-resources.ts`, `library/tests/engine/resources.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Resource pools | Scaling resource pools | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/traits-and-resources.ts`, `library/tests/engine/resources.test.ts`, `library/tests/engine/feats-and-species.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Resource pools | Resource spend mutation | None |  | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/db/schema/progression.ts`, `app/src/server/progression/service.ts` |
@@ -37,11 +37,11 @@ Status rule:
 | Equipment loadout and equipped state | Equipped-state persistence | None | `action-equipment-persistence` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/db/schema/progression.ts`, `content/canon/packs/srd-5e-2024/equipment/` |
 | Equipment loadout and equipped state | Armor equipment effect application | None | `action-equipped-state-persistence` | `runtime`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/equipment/`, `library/src/engine/defenses.ts` |
 | Equipment loadout and equipped state | Weapon equipment effect application | None | `action-equipped-state-persistence` | `runtime`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/equipment/`, `library/src/engine/character-computer.ts` |
-| Weapon and attack profiles | Melee attack profile derivation | Partial | `action-weapon-effect-application` | `runtime`, `explainability`, `tests`, `fixtures`, `live-roster` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
-| Weapon and attack profiles | Ranged attack profile derivation | Partial | `action-weapon-effect-application` | `runtime`, `explainability`, `tests`, `fixtures`, `live-roster` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
-| Weapon and attack profiles | Damage package projection | Partial | `action-melee-attack-profiles`, `action-ranged-attack-profiles` | `runtime`, `tests`, `fixtures` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
+| Weapon and attack profiles | Melee attack profile derivation | Full | `action-weapon-effect-application` | `runtime`, `explainability`, `tests`, `fixtures`, `live-roster` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
+| Weapon and attack profiles | Ranged attack profile derivation | Full | `action-weapon-effect-application` | `runtime`, `explainability`, `tests`, `fixtures`, `live-roster` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
+| Weapon and attack profiles | Damage package projection | Full | `action-melee-attack-profiles`, `action-ranged-attack-profiles` | `runtime`, `tests`, `fixtures` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
 | Weapon Mastery | Weapon Mastery choice capture | Partial |  | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `library/tests/engine/attacks.test.ts`, `data/real-campaign-intake/verified-characters.json`, `content/canon/packs/srd-5e-2024/class-features/` |
-| Weapon Mastery | Weapon Mastery runtime resolution | Partial | `action-weapon-mastery-choice-capture`, `action-melee-attack-profiles` | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
+| Weapon Mastery | Weapon Mastery runtime resolution | Full | `action-weapon-mastery-choice-capture`, `action-melee-attack-profiles` | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/attack-profiles.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
 
 ## Class Features
 
@@ -54,7 +54,7 @@ Status rule:
 | --- | --- | --- | --- | --- | --- |
 | Fighter: Second Wind | Second Wind surface and use count | Full |  | `runtime`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/class-features/`, `library/src/engine/traits-and-resources.ts`, `library/tests/engine/resources.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Fighter: Second Wind | Second Wind healing resolution | None | `feature-second-wind-surface`, `action-resource-spend-mutation` | `runtime`, `mutation`, `tests`, `fixtures`, `live-roster` | `content/canon/packs/srd-5e-2024/class-features/`, `app/src/server/progression/service.ts` |
-| Druid: Primal Order (Warden) | Primal Order (Warden) proficiencies | Partial |  | `runtime`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/class-features/`, `library/src/engine/proficiencies.ts`, `data/real-campaign-intake/verified-characters.json` |
+| Druid: Primal Order (Warden) | Primal Order (Warden) proficiencies | Partial |  | `runtime`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/class-features/`, `library/src/engine/proficiencies.ts`, `data/real-campaign-intake/verified-characters.json`, `library/tests/engine/proficiencies.test.ts`, `library/tests/canon/srd-roster-batch.test.ts` |
 | Druid: Wild Shape | Wild Shape use tracking | Full |  | `runtime`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/class-features/`, `library/src/engine/wild-shape.ts`, `library/tests/engine/wild-shape.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Druid: Wild Shape | Wild Shape form library | Partial |  | `canon`, `runtime`, `tests`, `fixtures` | `library/src/engine/wild-shape.ts`, `library/tests/engine/wild-shape.test.ts` |
 | Druid: Wild Shape | Wild Shape transform state | Partial | `feature-wild-shape-form-library`, `action-resource-spend-mutation` | `persistence`, `runtime`, `mutation`, `tests`, `fixtures`, `live-roster` | `library/src/engine/wild-shape.ts`, `library/tests/engine/wild-shape.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
@@ -74,8 +74,8 @@ Status rule:
 ## Core Character
 
 - Total: 20
-- Full: 12
-- Partial: 4
+- Full: 13
+- Partial: 3
 - None: 4
 
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
@@ -87,19 +87,19 @@ Status rule:
 | Skill proficiencies and skill choice state | Skill proficiency grants | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/proficiencies.ts`, `library/tests/engine/proficiencies.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `data/real-campaign-intake/verified-characters.json` |
 | Skill proficiencies and skill choice state | Skill choice capture and persistence | None |  | `persistence`, `mutation`, `fixtures`, `live-roster` | `app/src/server/db/schema/progression.ts`, `app/src/server/progression/service.ts`, `data/real-campaign-intake/verified-characters.json` |
 | Skill proficiencies and skill choice state | Skill bonus derivation | Full | `core-skill-choice-capture` | `runtime`, `explainability`, `tests`, `live-roster` | `library/src/engine/proficiencies.ts`, `library/tests/engine/proficiencies.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
-| Expertise | Expertise grants | Partial | `core-skill-choice-capture` | `runtime`, `tests`, `live-roster` | `library/src/engine/proficiencies.ts`, `library/tests/engine/proficiencies.test.ts` |
+| Expertise | Expertise grants | Full | `core-skill-choice-capture` | `runtime`, `tests`, `live-roster` | `library/src/engine/proficiencies.ts`, `library/tests/engine/proficiencies.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
 | Initiative | Initiative derivation | Full |  | `runtime`, `tests`, `explainability` | `library/src/engine/character-computer.ts`, `library/tests/engine/character-computer.test.ts` |
 | Armor Class calculation | AC base snapshot fallback | Full |  | `runtime`, `explainability`, `tests`, `live-roster` | `library/src/engine/defenses.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Armor Class calculation | AC formula selection | Full |  | `runtime`, `tests`, `explainability` | `library/src/engine/defenses.ts`, `library/tests/engine/attacks.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Armor Class calculation | Equipped armor and shield contribution to AC | None | `action-equipment-persistence`, `action-equipped-state-persistence` | `persistence`, `runtime`, `mutation`, `tests`, `live-roster` | `content/canon/packs/srd-5e-2024/equipment/`, `library/src/engine/defenses.ts` |
-| Hit Point calculation | HP base snapshot fallback | Partial |  | `runtime`, `explainability`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `app/src/server/db/seed-real-campaign.ts` |
+| Hit Point calculation | HP base snapshot fallback | Partial |  | `runtime`, `explainability`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `app/src/server/db/seed-real-campaign.ts`, `library/tests/engine/hp.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `data/real-campaign-intake/verified-characters.json` |
 | Hit Point calculation | Level-by-level HP derivation | None | `progression-class-level-commit` | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/character-computer.ts`, `app/src/server/progression/service.ts`, `content/canon/packs/srd-5e-2024/class-features/` |
 | Speed and speed bonuses | Walk speed derivation | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `library/tests/engine/feats-and-species.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Speed and speed bonuses | Alternate movement modes | None |  | `runtime`, `tests`, `fixtures` | `library/src/engine/traits-and-resources.ts`, `library/src/engine/character-computer.ts` |
 | Passive Perception | Passive Perception derivation | Full | `core-skill-choice-capture` | `runtime`, `explainability`, `tests`, `live-roster` | `library/src/engine/proficiencies.ts`, `library/tests/engine/proficiencies.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Senses | Sense grants | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/character-computer.ts`, `library/tests/engine/feats-and-species.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
-| Resistances and immunities | Resistance grants | Partial |  | `runtime`, `tests` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/species/` |
-| Resistances and immunities | Immunity grants | Partial |  | `runtime`, `tests` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/species/` |
+| Resistances and immunities | Resistance grants | Partial |  | `runtime`, `tests` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/species/`, `library/tests/engine/character-computer.test.ts` |
+| Resistances and immunities | Immunity grants | Partial |  | `runtime`, `tests` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/species/`, `library/tests/engine/character-computer.test.ts` |
 
 ## Feats and Species
 
@@ -138,21 +138,21 @@ Status rule:
 | XP ledger | XP spend ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts`, `library/tests/engine/character-computer.test.ts` |
 | XP ledger | XP refund and adjustment ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts`, `library/tests/engine/character-computer.test.ts` |
 | AA and level-up spend-plan preview | Spend-plan document parse and normalization | Full |  | `runtime`, `tests` | `app/src/server/progression/service.ts`, `app/src/server/progression/plan-document.test.ts` |
-| AA and level-up spend-plan preview | Spend-plan preview validation | Partial | `progression-spend-plan-parse` | `runtime`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `library/src/engine/prerequisite-evaluator.ts` |
-| AA and level-up spend-plan commit | Spend-plan class-level commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts` |
-| AA and level-up spend-plan commit | Spend-plan canonical-source commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts` |
-| AA and level-up spend-plan commit | Spend-plan spell-access commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts` |
+| AA and level-up spend-plan preview | Spend-plan preview validation | Partial | `progression-spend-plan-parse` | `runtime`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `library/src/engine/prerequisite-evaluator.ts`, `app/src/server/progression/spend-plan-preparation.test.ts` |
+| AA and level-up spend-plan commit | Spend-plan class-level commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts`, `app/src/server/progression/spend-plan-preparation.test.ts` |
+| AA and level-up spend-plan commit | Spend-plan canonical-source commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts`, `app/src/server/progression/spend-plan-preparation.test.ts` |
+| AA and level-up spend-plan commit | Spend-plan spell-access commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts`, `app/src/server/progression/spend-plan-preparation.test.ts` |
 | Prerequisite evaluation | Prerequisite: level | Full |  | `runtime`, `tests` | `library/src/engine/prerequisite-evaluator.ts`, `library/tests/engine/character-computer.test.ts` |
 | Prerequisite evaluation | Prerequisite: spellcasting | Full |  | `runtime`, `tests` | `library/src/engine/prerequisite-evaluator.ts`, `library/tests/engine/character-computer.test.ts` |
 | Prerequisite evaluation | Prerequisite: proficiency | Full |  | `runtime`, `tests` | `library/src/engine/prerequisite-evaluator.ts`, `library/tests/engine/character-computer.test.ts` |
 | Prerequisite evaluation | Prerequisite: ability score | Full |  | `runtime`, `tests` | `library/src/engine/prerequisite-evaluator.ts`, `library/tests/engine/character-computer.test.ts` |
-| Prerequisite evaluation | Prerequisite: source or ability match | Partial |  | `runtime`, `tests`, `fixtures` | `library/src/engine/prerequisite-evaluator.ts`, `app/src/server/progression/service.ts` |
+| Prerequisite evaluation | Prerequisite: source or ability match | Partial |  | `runtime`, `tests`, `fixtures` | `library/src/engine/prerequisite-evaluator.ts`, `app/src/server/progression/service.ts`, `app/src/server/progression/prerequisite-evaluator.test.ts` |
 
 ## Rules and Conditions
 
 - Total: 8
-- Full: 0
-- Partial: 6
+- Full: 1
+- Partial: 5
 - None: 2
 
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
@@ -161,7 +161,7 @@ Status rule:
 | Condition: Charmed | Condition apply/remove mutation | Partial | `rules-condition-state-engine` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `library/src/engine/conditions.ts`, `library/tests/engine/conditions.test.ts` |
 | Condition: Charmed | Charmed mechanical effects | Partial | `rules-condition-state-engine` | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/conditions.ts`, `library/tests/engine/conditions.test.ts` |
 | Condition: Incapacitated | Incapacitated mechanical effects | Partial | `rules-condition-state-engine` | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/conditions.ts`, `library/tests/engine/conditions.test.ts` |
-| Rule: Concentration | Concentration rule canon linkage | Partial |  | `canon`, `tests` | `content/canon/packs/srd-5e-2024/rules/`, `content/canon/packs/srd-5e-2024/spells/` |
+| Rule: Concentration | Concentration rule canon linkage | Full |  | `canon`, `tests` | `content/canon/packs/srd-5e-2024/rules/`, `content/canon/packs/srd-5e-2024/spells/`, `library/tests/canon/catalog.test.ts` |
 | Rule: Study action | Study action availability | None |  | `runtime`, `tests`, `fixtures` | `content/canon/packs/srd-5e-2024/rules/`, `library/src/engine/character-computer.ts` |
 | Short-rest / long-rest recovery automation | Rest flow event recording | None | `action-short-rest-reset-engine`, `action-long-rest-reset-engine` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts` |
 | Condition: Incapacitated | DM condition override support | Partial | `rules-condition-apply-remove` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `library/src/engine/conditions.ts`, `library/tests/engine/conditions.test.ts` |
@@ -169,25 +169,25 @@ Status rule:
 ## Spellcasting
 
 - Total: 20
-- Full: 6
-- Partial: 7
+- Full: 11
+- Partial: 2
 - None: 7
 
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
 | --- | --- | --- | --- | --- | --- |
-| Spell catalog lookup | Spell lookup by canonical id | Partial |  | `canon`, `runtime`, `tests` | `library/src/catalog.ts`, `content/canon/packs/srd-5e-2024/spells/` |
-| Spell catalog lookup | Spell lookup by name alias | Partial |  | `canon`, `runtime`, `tests` | `library/src/catalog.ts`, `content/canon/packs/srd-5e-2024/spells/` |
-| Spell catalog lookup | Enabled-pack spell visibility | Partial |  | `canon`, `runtime`, `tests` | `library/src/catalog.ts`, `content/canon/packs/srd-5e-2024/spells/` |
+| Spell catalog lookup | Spell lookup by canonical id | Full |  | `canon`, `runtime`, `tests` | `library/src/catalog.ts`, `content/canon/packs/srd-5e-2024/spells/`, `library/tests/canon/catalog.test.ts` |
+| Spell catalog lookup | Spell lookup by name alias | Full |  | `canon`, `runtime`, `tests` | `library/src/catalog.ts`, `content/canon/packs/srd-5e-2024/spells/`, `library/tests/canon/catalog.test.ts` |
+| Spell catalog lookup | Enabled-pack spell visibility | Full |  | `canon`, `runtime`, `tests` | `library/src/catalog.ts`, `content/canon/packs/srd-5e-2024/spells/`, `library/tests/canon/catalog.test.ts` |
 | Spell access and known spell lists | Spell access grants | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `data/real-campaign-intake/verified-characters.json` |
 | Spell access and known spell lists | Spell access dedupe | Full |  | `runtime`, `tests` | `library/src/engine/spellcasting.ts`, `library/tests/engine/character-computer.test.ts` |
 | Spell access and known spell lists | Spell origin choice capture | Partial |  | `persistence`, `runtime`, `tests`, `live-roster` | `app/src/server/progression/service.ts`, `data/real-campaign-intake/verified-characters.json` |
-| Spell catalog lookup | Roster spell canon coverage | Partial |  | `canon`, `tests`, `fixtures`, `live-roster` | `content/canon/packs/srd-5e-2024/spells/`, `data/real-campaign-intake/verified-characters.json` |
+| Spell catalog lookup | Roster spell canon coverage | Partial |  | `canon`, `tests`, `fixtures`, `live-roster` | `content/canon/packs/srd-5e-2024/spells/`, `data/real-campaign-intake/verified-characters.json`, `library/tests/canon/catalog.test.ts`, `library/tests/canon/srd-roster-batch.test.ts` |
 | Spell slot pools | Spell slot pools from class features | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Pact Magic | Pact Magic progression | Full |  | `runtime`, `tests`, `live-roster` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
 | Spell attack bonus and spell save DC | Spell save DC math | Full |  | `runtime`, `tests`, `explainability` | `library/src/engine/spellcasting.ts`, `library/tests/engine/character-computer.test.ts` |
 | Spell attack bonus and spell save DC | Spell attack bonus math | Full |  | `runtime`, `tests`, `explainability` | `library/src/engine/spellcasting.ts`, `library/tests/engine/character-computer.test.ts` |
-| Prepared / known spell capacity limits | Prepared spell capacity grants | Partial |  | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts`, `app/src/server/progression/live-roster.integration.test.ts` |
-| Prepared / known spell capacity limits | Known spell capacity grants | Partial |  | `runtime`, `tests`, `fixtures` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts` |
+| Prepared / known spell capacity limits | Prepared spell capacity grants | Full |  | `runtime`, `tests`, `fixtures`, `live-roster` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts`, `app/src/server/progression/live-roster.integration.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
+| Prepared / known spell capacity limits | Known spell capacity grants | Full |  | `runtime`, `tests`, `fixtures` | `library/src/engine/spellcasting.ts`, `library/tests/engine/spellcasting.test.ts`, `library/tests/verification/fixture-roster-snapshot.test.ts` |
 | Prepared / known spell capacity limits | Prepared and known spell capacity enforcement | None | `spell-prepared-capacity-grants`, `spell-known-capacity-grants` | `runtime`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/progression/service.ts`, `library/src/engine/spellcasting.ts` |
 | Spell cast resolution | Spell slot spend mutation | None | `action-resource-spend-mutation` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/progression/service.ts`, `library/src/engine/spellcasting.ts` |
 | Spell cast resolution | Free-cast and no-slot cast tracking | None | `spell-slot-spend-mutation` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `content/canon/packs/srd-5e-2024/feats/` |

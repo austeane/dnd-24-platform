@@ -3,49 +3,69 @@ import type { CharacterBaseSnapshot } from "@dnd/library";
 import type { CharacterSourceRecord, XpTransactionRecord } from "./types.ts";
 
 /**
- * Mock the DB layer so that prepareSpendPlan can run without a real database.
+ * Mock the DB and projection layers so that prepareSpendPlan can run without
+ * a real database.
  *
- * Three data sources are intercepted:
- *   1. getCampaignEnabledPackIds (db query in spend-plan-preparation.ts)
- *   2. listCharacterSources (re-exported from character-sources.ts)
- *   3. listCharacterXpTransactions (from xp-transactions.ts)
+ * Two intercepts:
+ *   1. loadCharacterProjectionRows (from projection.ts) — returns canned rows
+ *   2. db (from ../db/index.ts) — provides a chainable mock for
+ *      getCampaignEnabledPackIds which is a private function in
+ *      spend-plan-preparation.ts that queries campaigns directly
  */
 
-vi.mock("./character-sources.ts", async () => {
-  const actual = await vi.importActual("./character-sources.ts") as Record<string, unknown>;
+vi.mock("./projection.ts", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("./projection.ts")>();
   return {
     ...actual,
-    listCharacterSources: vi.fn(),
+    loadCharacterProjectionRows: vi.fn(),
   };
 });
 
-vi.mock("./xp-transactions.ts", () => ({
-  listCharacterXpTransactions: vi.fn(),
-}));
-
 vi.mock("../db/index.ts", () => {
-  const db = {
-    select: () => ({
-      from: () => ({
-        where: () => ({
-          limit: () => [{ enabledPackIds: ["srd-5e-2024", "advanced-adventurers"] }],
-        }),
-      }),
-    }),
-  };
+  // Fully chainable mock that handles select().from().where().limit() etc.
+  function chainable(terminal?: unknown): Record<string, unknown> {
+    const proxy: Record<string, unknown> = {};
+    for (const method of ["select", "from", "where", "orderBy", "limit", "offset"]) {
+      proxy[method] = (...args: unknown[]) => {
+        if (method === "limit" && terminal !== undefined) return terminal;
+        return proxy;
+      };
+    }
+    // Make it thenable so Promise.all works when the chain is awaited directly
+    proxy.then = (resolve: (v: unknown) => void) => resolve(terminal ?? []);
+    return proxy;
+  }
+  const db = chainable([{ enabledPackIds: ["srd-5e-2024", "advanced-adventurers"] }]);
   return { db };
 });
 
-import { listCharacterSources } from "./character-sources.ts";
-import { listCharacterXpTransactions } from "./xp-transactions.ts";
+import { loadCharacterProjectionRows } from "./projection.ts";
 import { prepareSpendPlan } from "./spend-plan-preparation.ts";
+import type { CharacterProjectionRows } from "./projection.ts";
 
-const mockListSources = vi.mocked(listCharacterSources);
-const mockListXp = vi.mocked(listCharacterXpTransactions);
+const mockLoadRows = vi.mocked(loadCharacterProjectionRows);
 
 // --- fixtures ---
 
 const now = new Date("2026-03-10T00:00:00.000Z");
+
+function makeProjectionRows(
+  sourceRecords: CharacterSourceRecord[],
+  xpRecords: XpTransactionRecord[] = [],
+): CharacterProjectionRows {
+  return {
+    sourceRecords,
+    xpRecords,
+    activeConditionRecords: [],
+    resourcePoolRecords: [],
+    skillChoiceRecords: [],
+    featChoiceRecords: [],
+    equipmentRecords: [],
+    weaponMasteryRecords: [],
+    metamagicChoiceRecords: [],
+    activePactBladeBond: null,
+  };
+}
 
 const baseSnapshot: CharacterBaseSnapshot = {
   name: "TestChar",
@@ -119,8 +139,7 @@ describe("prepareSpendPlan", () => {
 
   describe("spend-plan preview (progression-spend-plan-preview)", () => {
     it("returns a valid preview for a class-level operation", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "preview:char-1",
@@ -151,8 +170,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("correctly prices multi-operation plans", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(30)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(30)]));
 
       const result = await prepareSpendPlan(
         "preview:char-1",
@@ -188,8 +206,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("rejects preview when character has no base snapshot", async () => {
-      mockListSources.mockResolvedValue([]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([]));
 
       await expect(
         prepareSpendPlan("preview:char-1", "campaign-1", "char-1", null, "preview", {
@@ -208,8 +225,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("rejects operations when XP is insufficient", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(3)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(3)]));
 
       await expect(
         prepareSpendPlan("preview:char-1", "campaign-1", "char-1", null, "preview", {
@@ -228,8 +244,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("allows zero-cost operations with no banked XP", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()]));
 
       const result = await prepareSpendPlan(
         "preview:char-1",
@@ -257,8 +272,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("tracks XP budget across sequential operations in a single plan", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(10)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(10)]));
 
       await expect(
         prepareSpendPlan("preview:char-1", "campaign-1", "char-1", null, "preview", {
@@ -286,8 +300,7 @@ describe("prepareSpendPlan", () => {
 
   describe("class-level commit (progression-class-level-commit)", () => {
     it("produces correct source insert for class-level operation", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -320,8 +333,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("produces correct XP transaction insert for non-zero cost", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -354,8 +366,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("omits XP transaction for zero-cost class-level operation", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -381,11 +392,10 @@ describe("prepareSpendPlan", () => {
     });
 
     it("assigns incrementing ranks for same-class level-ups", async () => {
-      mockListSources.mockResolvedValue([
+      mockLoadRows.mockResolvedValue(makeProjectionRows([
         makeOverrideSource(),
         makeClassLevelSource("class:warlock", "srd-5e-2024", 1),
-      ]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      ], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -411,8 +421,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("assigns incrementing ranks for multiple class-level ops in same plan", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -446,8 +455,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("rejects unknown class entity", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       await expect(
         prepareSpendPlan("plan-1", "campaign-1", "char-1", null, "DM", {
@@ -466,8 +474,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("uses custom label when provided", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -496,8 +503,7 @@ describe("prepareSpendPlan", () => {
 
   describe("canonical-source commit (progression-canonical-source-commit)", () => {
     it("produces correct source insert for a feat", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -530,8 +536,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("produces correct source insert for a species", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -575,8 +580,7 @@ describe("prepareSpendPlan", () => {
         updatedAt: now,
       };
 
-      mockListSources.mockResolvedValue([makeOverrideSource(), existingFeatSource]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource(), existingFeatSource], [makeXpAward(20)]));
 
       await expect(
         prepareSpendPlan("plan-1", "campaign-1", "char-1", null, "DM", {
@@ -595,8 +599,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("rejects unknown canonical entity", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       await expect(
         prepareSpendPlan("plan-1", "campaign-1", "char-1", null, "DM", {
@@ -615,8 +618,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("rejects sourceKind-type mismatch", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       await expect(
         prepareSpendPlan("plan-1", "campaign-1", "char-1", null, "DM", {
@@ -635,8 +637,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("uses aa-purchase XP category for aa-purchase sourceKind", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(20)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(20)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -664,8 +665,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("respects custom rank when provided", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -694,8 +694,7 @@ describe("prepareSpendPlan", () => {
 
   describe("spell-access commit (progression-spell-access-commit)", () => {
     it("produces correct source insert for spell-access by name", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(10)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(10)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -729,8 +728,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("rejects unknown spell name", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(10)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(10)]));
 
       await expect(
         prepareSpendPlan("plan-1", "campaign-1", "char-1", null, "DM", {
@@ -749,8 +747,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("tracks alwaysPrepared flag in spell access payload", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -779,8 +776,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("uses aa-purchase XP category for aa-purchase spell access", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(10)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(10)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -806,8 +802,7 @@ describe("prepareSpendPlan", () => {
     });
 
     it("omits XP transaction for zero-cost spell access", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()]));
 
       const result = await prepareSpendPlan(
         "plan-1",
@@ -835,8 +830,7 @@ describe("prepareSpendPlan", () => {
 
   describe("mixed operation plans", () => {
     it("handles plan with class-level + feat + spell-access in sequence", async () => {
-      mockListSources.mockResolvedValue([makeOverrideSource()]);
-      mockListXp.mockResolvedValue([makeXpAward(30)]);
+      mockLoadRows.mockResolvedValue(makeProjectionRows([makeOverrideSource()], [makeXpAward(30)]));
 
       const result = await prepareSpendPlan(
         "plan-1",
