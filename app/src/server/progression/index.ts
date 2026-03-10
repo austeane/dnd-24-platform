@@ -1,4 +1,9 @@
 export type {
+  CharacterEquipmentRecord,
+  CharacterFeatChoiceRecord,
+  CharacterMetamagicChoiceRecord,
+  CharacterPactBladeBondRecord,
+  CharacterSkillChoiceRecord,
   CharacterSpendPlanDocument,
   CharacterSpendPlanOperation,
   CharacterSpendPlanPreview,
@@ -6,6 +11,7 @@ export type {
   CharacterRuntimeState,
   CharacterSpendPlanRecord,
   CharacterSpendPlanSummary,
+  CharacterWeaponMasteryRecord,
   CharacterXpLedgerSummary,
   CommitCharacterSpendPlanInput,
   CreateCharacterSpendPlanInput,
@@ -14,6 +20,13 @@ export type {
   NewCharacterSpendPlanRecord,
   NewXpTransactionRecord,
   RecordCharacterSourceInput,
+  RecordEquipmentInput,
+  RecordFeatChoiceInput,
+  RecordMetamagicChoiceInput,
+  RecordPactBladeBondInput,
+  RecordSkillChoiceInput,
+  RecordWeaponMasteryInput,
+  UpdateEquipmentInput,
   XpTransactionRecord,
 } from "./types.ts";
 export {
@@ -32,3 +45,21 @@ export {
   listCharacterSpendPlans,
   commitCharacterSpendPlan,
 } from "./spend-plan-lifecycle.ts";
+export {
+  recordSkillChoice,
+  listCharacterSkillChoices,
+  deleteSkillChoice,
+  recordFeatChoice,
+  listCharacterFeatChoices,
+  recordEquipment,
+  updateEquipment,
+  listCharacterEquipment,
+  deleteEquipment,
+  recordWeaponMastery,
+  listCharacterWeaponMasteries,
+  recordMetamagicChoice,
+  listCharacterMetamagicChoices,
+  recordPactBladeBond,
+  getActivePactBladeBond,
+  unbondPactBlade,
+} from "./choice-state.ts";

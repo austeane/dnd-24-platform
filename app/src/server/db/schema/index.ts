@@ -14,6 +14,11 @@ export {
   sessions,
 } from "./campaigns.ts";
 export {
+  characterEquipment,
+  characterFeatChoices,
+  characterMetamagicChoices,
+  characterPactBladeBonds,
+  characterSkillChoices,
   characterSourceKindEnum,
   characterSourceKinds,
   characterSources,
@@ -22,6 +27,11 @@ export {
   characterSpendPlanStateEnum,
   characterSpendPlanStates,
   characterSpendPlans,
+  characterWeaponMasteries,
+  equipmentSlotEnum,
+  equipmentSlots,
+  skillChoiceSourceEnum,
+  skillChoiceSources,
   xpTransactionCategories,
   xpTransactionCategoryEnum,
   xpTransactions,
@@ -56,5 +66,7 @@ export type {
   CharacterSourceKind,
   CharacterSpendPlanKind,
   CharacterSpendPlanState,
+  EquipmentSlot,
+  SkillChoiceSource,
   XpTransactionCategory,
 } from "./progression.ts";

@@ -61,6 +61,30 @@ export const relations = defineRelations(schema, (r) => ({
       from: r.characters.id,
       to: r.xpTransactions.characterId,
     }),
+    skillChoices: r.many.characterSkillChoices({
+      from: r.characters.id,
+      to: r.characterSkillChoices.characterId,
+    }),
+    featChoices: r.many.characterFeatChoices({
+      from: r.characters.id,
+      to: r.characterFeatChoices.characterId,
+    }),
+    equipment: r.many.characterEquipment({
+      from: r.characters.id,
+      to: r.characterEquipment.characterId,
+    }),
+    weaponMasteries: r.many.characterWeaponMasteries({
+      from: r.characters.id,
+      to: r.characterWeaponMasteries.characterId,
+    }),
+    metamagicChoices: r.many.characterMetamagicChoices({
+      from: r.characters.id,
+      to: r.characterMetamagicChoices.characterId,
+    }),
+    pactBladeBonds: r.many.characterPactBladeBonds({
+      from: r.characters.id,
+      to: r.characterPactBladeBonds.characterId,
+    }),
   },
   characterSources: {
     character: r.one.characters({
@@ -184,6 +208,42 @@ export const relations = defineRelations(schema, (r) => ({
     session: r.one.sessions({
       from: r.xpTransactions.sessionId,
       to: r.sessions.id,
+    }),
+  },
+  characterSkillChoices: {
+    character: r.one.characters({
+      from: r.characterSkillChoices.characterId,
+      to: r.characters.id,
+    }),
+  },
+  characterFeatChoices: {
+    character: r.one.characters({
+      from: r.characterFeatChoices.characterId,
+      to: r.characters.id,
+    }),
+  },
+  characterEquipment: {
+    character: r.one.characters({
+      from: r.characterEquipment.characterId,
+      to: r.characters.id,
+    }),
+  },
+  characterWeaponMasteries: {
+    character: r.one.characters({
+      from: r.characterWeaponMasteries.characterId,
+      to: r.characters.id,
+    }),
+  },
+  characterMetamagicChoices: {
+    character: r.one.characters({
+      from: r.characterMetamagicChoices.characterId,
+      to: r.characters.id,
+    }),
+  },
+  characterPactBladeBonds: {
+    character: r.one.characters({
+      from: r.characterPactBladeBonds.characterId,
+      to: r.characters.id,
     }),
   },
 }));

@@ -19,10 +19,18 @@ import {
 } from "../campaigns/index.ts";
 import { client, db } from "./index.ts";
 import {
+  characterEquipment,
+  characterFeatChoices,
+  characterMetamagicChoices,
+  characterPactBladeBonds,
+  characterSkillChoices,
   characterSourceKinds,
   characterSources,
+  characterWeaponMasteries,
+  equipmentSlots,
   levelingMethods,
   progressionModes,
+  skillChoiceSources,
   xpTransactionCategories,
   xpTransactions,
 } from "./schema/index.ts";
@@ -70,6 +78,50 @@ const xpEntrySchema = z.object({
   sessionId: z.string().min(1).nullable().optional(),
 });
 
+const skillChoiceSchema = z.object({
+  skillName: z.string().min(1),
+  source: z.enum(skillChoiceSources),
+  sourceLabel: z.string().min(1),
+  hasExpertise: z.boolean().optional(),
+});
+
+const featChoiceSchema = z.object({
+  featEntityId: z.string().min(1),
+  featPackId: z.string().min(1).nullable().optional(),
+  featLabel: z.string().min(1),
+  subChoicesJson: z.record(z.string(), z.unknown()).nullable().optional(),
+  sourceLabel: z.string().min(1),
+});
+
+const equipmentEntrySchema = z.object({
+  itemEntityId: z.string().min(1),
+  itemPackId: z.string().min(1).nullable().optional(),
+  itemLabel: z.string().min(1),
+  quantity: z.number().int().positive().default(1),
+  equipped: z.boolean().default(false),
+  slot: z.enum(equipmentSlots).nullable().optional(),
+  stateJson: z.record(z.string(), z.unknown()).nullable().optional(),
+});
+
+const weaponMasterySchema = z.object({
+  weaponEntityId: z.string().min(1),
+  weaponPackId: z.string().min(1).nullable().optional(),
+  weaponLabel: z.string().min(1),
+  masteryProperty: z.string().min(1),
+});
+
+const metamagicChoiceSchema = z.object({
+  metamagicOption: z.string().min(1),
+  sourceLabel: z.string().min(1),
+});
+
+const pactBladeBondSchema = z.object({
+  weaponEntityId: z.string().min(1).nullable().optional(),
+  weaponPackId: z.string().min(1).nullable().optional(),
+  weaponLabel: z.string().min(1),
+  isMagicWeapon: z.boolean().default(false),
+});
+
 const verifiedCharacterSchema = z.object({
   reviewStatus: z.enum(reviewStatuses),
   sourceFiles: z.array(z.string().min(1)).min(1),
@@ -103,6 +155,12 @@ const verifiedCharacterSchema = z.object({
   sourceLedger: z.object({
     features: z.array(featureSchema).default([]),
   }).default({ features: [] }),
+  skillChoices: z.array(skillChoiceSchema).default([]),
+  featChoices: z.array(featChoiceSchema).default([]),
+  equipment: z.array(equipmentEntrySchema).default([]),
+  weaponMasteries: z.array(weaponMasterySchema).default([]),
+  metamagicChoices: z.array(metamagicChoiceSchema).default([]),
+  pactBladeBond: pactBladeBondSchema.nullable().optional(),
   xpLedger: z.array(xpEntrySchema).default([]),
   notes: z.array(z.string()).default([]),
 });
@@ -453,6 +511,154 @@ function buildSeedFeatureSet(character: VerifiedCharacterSeed): SeedFeature[] {
   return [...merged.values()];
 }
 
+async function seedChoiceState(
+  characterId: string,
+  characterSlug: string,
+  character: VerifiedCharacterSeed,
+): Promise<void> {
+  // --- Skill choices: delete-and-replace ---
+  await db
+    .delete(characterSkillChoices)
+    .where(eq(characterSkillChoices.characterId, characterId));
+  for (const skill of character.skillChoices) {
+    const skillId = createSeedId(characterSlug, `skill:${skill.skillName.toLowerCase().replace(/\s+/g, "-")}`);
+    await db
+      .insert(characterSkillChoices)
+      .values({
+        id: skillId,
+        characterId,
+        skillName: skill.skillName,
+        source: skill.source,
+        sourceLabel: skill.sourceLabel,
+        hasExpertise: skill.hasExpertise ?? false,
+      })
+      .onConflictDoUpdate({
+        target: [characterSkillChoices.characterId, characterSkillChoices.skillName],
+        set: {
+          source: skill.source,
+          sourceLabel: skill.sourceLabel,
+          hasExpertise: skill.hasExpertise ?? false,
+        },
+      });
+  }
+
+  // --- Feat choices: delete-and-replace ---
+  await db
+    .delete(characterFeatChoices)
+    .where(eq(characterFeatChoices.characterId, characterId));
+  for (const feat of character.featChoices) {
+    const featId = createSeedId(characterSlug, `feat:${feat.featEntityId}`);
+    await db
+      .insert(characterFeatChoices)
+      .values({
+        id: featId,
+        characterId,
+        featEntityId: feat.featEntityId,
+        featPackId: feat.featPackId ?? null,
+        featLabel: feat.featLabel,
+        subChoicesJson: feat.subChoicesJson ?? null,
+        sourceLabel: feat.sourceLabel,
+      })
+      .onConflictDoUpdate({
+        target: [characterFeatChoices.characterId, characterFeatChoices.featEntityId],
+        set: {
+          featPackId: feat.featPackId ?? null,
+          featLabel: feat.featLabel,
+          subChoicesJson: feat.subChoicesJson ?? null,
+          sourceLabel: feat.sourceLabel,
+        },
+      });
+  }
+
+  // --- Equipment: delete-and-replace ---
+  await db
+    .delete(characterEquipment)
+    .where(eq(characterEquipment.characterId, characterId));
+  for (let i = 0; i < character.equipment.length; i++) {
+    const item = character.equipment[i];
+    const itemId = createSeedId(characterSlug, `equip:${i}:${item.itemEntityId}`);
+    await db
+      .insert(characterEquipment)
+      .values({
+        id: itemId,
+        characterId,
+        itemEntityId: item.itemEntityId,
+        itemPackId: item.itemPackId ?? null,
+        itemLabel: item.itemLabel,
+        quantity: item.quantity,
+        equipped: item.equipped,
+        slot: item.slot ?? null,
+        stateJson: item.stateJson ?? null,
+      });
+  }
+
+  // --- Weapon masteries: delete-and-replace ---
+  await db
+    .delete(characterWeaponMasteries)
+    .where(eq(characterWeaponMasteries.characterId, characterId));
+  for (const mastery of character.weaponMasteries) {
+    const masteryId = createSeedId(characterSlug, `mastery:${mastery.weaponEntityId}`);
+    await db
+      .insert(characterWeaponMasteries)
+      .values({
+        id: masteryId,
+        characterId,
+        weaponEntityId: mastery.weaponEntityId,
+        weaponPackId: mastery.weaponPackId ?? null,
+        weaponLabel: mastery.weaponLabel,
+        masteryProperty: mastery.masteryProperty,
+      })
+      .onConflictDoUpdate({
+        target: [characterWeaponMasteries.characterId, characterWeaponMasteries.weaponEntityId],
+        set: {
+          weaponPackId: mastery.weaponPackId ?? null,
+          weaponLabel: mastery.weaponLabel,
+          masteryProperty: mastery.masteryProperty,
+        },
+      });
+  }
+
+  // --- Metamagic choices: delete-and-replace ---
+  await db
+    .delete(characterMetamagicChoices)
+    .where(eq(characterMetamagicChoices.characterId, characterId));
+  for (const meta of character.metamagicChoices) {
+    const metaId = createSeedId(characterSlug, `metamagic:${meta.metamagicOption.toLowerCase().replace(/\s+/g, "-")}`);
+    await db
+      .insert(characterMetamagicChoices)
+      .values({
+        id: metaId,
+        characterId,
+        metamagicOption: meta.metamagicOption,
+        sourceLabel: meta.sourceLabel,
+      })
+      .onConflictDoUpdate({
+        target: [characterMetamagicChoices.characterId, characterMetamagicChoices.metamagicOption],
+        set: {
+          sourceLabel: meta.sourceLabel,
+        },
+      });
+  }
+
+  // --- Pact blade bond: delete-and-replace ---
+  await db
+    .delete(characterPactBladeBonds)
+    .where(eq(characterPactBladeBonds.characterId, characterId));
+  if (character.pactBladeBond) {
+    const bondId = createSeedId(characterSlug, "pact-blade-bond");
+    await db
+      .insert(characterPactBladeBonds)
+      .values({
+        id: bondId,
+        characterId,
+        weaponEntityId: character.pactBladeBond.weaponEntityId ?? null,
+        weaponPackId: character.pactBladeBond.weaponPackId ?? null,
+        weaponLabel: character.pactBladeBond.weaponLabel,
+        isMagicWeapon: character.pactBladeBond.isMagicWeapon,
+      });
+  }
+}
+
 async function seedCharacter(
   campaignId: string,
   campaignName: string,
@@ -586,6 +792,8 @@ async function seedCharacter(
   }
 
   await cleanupStaleSeedRows(record.id, character.identity.slug, desiredSourceIds, desiredXpIds);
+
+  await seedChoiceState(record.id, character.identity.slug, character);
 
   const runtimeState = await getCharacterRuntimeState(record.id);
   if (!runtimeState) {

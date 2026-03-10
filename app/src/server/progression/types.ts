@@ -4,11 +4,19 @@ import type {
   CharacterSourceKind,
   CharacterSpendPlanKind,
   CharacterSpendPlanState,
+  EquipmentSlot,
+  SkillChoiceSource,
   XpTransactionCategory,
 } from "../db/schema/index.ts";
 import {
+  characterEquipment,
+  characterFeatChoices,
+  characterMetamagicChoices,
+  characterPactBladeBonds,
+  characterSkillChoices,
   characterSources,
   characterSpendPlans,
+  characterWeaponMasteries,
   xpTransactions,
 } from "../db/schema/index.ts";
 
@@ -140,4 +148,80 @@ export interface CharacterSpendPlanPreview {
   bankedXpBefore: number;
   bankedXpAfter: number;
   normalizedOperationCount: number;
+}
+
+// --- Choice-State Record Types ---
+
+export type CharacterSkillChoiceRecord = InferSelectModel<typeof characterSkillChoices>;
+export type CharacterFeatChoiceRecord = InferSelectModel<typeof characterFeatChoices>;
+export type CharacterEquipmentRecord = InferSelectModel<typeof characterEquipment>;
+export type CharacterWeaponMasteryRecord = InferSelectModel<typeof characterWeaponMasteries>;
+export type CharacterMetamagicChoiceRecord = InferSelectModel<typeof characterMetamagicChoices>;
+export type CharacterPactBladeBondRecord = InferSelectModel<typeof characterPactBladeBonds>;
+
+// --- Choice-State Input Types ---
+
+export interface RecordSkillChoiceInput {
+  id?: string;
+  characterId: string;
+  skillName: string;
+  source: SkillChoiceSource;
+  sourceLabel: string;
+  hasExpertise?: boolean;
+}
+
+export interface RecordFeatChoiceInput {
+  id?: string;
+  characterId: string;
+  featEntityId: string;
+  featPackId?: string | null;
+  featLabel: string;
+  subChoicesJson?: Record<string, unknown> | null;
+  sourceLabel: string;
+}
+
+export interface RecordEquipmentInput {
+  id?: string;
+  characterId: string;
+  itemEntityId: string;
+  itemPackId?: string | null;
+  itemLabel: string;
+  quantity?: number;
+  equipped?: boolean;
+  slot?: EquipmentSlot | null;
+  stateJson?: Record<string, unknown> | null;
+}
+
+export interface UpdateEquipmentInput {
+  id: string;
+  equipped?: boolean;
+  slot?: EquipmentSlot | null;
+  quantity?: number;
+  stateJson?: Record<string, unknown> | null;
+}
+
+export interface RecordWeaponMasteryInput {
+  id?: string;
+  characterId: string;
+  weaponEntityId: string;
+  weaponPackId?: string | null;
+  weaponLabel: string;
+  masteryProperty: string;
+}
+
+export interface RecordMetamagicChoiceInput {
+  id?: string;
+  characterId: string;
+  metamagicOption: string;
+  sourceLabel: string;
+}
+
+export interface RecordPactBladeBondInput {
+  id?: string;
+  characterId: string;
+  weaponEntityId?: string | null;
+  weaponPackId?: string | null;
+  weaponLabel: string;
+  isMagicWeapon?: boolean;
+  bondedAt?: Date;
 }

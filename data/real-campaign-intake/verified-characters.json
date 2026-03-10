@@ -85,6 +85,60 @@
           }
         ]
       },
+      "skillChoices": [
+        { "skillName": "Athletics", "source": "class", "sourceLabel": "Fighter" },
+        { "skillName": "Intimidation", "source": "class", "sourceLabel": "Fighter" }
+      ],
+      "featChoices": [
+        {
+          "featEntityId": "feat:savage-attacker",
+          "featPackId": "srd-5e-2024",
+          "featLabel": "Savage Attacker",
+          "sourceLabel": "Background feat"
+        }
+      ],
+      "equipment": [
+        {
+          "itemEntityId": "equipment:longsword",
+          "itemLabel": "Longsword",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "main-hand"
+        },
+        {
+          "itemEntityId": "equipment:shield",
+          "itemLabel": "Shield",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "off-hand"
+        },
+        {
+          "itemEntityId": "equipment:leather-armor",
+          "itemLabel": "Leather Armor",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "armor"
+        },
+        {
+          "itemEntityId": "equipment:javelin",
+          "itemLabel": "Javelin",
+          "quantity": 4,
+          "equipped": false,
+          "slot": "carried"
+        }
+      ],
+      "weaponMasteries": [
+        {
+          "weaponEntityId": "equipment:longsword",
+          "weaponLabel": "Longsword",
+          "masteryProperty": "Sap"
+        },
+        {
+          "weaponEntityId": "equipment:javelin",
+          "weaponLabel": "Javelin",
+          "masteryProperty": "Slow"
+        }
+      ],
       "xpLedger": [],
       "notes": [
         "Species appears to be Goliath.",
@@ -205,6 +259,34 @@
           }
         ]
       },
+      "skillChoices": [
+        { "skillName": "Nature", "source": "class", "sourceLabel": "Druid" },
+        { "skillName": "Perception", "source": "class", "sourceLabel": "Druid" }
+      ],
+      "featChoices": [],
+      "equipment": [
+        {
+          "itemEntityId": "equipment:quarterstaff",
+          "itemLabel": "Quarterstaff",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "main-hand"
+        },
+        {
+          "itemEntityId": "equipment:leather-armor",
+          "itemLabel": "Leather Armor",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "armor"
+        },
+        {
+          "itemEntityId": "equipment:shield",
+          "itemLabel": "Shield",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "off-hand"
+        }
+      ],
       "xpLedger": [],
       "notes": [
         "The back-page spell list includes a mix of druid and species-origin magic; it is stored as known spell access for now.",
@@ -300,6 +382,37 @@
           }
         ]
       },
+      "skillChoices": [
+        { "skillName": "Arcana", "source": "class", "sourceLabel": "Warlock" },
+        { "skillName": "Deception", "source": "class", "sourceLabel": "Warlock" },
+        { "skillName": "Perception", "source": "feat", "sourceLabel": "Skilled" },
+        { "skillName": "Persuasion", "source": "feat", "sourceLabel": "Skilled" },
+        { "skillName": "Stealth", "source": "feat", "sourceLabel": "Skilled" }
+      ],
+      "featChoices": [
+        {
+          "featEntityId": "feat:skilled",
+          "featPackId": "srd-5e-2024",
+          "featLabel": "Skilled",
+          "subChoicesJson": {
+            "skillProficiencies": ["Perception", "Persuasion", "Stealth"]
+          },
+          "sourceLabel": "Background feat"
+        }
+      ],
+      "equipment": [
+        {
+          "itemEntityId": "equipment:leather-armor",
+          "itemLabel": "Leather Armor",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "armor"
+        }
+      ],
+      "pactBladeBond": {
+        "weaponLabel": "Pact Weapon (conjured)",
+        "isMagicWeapon": false
+      },
       "xpLedger": [],
       "notes": [
         "Species is written as Half-Elf Drow.",
@@ -381,6 +494,42 @@
           }
         ]
       },
+      "skillChoices": [
+        { "skillName": "Acrobatics", "source": "class", "sourceLabel": "Bard" },
+        { "skillName": "Performance", "source": "class", "sourceLabel": "Bard" },
+        { "skillName": "Persuasion", "source": "class", "sourceLabel": "Bard" }
+      ],
+      "featChoices": [
+        {
+          "featEntityId": "feat:musician",
+          "featPackId": "srd-5e-2024",
+          "featLabel": "Musician",
+          "sourceLabel": "Background feat"
+        }
+      ],
+      "equipment": [
+        {
+          "itemEntityId": "equipment:rapier",
+          "itemLabel": "Rapier",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "main-hand"
+        },
+        {
+          "itemEntityId": "equipment:leather-armor",
+          "itemLabel": "Leather Armor",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "armor"
+        },
+        {
+          "itemEntityId": "equipment:lute",
+          "itemLabel": "Lute",
+          "quantity": 1,
+          "equipped": false,
+          "slot": "carried"
+        }
+      ],
       "xpLedger": [],
       "notes": [
         "Species is written as Wood Elf.",
@@ -446,6 +595,27 @@
           }
         ]
       },
+      "skillChoices": [
+        { "skillName": "Arcana", "source": "class", "sourceLabel": "Sorcerer" },
+        { "skillName": "Insight", "source": "class", "sourceLabel": "Sorcerer" }
+      ],
+      "featChoices": [
+        {
+          "featEntityId": "feat:magic-initiate",
+          "featPackId": "srd-5e-2024",
+          "featLabel": "Magic Initiate (Wizard)",
+          "subChoicesJson": {
+            "spellList": "wizard",
+            "notes": "The exact chosen wizard cantrips and level-1 spell are not legible from the available sheet photo."
+          },
+          "sourceLabel": "Background feat"
+        }
+      ],
+      "metamagicChoices": [
+        { "metamagicOption": "Subtle Spell", "sourceLabel": "Sorcerer 2" },
+        { "metamagicOption": "Twinned Spell", "sourceLabel": "Sorcerer 2" }
+      ],
+      "equipment": [],
       "xpLedger": [],
       "notes": [
         "Species text is faint and remains unresolved.",
