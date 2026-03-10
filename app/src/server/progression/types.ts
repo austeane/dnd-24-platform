@@ -1,10 +1,12 @@
-import type { CharacterState, PackId } from "@dnd/library";
+import type { CharacterState, PackId, ResourcePoolDefinition } from "@dnd/library";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type {
   CharacterSourceKind,
   CharacterSpendPlanKind,
   CharacterSpendPlanState,
   EquipmentSlot,
+  ResourceEventChange,
+  ResourceEventKind,
   SkillChoiceSource,
   XpTransactionCategory,
 } from "../db/schema/index.ts";
@@ -13,10 +15,12 @@ import {
   characterFeatChoices,
   characterMetamagicChoices,
   characterPactBladeBonds,
+  characterResourcePools,
   characterSkillChoices,
   characterSources,
   characterSpendPlans,
   characterWeaponMasteries,
+  resourceEvents,
   xpTransactions,
 } from "../db/schema/index.ts";
 
@@ -224,4 +228,51 @@ export interface RecordPactBladeBondInput {
   weaponLabel: string;
   isMagicWeapon?: boolean;
   bondedAt?: Date;
+}
+
+// --- Resource Pool Record Types ---
+
+export type CharacterResourcePoolRecord = InferSelectModel<typeof characterResourcePools>;
+export type ResourceEventRecord = InferSelectModel<typeof resourceEvents>;
+
+// --- Resource Pool Input Types ---
+
+export interface InitializeResourcePoolsInput {
+  characterId: string;
+  pools: ResourcePoolDefinition[];
+}
+
+export interface SpendResourceInput {
+  characterId: string;
+  resourceName: string;
+  amount?: number;
+  sessionId?: string | null;
+  note?: string;
+  createdByLabel: string;
+}
+
+export interface RestoreResourceInput {
+  characterId: string;
+  resourceName: string;
+  amount?: number;
+  sessionId?: string | null;
+  note?: string;
+  createdByLabel: string;
+}
+
+export interface RestInput {
+  characterId: string;
+  sessionId?: string | null;
+  note?: string;
+  createdByLabel: string;
+}
+
+export interface RecordResourceEventInput {
+  id?: string;
+  characterId: string;
+  sessionId?: string | null;
+  eventKind: ResourceEventKind;
+  changes: ResourceEventChange[];
+  note?: string;
+  createdByLabel: string;
 }

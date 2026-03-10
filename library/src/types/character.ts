@@ -80,6 +80,18 @@ export interface EvaluatedResource extends GrantedResource {
   sourceName: string;
 }
 
+/**
+ * A computed resource pool definition: the "truth" of what a resource
+ * pool looks like for a character, derived from their sources.
+ * Used to initialize or sync persistent resource pool state.
+ */
+export interface ResourcePoolDefinition {
+  resourceName: string;
+  maxUses: number;
+  resetOn: "short" | "long";
+  sourceName: string;
+}
+
 export interface EvaluatedTrait extends GrantedTrait {
   sourceName: string;
 }

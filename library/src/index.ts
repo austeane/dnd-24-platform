@@ -9,9 +9,11 @@ export { parseMarkdown, splitByHeading, nodeText, isPageNumberLine } from "./par
 // Engine
 export {
   ENGINE_VERSION,
+  buildResourcePoolDefinitions,
   computeCharacterState,
   evaluatePrerequisites,
   getAbilityModifier,
+  getPoolsForRestType,
 } from "./engine/index.ts";
 
 // Catalog helpers

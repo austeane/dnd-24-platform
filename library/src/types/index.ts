@@ -93,6 +93,7 @@ export type {
   EvaluatedResource,
   EvaluatedSense,
   EvaluatedTrait,
+  ResourcePoolDefinition,
   XPLedgerEntry,
   ModifierExplanation,
   PrerequisiteCheck,

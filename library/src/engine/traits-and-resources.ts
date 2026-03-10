@@ -3,9 +3,11 @@ import type {
   EvaluatedResource,
   EvaluatedSense,
   EvaluatedTrait,
+  ResourcePoolDefinition,
 } from "../types/character.ts";
 import type {
   EffectAbilityName,
+  RestType,
   SourceWithEffects,
 } from "../types/effect.ts";
 import { getAbilityModifier } from "./math.ts";
@@ -122,4 +124,60 @@ export function buildNotes(sources: SourceWithEffects[], effects: EffectEnvelope
   ];
 
   return uniqueSorted(notes);
+}
+
+/**
+ * Builds pool definitions for all resources a character possesses.
+ * These are the "truth" definitions derived from sources/effects that can
+ * be used to initialize or sync persistent resource pool state.
+ */
+export function buildResourcePoolDefinitions(
+  effects: EffectEnvelope[],
+  abilityScores: AbilityScoreSet,
+  proficiencyBonus: number,
+): ResourcePoolDefinition[] {
+  const pools: ResourcePoolDefinition[] = [];
+
+  for (const entry of effects) {
+    if (entry.effect.type === "grant-resource") {
+      pools.push({
+        resourceName: entry.effect.resource.name,
+        maxUses: entry.effect.resource.maxUses,
+        resetOn: entry.effect.resource.resetOn,
+        sourceName: entry.sourceName,
+      });
+    }
+
+    if (entry.effect.type === "grant-scaling-resource") {
+      const { resource } = entry.effect;
+      const resolvedUses = resource.mode === "proficiency-bonus"
+        ? resource.baseUses + proficiencyBonus + (resource.bonus ?? 0)
+        : resource.baseUses +
+          getEffectAbilityModifier(abilityScores, resource.ability ?? "charisma") +
+          (resource.bonus ?? 0);
+      pools.push({
+        resourceName: resource.name,
+        maxUses: Math.max(resolvedUses, resource.minimum),
+        resetOn: resource.resetOn,
+        sourceName: entry.sourceName,
+      });
+    }
+  }
+
+  return pools;
+}
+
+/**
+ * Returns the names of all resource pools that reset on the given rest type.
+ * Long rest resets both short-rest and long-rest pools.
+ */
+export function getPoolsForRestType(
+  pools: ResourcePoolDefinition[],
+  restType: RestType,
+): ResourcePoolDefinition[] {
+  if (restType === "long") {
+    return pools;
+  }
+
+  return pools.filter((pool) => pool.resetOn === "short");
 }
