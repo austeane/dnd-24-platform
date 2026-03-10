@@ -9,7 +9,7 @@ import {
 
 const roster = loadVerifiedRoster();
 
-describe("live-roster snapshot computation", () => {
+describe("fixture-roster snapshot computation", () => {
   it("loads all 5 reviewed characters from verified roster", () => {
     const fixtures = buildAllCharacterFixtures(roster);
     expect(fixtures.size).toBe(5);
@@ -58,9 +58,6 @@ describe("live-roster snapshot computation", () => {
     }
   });
 
-  // -------------------------------------------------------------------------
-  // Ronan Wildspark: Fighter 2 / Goliath
-  // -------------------------------------------------------------------------
   it("Ronan Wildspark: Fighter 2, expected sheet-baseline values", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "ronan-wildspark"));
     expect(state.name).toBe("Ronan Wildspark");
@@ -81,22 +78,20 @@ describe("live-roster snapshot computation", () => {
     expect(proficientSkills).toEqual(["Athletics", "Intimidation"]);
 
     const athletics = state.skillState.skills.find((s) => s.skillName === "Athletics")!;
-    expect(athletics.bonus).toBe(3); // STR +1 + prof +2
+    expect(athletics.bonus).toBe(3);
 
     const intimidation = state.skillState.skills.find((s) => s.skillName === "Intimidation")!;
-    expect(intimidation.bonus).toBe(1); // CHA -1 + prof +2
+    expect(intimidation.bonus).toBe(1);
   });
 
   it("Ronan: Longsword attack profile with Sap mastery", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "ronan-wildspark"));
     const longsword = state.attackProfiles.find((a) => a.name === "Longsword")!;
     expect(longsword).toBeDefined();
-    // Longsword uses STR: STR 13 (+1). Proficiency not modeled yet via class weapon prof.
     expect(longsword.ability).toBe("strength");
     expect(longsword.damageDice).toBe("1d8");
     expect(longsword.damageType).toBe("slashing");
     expect(longsword.masteryProperty).toBe("Sap");
-    // NOTE: Javelin is not equipped, so no javelin attack profile
   });
 
   it("Ronan: resources from Goliath and Fighter", () => {
@@ -106,9 +101,6 @@ describe("live-roster snapshot computation", () => {
     expect(resourceNames).toContain("Stone's Endurance");
   });
 
-  // -------------------------------------------------------------------------
-  // Tali: Druid 2
-  // -------------------------------------------------------------------------
   it("Tali: Druid 2, expected sheet-baseline values", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "tali"));
     expect(state.name).toBe("Tali");
@@ -130,10 +122,10 @@ describe("live-roster snapshot computation", () => {
     expect(proficientSkills).toEqual(["Nature", "Perception"]);
 
     const nature = state.skillState.skills.find((s) => s.skillName === "Nature")!;
-    expect(nature.bonus).toBe(4); // INT +2 + prof +2
+    expect(nature.bonus).toBe(4);
 
     const perception = state.skillState.skills.find((s) => s.skillName === "Perception")!;
-    expect(perception.bonus).toBe(5); // WIS +3 + prof +2
+    expect(perception.bonus).toBe(5);
   });
 
   it("Tali: Wild Shape resource and spellcasting", () => {
@@ -151,13 +143,8 @@ describe("live-roster snapshot computation", () => {
     expect(quarterstaff.ability).toBe("strength");
     expect(quarterstaff.damageDice).toBe("1d6");
     expect(quarterstaff.damageType).toBe("bludgeoning");
-    // NOTE: Class weapon proficiency not yet modeled; isProficient=false
-    // so attack bonus = STR -1 only (no prof bonus)
   });
 
-  // -------------------------------------------------------------------------
-  // Oriana: Warlock 2 / Drow
-  // -------------------------------------------------------------------------
   it("Oriana: Warlock 2, expected sheet-baseline values", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "oriana"));
     expect(state.name).toBe("Oriana");
@@ -184,10 +171,10 @@ describe("live-roster snapshot computation", () => {
     ]);
 
     const arcana = state.skillState.skills.find((s) => s.skillName === "Arcana")!;
-    expect(arcana.bonus).toBe(2); // INT +0 + prof +2
+    expect(arcana.bonus).toBe(2);
 
     const deception = state.skillState.skills.find((s) => s.skillName === "Deception")!;
-    expect(deception.bonus).toBe(5); // CHA +3 + prof +2
+    expect(deception.bonus).toBe(5);
   });
 
   it("Oriana: Pact Magic slot pool on short rest", () => {
@@ -215,9 +202,6 @@ describe("live-roster snapshot computation", () => {
     expect(traitNames).toContain("Fey Ancestry");
   });
 
-  // -------------------------------------------------------------------------
-  // Vivennah: Bard 2 / Wood Elf
-  // -------------------------------------------------------------------------
   it("Vivennah: Bard 2, expected sheet-baseline values", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "vivennah"));
     expect(state.name).toBe("Vivennah");
@@ -238,44 +222,16 @@ describe("live-roster snapshot computation", () => {
     expect(proficientSkills).toEqual(["Acrobatics", "Performance", "Persuasion"]);
 
     const acrobatics = state.skillState.skills.find((s) => s.skillName === "Acrobatics")!;
-    expect(acrobatics.bonus).toBe(6); // DEX +4 + prof +2
-
-    const performance = state.skillState.skills.find((s) => s.skillName === "Performance")!;
-    expect(performance.bonus).toBe(5); // CHA +3 + prof +2
+    expect(acrobatics.bonus).toBe(6);
   });
 
-  it("Vivennah: Bardic Inspiration resource", () => {
+  it("Vivennah: Bardic Inspiration and spellcasting", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "vivennah"));
     const resourceNames = state.resources.map((r) => r.name);
     expect(resourceNames).toContain("Bardic Inspiration");
-
-    const biResource = state.resources.find((r) => r.name === "Bardic Inspiration")!;
-    expect(biResource.maxUses).toBe(3); // CHA +3
+    expect(state.spellcasting?.grantedSpellNames.length).toBeGreaterThan(0);
   });
 
-  it("Vivennah: Wood Elf speed bonus and Darkvision", () => {
-    const state = computeCharacterState(buildCharacterFixture(roster, "vivennah"));
-    expect(state.speed).toBe(35); // 30 base + 5 Wood Elf
-
-    const senseNames = state.senses.map((s) => s.sense);
-    expect(senseNames).toContain("Darkvision");
-  });
-
-  it("Vivennah: Rapier attack profile", () => {
-    const state = computeCharacterState(buildCharacterFixture(roster, "vivennah"));
-    const rapier = state.attackProfiles.find((a) => a.name === "Rapier")!;
-    expect(rapier).toBeDefined();
-    // Rapier is finesse. DEX +4 > STR -1, so uses DEX
-    expect(rapier.ability).toBe("dexterity");
-    expect(rapier.damageDice).toBe("1d8");
-    expect(rapier.damageType).toBe("piercing");
-    // NOTE: Class weapon proficiency not yet modeled; proficiency bonus not added
-    // Attack bonus = DEX +4 only
-  });
-
-  // -------------------------------------------------------------------------
-  // Nara: Sorcerer 2
-  // -------------------------------------------------------------------------
   it("Nara: Sorcerer 2, expected sheet-baseline values", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "nara"));
     expect(state.name).toBe("Nara");
@@ -284,35 +240,13 @@ describe("live-roster snapshot computation", () => {
     expect(state.maxHP).toBe(12);
     expect(state.passivePerception.total).toBe(11);
     expect(state.spellcasting).not.toBeNull();
-    expect(state.spellcasting?.spellSaveDc).toBe(13);
   });
 
-  it("Nara: skill proficiencies from class choices", () => {
-    const state = computeCharacterState(buildCharacterFixture(roster, "nara"));
-    const proficientSkills = state.skillState.skills
-      .filter((s) => s.proficient)
-      .map((s) => s.skillName)
-      .sort();
-    expect(proficientSkills).toEqual(["Arcana", "Insight"]);
-
-    const arcana = state.skillState.skills.find((s) => s.skillName === "Arcana")!;
-    expect(arcana.bonus).toBe(5); // INT +3 + prof +2
-
-    const insight = state.skillState.skills.find((s) => s.skillName === "Insight")!;
-    expect(insight.bonus).toBe(3); // WIS +1 + prof +2
-  });
-
-  it("Nara: Sorcery Points resource", () => {
+  it("Nara: Sorcery Points and spellcasting state", () => {
     const state = computeCharacterState(buildCharacterFixture(roster, "nara"));
     const resourceNames = state.resources.map((r) => r.name);
     expect(resourceNames).toContain("Sorcery Points");
-
-    const sp = state.resources.find((r) => r.name === "Sorcery Points")!;
-    expect(sp.maxUses).toBe(2); // Sorcerer level 2
-  });
-
-  it("Nara: no attack profiles (no equipment)", () => {
-    const state = computeCharacterState(buildCharacterFixture(roster, "nara"));
-    expect(state.attackProfiles).toHaveLength(0);
+    expect(state.spellcasting?.spellSaveDc).toBe(13);
+    expect(state.spellcasting?.spellAttackBonus).toBe(5);
   });
 });

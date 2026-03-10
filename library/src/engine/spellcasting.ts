@@ -3,6 +3,7 @@ import type {
   CharacterSpellCapacity,
   CharacterSpellSlotPool,
   CharacterSpellcastingState,
+  PersistedResourcePoolState,
   SpellSlotPoolDefinition,
 } from "../types/character.ts";
 import type {
@@ -23,6 +24,19 @@ function getEffectAbilityModifier(
   ability: EffectAbilityName,
 ): number {
   return getAbilityModifier(abilityScores[ability]);
+}
+
+function getTrackedCurrentUses(
+  resourcePoolState: PersistedResourcePoolState[],
+  resourceName: string,
+  total: number,
+): number {
+  const tracked = resourcePoolState.find((pool) => pool.resourceName === resourceName);
+  if (!tracked) {
+    return total;
+  }
+
+  return Math.min(Math.max(tracked.currentUses, 0), total);
 }
 
 // ---------------------------------------------------------------------------
@@ -408,21 +422,30 @@ export function buildSpellcastingState(
   const grantedSpells = [...grantedSpellMap.values()]
     .sort((left, right) => left.spellName.localeCompare(right.spellName));
   const grantedSpellNames = uniqueSorted(grantedSpells.map((spell) => spell.spellName));
-  const slotPools = effects.flatMap((entry) =>
-    entry.effect.type === "grant-spell-slots"
-      ? [{
-          sourceName: entry.sourceName,
-          source: entry.effect.pool.source,
-          resetOn: entry.effect.pool.resetOn,
-          slots: entry.effect.pool.slots
-            .map((total, index) => ({
-              level: index + 1,
-              total,
-            }))
-            .filter((slot) => slot.total > 0),
-        } satisfies CharacterSpellSlotPool]
-      : []
-  );
+  const slotPools: CharacterSpellSlotPool[] = [];
+  for (const entry of effects) {
+    if (entry.effect.type !== "grant-spell-slots") {
+      continue;
+    }
+    const slotGrant = entry.effect.pool;
+
+    slotPools.push({
+      sourceName: entry.sourceName,
+      source: slotGrant.source,
+      resetOn: slotGrant.resetOn,
+      slots: slotGrant.slots
+        .map((total, index) => ({
+          level: index + 1,
+          total,
+          current: getTrackedCurrentUses(
+            input.resourcePoolState ?? [],
+            `${slotGrant.source === "Pact Magic" ? "Pact Magic Slot" : "Spell Slot"} (Level ${index + 1})`,
+            total,
+          ),
+        }))
+        .filter((slot) => slot.total > 0),
+    });
+  }
   const capacities = effects.flatMap((entry) =>
     entry.effect.type === "grant-spell-capacity"
       ? [{

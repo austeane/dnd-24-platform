@@ -400,6 +400,65 @@ That order keeps persistence, session flow, and DM-to-player communication movin
 - `pnpm check` passes
 - `pnpm test` passes (409 tests)
 - `pnpm lint` passes (0 errors)
+
+### 11:38:15 Projection Unification, DB Acceptance, And Evidence Tightening
+
+Collapsed the parallel runtime paths into one app-side projection model. `getCharacterRuntimeState(...)`, spend-plan preview, seed verification, and DB-backed acceptance now all build from the same projection rows in `app/src/server/progression/projection.ts`.
+
+#### Implemented
+
+- Added persisted resource-pool state overlay to library runtime types and outputs:
+  - `CharacterComputationInput.resourcePoolState`
+  - `EvaluatedResource.currentUses`
+  - spell-slot `current` counts in runtime state
+- Refactored `computeCharacterState(...)` to append dynamic feat/species and caster envelopes before deriving traits, spellcasting, resources, and attacks.
+- Wired Pact of the Blade substitution, Magic Initiate spell grants, Bardic Inspiration die traits, and Metamagic traits through the main runtime path instead of helper-only tests.
+- Added `syncCharacterDerivedState(...)` and `syncCharacterResourcePools(...)` so source changes and seeds clamp tracked pools to computed maxima and initialize slot/free-cast pools consistently.
+- Hardened resource mutation validation:
+  - reject zero/negative spend or restore amounts
+  - clamp `currentUses` when `maxUses` shrink
+- Added a separate integration lane:
+  - `pnpm test:integration`
+  - `app/vitest.integration.config.ts`
+  - DB-backed runtime and live-roster acceptance tests
+- Reclassified fixture-only roster verification:
+  - `library/tests/verification/fixture-roster-snapshot.test.ts`
+  - `scripts/snapshot-fixture-roster.ts`
+- Replaced fake live-roster snapshotting with DB-backed reads:
+  - `scripts/snapshot-live-roster.ts`
+- Tightened mechanics evidence:
+  - atomic entries now carry explicit evidence buckets
+  - `full` rows without required gate evidence auto-downgrade during tracker build
+  - report determinism tests now call the real report/snapshot builders
+
+#### New Artifacts
+
+- `app/drizzle/20260310182938_graceful_vulture/`
+- `docs/reports/srd-mechanics-coverage.md`
+- `docs/reports/srd-mechanics-coverage-atomic.md`
+- `docs/reports/fleet-readiness.md`
+- `docs/reports/fleet-work-items.csv`
+- `data/fleet/snapshots/fixture-roster-baseline.json`
+- `data/fleet/snapshots/fixture-roster-latest.json`
+- `data/fleet/snapshots/live-roster-baseline.json`
+- `data/fleet/snapshots/live-roster-latest.json`
+
+#### Current Counts
+
+- Coarse tracker: `20` full, `26` partial, `7` none
+- Atomic tracker: `39` full, `39` partial, `33` none
+
+#### Validation
+
+- `pnpm check` passes
+- `pnpm test` passes
+- `pnpm lint` passes
+- `pnpm build` passes
+- `pnpm test:integration` passes against local disposable Postgres on port `5433`
+- `pnpm snapshot:fixture-roster --update` passes
+- `pnpm snapshot:live-roster --update` passes against the seeded integration DB
+- `pnpm report:mechanics-coverage` passes
+- `pnpm report:fleet-readiness --strict` passes
 - `pnpm snapshot:live-roster --update` regenerated baseline successfully
 
 ### Phase 9: Status Audit and Closeout (Fleet Batch: status-audit-and-closeout)

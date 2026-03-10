@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   computeCharacterState,
   evaluatePrerequisites,
+  getCanonicalEffectsForSource,
 } from "../../src/index.ts";
 import type { CharacterComputationInput } from "../../src/types/character.ts";
 
@@ -50,9 +51,16 @@ const sampleInput: CharacterComputationInput = {
         kind: "feat",
         name: "Alert",
       },
-      effects: [
-        { type: "modifier", target: "initiative", value: 2, condition: undefined },
-      ],
+      effects: [],
+    },
+    {
+      source: {
+        id: "class-feature-bardic-inspiration",
+        kind: "class-feature",
+        name: "Bardic Inspiration",
+        entityId: "class-feature:bardic-inspiration",
+      },
+      effects: [],
     },
     {
       source: {
@@ -83,6 +91,15 @@ const sampleInput: CharacterComputationInput = {
       sessionId: "session-1",
     },
   ],
+  resourcePoolState: [
+    {
+      resourceName: "Bardic Inspiration",
+      currentUses: 2,
+      maxUses: 3,
+      resetOn: "long",
+      sourceName: "Bardic Inspiration",
+    },
+  ],
 };
 
 describe("computeCharacterState", () => {
@@ -98,8 +115,111 @@ describe("computeCharacterState", () => {
     expect(state.spellcasting?.spellAttackBonus).toBe(5);
     expect(state.spellcasting?.spellSaveDc).toBe(13);
     expect(state.actions.map((action) => action.name)).toContain("Bardic Inspiration");
-    expect(state.resources.map((resource) => resource.name)).toContain("Bardic Inspiration");
+    const bardicInspiration = state.resources.find((resource) => resource.name === "Bardic Inspiration");
+    expect(bardicInspiration).toMatchObject({
+      currentUses: 2,
+      maxUses: 3,
+      isTracked: true,
+      isDepleted: false,
+    });
+    expect(state.traits.map((trait) => trait.name)).toContain("Bardic Inspiration Die");
     expect(state.xp.banked).toBe(8);
+  });
+
+  it("surfaces dynamic feat, caster, and pact-blade mechanics through the main runtime path", () => {
+    const state = computeCharacterState({
+      base: {
+        name: "Oriana",
+        progressionMode: "hybrid",
+        abilityScores: {
+          strength: 10,
+          dexterity: 12,
+          constitution: 14,
+          intelligence: 12,
+          wisdom: 10,
+          charisma: 18,
+        },
+        baseArmorClass: 12,
+        baseMaxHP: 18,
+        baseSpeed: 30,
+        spellcastingAbility: "charisma",
+      },
+      sources: [
+        {
+          source: {
+            id: "class-level-warlock",
+            kind: "class-level",
+            name: "Warlock 2",
+            rank: 2,
+          },
+          effects: [],
+        },
+        {
+          source: {
+            id: "feature-pact-blade",
+            kind: "class-feature",
+            name: "Pact of the Blade",
+            entityId: "class-feature:pact-of-the-blade",
+            payload: {
+              pactBladeBond: {
+                weaponEntityId: "equipment:dagger",
+                weaponLabel: "Dagger",
+                isMagicWeapon: false,
+              },
+            },
+          },
+          effects: [],
+        },
+        {
+          source: {
+            id: "feat-magic-initiate",
+            kind: "feat",
+            name: "Magic Initiate (Wizard)",
+            entityId: "feat:magic-initiate",
+            payload: {
+              subChoicesJson: {
+                spellList: "Wizard",
+                cantrips: ["Mage Hand", "Minor Illusion"],
+                level1Spell: "Shield",
+              },
+            },
+          },
+          effects: [],
+        },
+        {
+          source: {
+            id: "override-metamagic",
+            kind: "override",
+            name: "Metamagic Choices",
+            payload: {
+              metamagicChoices: ["Subtle Spell", "Twinned Spell"],
+            },
+          },
+          effects: [],
+        },
+        {
+          source: {
+            id: "equipment-dagger",
+            kind: "equipment",
+            name: "Dagger",
+            entityId: "equipment:dagger",
+            packId: "srd-5e-2024",
+          },
+          effects: getCanonicalEffectsForSource("srd-5e-2024", "equipment:dagger"),
+        },
+      ],
+      xpLedger: [],
+    });
+
+    expect(state.spellcasting?.grantedSpellNames).toEqual(
+      expect.arrayContaining(["Mage Hand", "Minor Illusion", "Shield"]),
+    );
+    expect(state.traits.map((trait) => trait.name)).toEqual(
+      expect.arrayContaining(["Subtle Spell", "Twinned Spell"]),
+    );
+
+    const dagger = state.attackProfiles.find((profile) => profile.weaponEntityId === "equipment:dagger");
+    expect(dagger?.ability).toBe("charisma");
   });
 });
 

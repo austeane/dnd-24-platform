@@ -16,14 +16,15 @@ import {
   characterSources,
   xpTransactions,
 } from "../db/schema/index.ts";
-import { extractBaseSnapshot } from "./character-sources.ts";
-import { listCharacterSources } from "./character-sources.ts";
 import { buildCharacterState } from "./character-state.ts";
 import {
   getCharacterSpendPlanTotalXpCost,
   parseCharacterSpendPlanDocument,
 } from "./plan-document.ts";
-import { listCharacterXpTransactions } from "./xp-transactions.ts";
+import {
+  loadCharacterProjectionRows,
+  type CharacterProjectionRows,
+} from "./projection.ts";
 import type {
   CanonicalSourceSpendPlanOperation,
   CharacterSourceRecord,
@@ -374,24 +375,27 @@ export async function prepareSpendPlan(
   planJson: unknown,
 ): Promise<PreparedSpendPlan> {
   const document = parseCharacterSpendPlanDocument(planJson);
-  const [enabledPackIds, sourceRecords, xpRecords] = await Promise.all([
+  const [enabledPackIds, projectionRows] = await Promise.all([
     getCampaignEnabledPackIds(campaignId),
-    listCharacterSources(characterId),
-    listCharacterXpTransactions(characterId),
+    loadCharacterProjectionRows(characterId),
   ]);
-
-  const baseSnapshot = extractBaseSnapshot(sourceRecords);
-  if (!baseSnapshot) {
-    throw new Error(`Character ${characterId} has no base snapshot`);
-  }
+  const { sourceRecords, xpRecords } = projectionRows;
 
   const preparedOperations: PreparedSpendPlanOperation[] = [];
   let projectedSourceRecords = [...sourceRecords];
   let projectedXpRecords = [...xpRecords];
-  let projectedState = buildCharacterState(baseSnapshot, projectedSourceRecords, projectedXpRecords);
+  let projectedRows: CharacterProjectionRows = {
+    ...projectionRows,
+    sourceRecords: projectedSourceRecords,
+    xpRecords: projectedXpRecords,
+  };
+  let projectedState = buildCharacterState(characterId, projectedRows);
+  if (!projectedState) {
+    throw new Error(`Character ${characterId} has no base snapshot`);
+  }
   const bankedXpBefore = projectedState.xp.banked;
 
-  document.operations.forEach((operation, operationIndex) => {
+  for (const [operationIndex, operation] of document.operations.entries()) {
     if (operation.xpCost > projectedState.xp.banked) {
       throw new Error(`planJson.operations[${operationIndex}]: costs ${operation.xpCost} XP but only ${projectedState.xp.banked} XP is currently banked`);
     }
@@ -447,8 +451,16 @@ export async function prepareSpendPlan(
         buildProjectedXpRecord(prepared.xpInsert, new Date()),
       ];
     }
-    projectedState = buildCharacterState(baseSnapshot, projectedSourceRecords, projectedXpRecords);
-  });
+    projectedRows = {
+      ...projectedRows,
+      sourceRecords: projectedSourceRecords,
+      xpRecords: projectedXpRecords,
+    };
+    projectedState = buildCharacterState(characterId, projectedRows);
+    if (!projectedState) {
+      throw new Error(`Character ${characterId} has no base snapshot`);
+    }
+  }
 
   return {
     document,

@@ -1,57 +1,39 @@
 import {
-  type CharacterBaseSnapshot,
+  type CharacterComputationInput,
   type CharacterState,
   computeCharacterState,
-  type XPLedgerEntry,
 } from "@dnd/library";
-import { extractBaseSnapshot, mapCharacterSourcesToRuntime } from "./character-sources.ts";
-import { listCharacterSources } from "./character-sources.ts";
-import { listCharacterXpTransactions } from "./xp-transactions.ts";
-import type {
-  CharacterRuntimeState,
-  CharacterSourceRecord,
-  XpTransactionRecord,
-} from "./types.ts";
-
-export function mapXpLedger(records: XpTransactionRecord[]): XPLedgerEntry[] {
-  return records.map((record) => ({
-    id: record.id,
-    timestamp: record.createdAt.toISOString(),
-    amount: record.amount,
-    category: record.category,
-    note: record.note,
-    sessionId: record.sessionId ?? undefined,
-  }));
-}
+import {
+  buildCharacterComputationInput,
+  buildCharacterRuntimeStateFromRows,
+  loadCharacterProjectionRows,
+  type CharacterProjectionRows,
+} from "./projection.ts";
+import type { CharacterRuntimeState } from "./types.ts";
 
 export function buildCharacterState(
-  baseSnapshot: CharacterBaseSnapshot,
-  sourceRecords: CharacterSourceRecord[],
-  xpRecords: XpTransactionRecord[],
+  characterId: string,
+  rows: CharacterProjectionRows,
+): CharacterState | null {
+  return buildCharacterRuntimeStateFromRows(characterId, rows);
+}
+
+export function buildCharacterComputationState(
+  characterId: string,
+  rows: CharacterProjectionRows,
+): CharacterComputationInput | null {
+  return buildCharacterComputationInput(characterId, rows);
+}
+
+export function computeProjectedCharacterState(
+  input: CharacterComputationInput,
 ): CharacterState {
-  return computeCharacterState({
-    base: baseSnapshot,
-    sources: mapCharacterSourcesToRuntime(sourceRecords),
-    xpLedger: mapXpLedger(xpRecords),
-  }) satisfies CharacterState;
+  return computeCharacterState(input) satisfies CharacterState;
 }
 
 export async function getCharacterRuntimeState(
   characterId: string,
 ): Promise<CharacterRuntimeState | null> {
-  const [sources, xpLedger] = await Promise.all([
-    listCharacterSources(characterId),
-    listCharacterXpTransactions(characterId),
-  ]);
-
-  const baseSnapshot = extractBaseSnapshot(sources);
-  if (!baseSnapshot) {
-    return null;
-  }
-
-  return computeCharacterState({
-    base: baseSnapshot,
-    sources: mapCharacterSourcesToRuntime(sources),
-    xpLedger: mapXpLedger(xpLedger),
-  }) satisfies CharacterState;
+  const rows = await loadCharacterProjectionRows(characterId);
+  return buildCharacterRuntimeStateFromRows(characterId, rows);
 }

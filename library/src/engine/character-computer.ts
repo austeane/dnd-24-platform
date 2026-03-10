@@ -4,6 +4,12 @@ import type {
 } from "../types/character.ts";
 import { buildACBreakdown, buildArmorClass } from "./defenses.ts";
 import { buildAttackProfiles } from "./attack-profiles.ts";
+import {
+  applyPactBladeCharismaSubstitution,
+  buildCasterClassFeatureEffects,
+  extractPactBladeBond,
+} from "./class-features-casters.ts";
+import { buildFeatAndSpeciesDynamicEffects } from "./feats-and-species.ts";
 import { getCharacterLevel } from "./levels.ts";
 import { getAbilityModifier, getProficiencyBonusForLevel } from "./math.ts";
 import { buildPassivePerception, buildProficiencies, buildSkillState } from "./proficiencies.ts";
@@ -27,11 +33,16 @@ import { computeConditionEffects } from "./conditions.ts";
 export { getAbilityModifier } from "./math.ts";
 
 export function computeCharacterState(input: CharacterComputationInput): CharacterState {
-  const effects = flattenEffects(input.sources);
+  const baseEffects = flattenEffects(input.sources);
   const level = getCharacterLevel(input.sources);
   const baseProficiencyBonus = getProficiencyBonusForLevel(level);
-  const proficiencyBonusModifiers = getNumericModifierContributors(effects, "proficiency-bonus");
+  const proficiencyBonusModifiers = getNumericModifierContributors(baseEffects, "proficiency-bonus");
   const proficiencyBonus = baseProficiencyBonus + sumContributors(proficiencyBonusModifiers);
+  const dynamicEffects = [
+    ...buildFeatAndSpeciesDynamicEffects(input.sources, proficiencyBonus),
+    ...buildCasterClassFeatureEffects(input.sources),
+  ];
+  const effects = [...baseEffects, ...dynamicEffects];
   const proficiencies = buildProficiencies(effects);
 
   const dexterityModifier = getAbilityModifier(input.base.abilityScores.dexterity);
@@ -43,6 +54,17 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
       entry.effect.type === "speed-bonus" && entry.effect.movementType === "walk"
     )
     .map((entry) => entry.effect.value);
+
+  const pactBladeBond = extractPactBladeBond(input.sources);
+  const attackProfiles = buildAttackProfiles(input, effects, proficiencyBonus, proficiencies)
+    .map((profile) =>
+      applyPactBladeCharismaSubstitution(
+        profile,
+        input.base.abilityScores,
+        pactBladeBond?.weaponEntityId,
+        proficiencyBonus,
+      )
+    );
 
   return {
     name: input.base.name,
@@ -59,7 +81,7 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
     maxHPExplanation: createExplanation("Base HP", input.base.baseMaxHP, hpContributors),
     armorClass: buildArmorClass(input, effects),
     acBreakdown: buildACBreakdown(input, effects),
-    attackProfiles: buildAttackProfiles(input, effects, proficiencyBonus, proficiencies),
+    attackProfiles,
     initiative: createExplanation("Dexterity", dexterityModifier, initiativeContributors),
     speed:
       input.base.baseSpeed +
@@ -81,7 +103,12 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
           }]
         : []
     ),
-    resources: buildResources(effects, input.base.abilityScores, proficiencyBonus),
+    resources: buildResources(
+      effects,
+      input.base.abilityScores,
+      proficiencyBonus,
+      input.resourcePoolState,
+    ),
     traits: buildTraits(input.sources, effects),
     senses: buildSenses(effects),
     notes: buildNotes(input.sources, effects),

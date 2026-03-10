@@ -6,6 +6,7 @@ import {
   characterSpendPlans,
   xpTransactions,
 } from "../db/schema/index.ts";
+import { syncCharacterDerivedState } from "./derived-state.ts";
 import { prepareSpendPlan } from "./spend-plan-preparation.ts";
 import type {
   CharacterSpendPlanPreview,
@@ -57,7 +58,7 @@ export async function createCharacterSpendPlan(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterSpendPlans(
@@ -117,7 +118,7 @@ export async function commitCharacterSpendPlan(
   );
   const committedAt = input.committedAt ?? new Date();
 
-  return db.transaction(async (tx) => {
+  const committed = await db.transaction(async (tx) => {
     for (const operation of prepared.operations) {
       await tx.insert(characterSources).values(operation.sourceInsert);
       if (operation.xpInsert) {
@@ -139,4 +140,11 @@ export async function commitCharacterSpendPlan(
 
     return row ?? null;
   });
+
+  if (!committed) {
+    return null;
+  }
+
+  await syncCharacterDerivedState(plan.characterId);
+  return committed;
 }

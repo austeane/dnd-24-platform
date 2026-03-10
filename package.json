@@ -16,6 +16,7 @@
     "lint": "oxlint .",
     "lint:fix": "oxlint --fix .",
     "test": "pnpm -r run test",
+    "test:integration": "pnpm -F @dnd/app test:integration",
     "extract:character-sheets": "tsx scripts/extract-character-sheets.ts",
     "seed:real-campaign": "pnpm -F @dnd/app db:seed:real-campaign",
     "db:generate": "pnpm -F @dnd/app db:generate",
@@ -26,6 +27,7 @@
     "report:mechanics-coverage": "tsx scripts/report-mechanics-coverage.ts",
     "report:fleet-readiness": "tsx scripts/report-fleet-readiness.ts",
     "snapshot:live-roster": "tsx scripts/snapshot-live-roster.ts",
+    "snapshot:fixture-roster": "tsx scripts/snapshot-fixture-roster.ts",
     "prepare": "husky"
   },
   "devDependencies": {

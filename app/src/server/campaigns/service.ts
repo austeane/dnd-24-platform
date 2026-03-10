@@ -67,7 +67,7 @@ export async function createCampaign(
     })
     .returning();
 
-  return mapCampaignSettings(row);
+  return mapCampaignSettings(row!);
 }
 
 export async function listCampaigns(): Promise<CampaignSummary[]> {
@@ -172,7 +172,7 @@ export async function createCharacter(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCampaignRoster(
@@ -246,7 +246,7 @@ export async function createSession(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCampaignSessions(

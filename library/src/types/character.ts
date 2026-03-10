@@ -43,6 +43,7 @@ export interface CharacterComputationInput {
   sources: SourceWithEffects[];
   xpLedger: XPLedgerEntry[];
   activeConditions?: ActiveCondition[];
+  resourcePoolState?: PersistedResourcePoolState[];
 }
 
 export interface XPLedgerEntry {
@@ -100,6 +101,9 @@ export interface EvaluatedAction extends GrantedAction {
 
 export interface EvaluatedResource extends GrantedResource {
   sourceName: string;
+  currentUses: number;
+  isTracked: boolean;
+  isDepleted: boolean;
 }
 
 /**
@@ -129,6 +133,7 @@ export interface CharacterSpellSlotPool {
   slots: Array<{
     level: number;
     total: number;
+    current: number;
   }>;
 }
 
@@ -159,6 +164,14 @@ export interface SpellSlotPoolDefinition {
   resetOn: "short" | "long";
   source: string;
   resourceName: string;
+}
+
+export interface PersistedResourcePoolState {
+  resourceName: string;
+  currentUses: number;
+  maxUses: number;
+  resetOn: "short" | "long";
+  sourceName: string;
 }
 
 export interface PrerequisiteCheck {

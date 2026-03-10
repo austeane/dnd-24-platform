@@ -37,10 +37,11 @@ import {
 import {
   getCharacterRuntimeState,
   listCharacterSources,
+  syncCharacterDerivedState,
 } from "../progression/index.ts";
 
 const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../../..");
-const defaultSeedPath = path.join(
+export const defaultSeedPath = path.join(
   rootDir,
   "data",
   "real-campaign-intake",
@@ -794,6 +795,7 @@ async function seedCharacter(
   await cleanupStaleSeedRows(record.id, character.identity.slug, desiredSourceIds, desiredXpIds);
 
   await seedChoiceState(record.id, character.identity.slug, character);
+  await syncCharacterDerivedState(record.id);
 
   const runtimeState = await getCharacterRuntimeState(record.id);
   if (!runtimeState) {
@@ -805,13 +807,9 @@ async function seedCharacter(
   );
 }
 
-async function main(): Promise<void> {
-  const inputPath = process.argv[2]
-    ? path.resolve(process.cwd(), process.argv[2])
-    : defaultSeedPath;
-  const rawInput = await readFile(inputPath, "utf8");
-  const parsed = verifiedCampaignSchema.parse(JSON.parse(rawInput)) satisfies VerifiedCampaignSeed;
-
+export async function seedVerifiedCampaign(
+  parsed: VerifiedCampaignSeed,
+): Promise<void> {
   const existingCampaign = await getCampaignBySlug(parsed.campaign.slug);
   const campaign = existingCampaign
     ? await updateCampaignSettings({
@@ -850,8 +848,28 @@ async function main(): Promise<void> {
   }
 }
 
-try {
-  await main();
-} finally {
-  await client.end({ timeout: 5 });
+export async function seedVerifiedCampaignFromPath(
+  inputPath = defaultSeedPath,
+): Promise<void> {
+  const rawInput = await readFile(inputPath, "utf8");
+  const parsed = verifiedCampaignSchema.parse(JSON.parse(rawInput)) satisfies VerifiedCampaignSeed;
+  await seedVerifiedCampaign(parsed);
+}
+
+async function main(): Promise<void> {
+  const inputPath = process.argv[2]
+    ? path.resolve(process.cwd(), process.argv[2])
+    : defaultSeedPath;
+  await seedVerifiedCampaignFromPath(inputPath);
+}
+
+const isMain = process.argv[1] !== undefined &&
+  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+
+if (isMain) {
+  try {
+    await main();
+  } finally {
+    await client.end({ timeout: 5 });
+  }
 }

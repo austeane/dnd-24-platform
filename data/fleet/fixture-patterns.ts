@@ -1,8 +1,8 @@
 /**
  * Fixture infrastructure for fleet batch testing.
  *
- * Each batch that requires `fixtures` or `live-roster` gates should use these
- * helpers to build deterministic test inputs from the verified roster data.
+ * Each batch that requires `fixtures` coverage should use these helpers to
+ * build deterministic test inputs from the verified roster data.
  *
  * Usage in a batch test:
  *   import { loadVerifiedRoster, buildCharacterFixture } from "../../data/fleet/fixture-patterns.ts";

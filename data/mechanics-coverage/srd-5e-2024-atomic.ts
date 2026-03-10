@@ -1,8 +1,14 @@
 import type {
+  AtomicMechanicEvidence,
   AtomicMechanicsCoverageEntry,
   AtomicCoverageKind,
   CoverageStatus,
   VerificationGateId,
+} from "./types.ts";
+import {
+  classifyEvidenceRefs,
+  getMissingEvidenceGates,
+  mergeEvidence,
 } from "./types.ts";
 
 const refs = {
@@ -37,7 +43,11 @@ const refs = {
   testsWildShape: "library/tests/engine/wild-shape.test.ts",
   testsCasterFeatures: "library/tests/engine/class-features-casters.test.ts",
   testsFeatsSpecies: "library/tests/engine/feats-and-species.test.ts",
-  testsLiveRoster: "library/tests/verification/live-roster-snapshot.test.ts",
+  testsFixtureRoster: "library/tests/verification/fixture-roster-snapshot.test.ts",
+  testsLiveRoster: "app/src/server/progression/live-roster.integration.test.ts",
+  testsRuntimeIntegration: "app/src/server/progression/runtime-state.integration.test.ts",
+  snapshotLiveRoster: "scripts/snapshot-live-roster.ts",
+  snapshotFixtureRoster: "scripts/snapshot-fixture-roster.ts",
   engineAttacks: "library/src/engine/attack-profiles.ts",
   engineConditions: "library/src/engine/conditions.ts",
   engineWildShape: "library/src/engine/wild-shape.ts",
@@ -58,19 +68,31 @@ function atomic(
     dependsOn?: string[];
     refs?: string[];
     verificationGates?: VerificationGateId[];
+    evidence?: Partial<AtomicMechanicEvidence>;
   } = {},
 ): AtomicMechanicsCoverageEntry {
+  const refs = options.refs ?? [];
+  const verificationGates = options.verificationGates ?? ["runtime", "tests"];
+  const evidence = mergeEvidence(
+    classifyEvidenceRefs(refs),
+    options.evidence,
+  );
+  const auditedStatus = status === "full" && getMissingEvidenceGates(verificationGates, evidence).length > 0
+    ? "partial"
+    : status;
+
   return {
     id,
     parentId,
     area,
     name,
-    status,
+    status: auditedStatus,
     kind: options.kind ?? "runtime",
     summary,
     dependsOn: options.dependsOn ?? [],
-    refs: options.refs ?? [],
-    verificationGates: options.verificationGates ?? ["runtime", "tests"],
+    refs,
+    verificationGates,
+    evidence,
   };
 }
 

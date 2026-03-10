@@ -51,6 +51,7 @@ export {
   listCharacterSources,
 } from "./character-sources.ts";
 export { getCharacterRuntimeState } from "./character-state.ts";
+export { syncCharacterDerivedState } from "./derived-state.ts";
 export {
   previewCharacterSpendPlan,
   createCharacterSpendPlan,

@@ -64,7 +64,7 @@ export async function applyCondition(
     createdByLabel: input.appliedByLabel.trim(),
   });
 
-  return row;
+  return row!;
 }
 
 /**
@@ -104,7 +104,7 @@ export async function removeCondition(
     createdByLabel: input.removedByLabel.trim(),
   });
 
-  return row;
+  return row!;
 }
 
 /**
@@ -202,5 +202,5 @@ async function recordConditionEvent(input: {
     })
     .returning();
 
-  return row;
+  return row!;
 }

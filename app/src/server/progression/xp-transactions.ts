@@ -25,7 +25,7 @@ export async function recordXpTransaction(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterXpTransactions(

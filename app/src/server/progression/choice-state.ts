@@ -53,7 +53,7 @@ export async function recordSkillChoice(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterSkillChoices(
@@ -113,7 +113,7 @@ export async function recordFeatChoice(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterFeatChoices(
@@ -159,7 +159,7 @@ export async function recordEquipment(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function updateEquipment(
@@ -237,7 +237,7 @@ export async function recordWeaponMastery(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterWeaponMasteries(
@@ -274,7 +274,7 @@ export async function recordMetamagicChoice(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterMetamagicChoices(
@@ -315,7 +315,7 @@ export async function recordPactBladeBond(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function getActivePactBladeBond(

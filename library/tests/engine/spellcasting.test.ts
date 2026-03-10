@@ -374,7 +374,7 @@ describe("buildSpellSlotPoolDefinitions", () => {
         source: "Spellcasting",
         resetOn: "long",
         slots: [
-          { level: 1, total: 3 },
+          { level: 1, total: 3, current: 3 },
         ],
       },
     ]);
@@ -397,7 +397,7 @@ describe("buildSpellSlotPoolDefinitions", () => {
         source: "Pact Magic",
         resetOn: "short",
         slots: [
-          { level: 1, total: 2 },
+          { level: 1, total: 2, current: 2 },
         ],
       },
     ]);
@@ -420,9 +420,9 @@ describe("buildSpellSlotPoolDefinitions", () => {
         source: "Spellcasting",
         resetOn: "long",
         slots: [
-          { level: 1, total: 4 },
-          { level: 2, total: 3 },
-          { level: 3, total: 2 },
+          { level: 1, total: 4, current: 4 },
+          { level: 2, total: 3, current: 3 },
+          { level: 3, total: 2, current: 2 },
         ],
       },
     ]);
@@ -474,7 +474,7 @@ describe("live roster spellcasting integration", () => {
     expect(sc.slotPools).toHaveLength(1);
     expect(sc.slotPools[0]!.source).toBe("Spellcasting");
     expect(sc.slotPools[0]!.resetOn).toBe("long");
-    expect(sc.slotPools[0]!.slots).toEqual([{ level: 1, total: 3 }]);
+    expect(sc.slotPools[0]!.slots).toEqual([{ level: 1, total: 3, current: 3 }]);
     expect(sc.grantedSpellNames).toContain("Cure Wounds");
     expect(sc.grantedSpellNames).toContain("Druidcraft");
     expect(sc.grantedSpellNames).toContain("Shillelagh");
@@ -514,7 +514,7 @@ describe("live roster spellcasting integration", () => {
     expect(sc.spellSaveDc).toBe(13);
     expect(sc.spellAttackBonus).toBe(5);
     expect(sc.slotPools).toHaveLength(1);
-    expect(sc.slotPools[0]!.slots).toEqual([{ level: 1, total: 3 }]);
+    expect(sc.slotPools[0]!.slots).toEqual([{ level: 1, total: 3, current: 3 }]);
 
     // Bard known spell count at level 2
     const knownCount = getKnownSpellCount("bard", 2);
@@ -586,7 +586,7 @@ describe("live roster spellcasting integration", () => {
     expect(sc.slotPools).toHaveLength(1);
     expect(sc.slotPools[0]!.source).toBe("Pact Magic");
     expect(sc.slotPools[0]!.resetOn).toBe("short");
-    expect(sc.slotPools[0]!.slots).toEqual([{ level: 1, total: 2 }]);
+    expect(sc.slotPools[0]!.slots).toEqual([{ level: 1, total: 2, current: 2 }]);
 
     // Verify derived pact magic progression
     const pactSlots = derivePactMagicSlots(2);
@@ -622,9 +622,9 @@ describe("spell slot pool definition resource naming", () => {
         source: "Spellcasting",
         resetOn: "long",
         slots: [
-          { level: 1, total: 4 },
-          { level: 2, total: 3 },
-          { level: 3, total: 2 },
+          { level: 1, total: 4, current: 4 },
+          { level: 2, total: 3, current: 3 },
+          { level: 3, total: 2, current: 2 },
         ],
       },
     ]);
@@ -646,7 +646,7 @@ describe("spell slot pool definition resource naming", () => {
         source: "Pact Magic",
         resetOn: "short",
         slots: [
-          { level: 3, total: 2 },
+          { level: 3, total: 2, current: 2 },
         ],
       },
     ]);

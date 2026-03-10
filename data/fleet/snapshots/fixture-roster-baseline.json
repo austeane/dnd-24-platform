@@ -43,8 +43,6 @@
       "Convert Spell Slot to Sorcery Points",
       "Magic Initiate",
       "Metamagic",
-      "Sorcerer 2",
-      "Sorcerous Spellcasting (Level 2)",
       "Subtle Spell",
       "Twinned Spell"
     ],
@@ -99,13 +97,10 @@
     "attackProfiles": [],
     "traits": [
       "Fey Ancestry",
-      "Pact Magic (Level 2)",
       "Pact Weapon",
       "Skilled",
       "Spell Slot Recovery",
-      "Trance",
-      "Warlock 2",
-      "Warlock spell list"
+      "Trance"
     ],
     "conditions": []
   },
@@ -137,14 +132,14 @@
       {
         "name": "Longsword",
         "ability": "strength",
-        "attackBonus": 3,
+        "attackBonus": 1,
         "damageDice": "1d8",
         "masteryProperty": "Sap"
       }
     ],
     "traits": [
-      "Fighter 2",
       "Giant Ancestry",
+      "Longsword",
       "Savage Attacker",
       "Second Wind",
       "Weapon Mastery"
@@ -200,17 +195,15 @@
       {
         "name": "Quarterstaff",
         "ability": "strength",
-        "attackBonus": 1,
+        "attackBonus": -1,
         "damageDice": "1d6"
       }
     ],
     "traits": [
-      "Druid 2",
-      "Druid spell list",
-      "Druidic Spellcasting (Level 2)",
       "Feerie Tollen",
       "Hex Magic",
       "Primal Order: Warden",
+      "Quarterstaff",
       "Wild Companion Familiar",
       "Wild Shape Forms"
     ],
@@ -266,13 +259,11 @@
       }
     ],
     "traits": [
-      "Bard 2",
-      "Bard spell list",
-      "Bard Spellcasting (Level 2)",
       "Bardic Inspiration Die",
       "Bardic Inspiration Die",
       "Fey Ancestry",
       "Musician",
+      "Rapier",
       "Trance"
     ],
     "conditions": []

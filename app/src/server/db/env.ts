@@ -32,3 +32,15 @@ export function getMigrationDatabaseUrl(): string {
 export function getDrizzleKitDatabaseUrl(): string | undefined {
   return getEnvValue("DATABASE_PUBLIC_URL") ?? getEnvValue("DATABASE_URL");
 }
+
+export function getTestDatabaseUrl(): string {
+  const databaseUrl = getEnvValue("DATABASE_TEST_URL");
+
+  if (!databaseUrl) {
+    throw new Error(
+      "DATABASE_TEST_URL is required for integration tests.",
+    );
+  }
+
+  return databaseUrl;
+}

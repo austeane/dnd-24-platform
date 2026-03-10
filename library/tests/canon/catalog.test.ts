@@ -119,7 +119,7 @@ describe("spellcasting runtime", () => {
         sourceName: "Bard Spellcasting (Level 2)",
         source: "Spellcasting",
         resetOn: "long",
-        slots: [{ level: 1, total: 3 }],
+        slots: [{ level: 1, total: 3, current: 3 }],
       },
     ]);
     expect(state.spellcasting?.grantedSpells).toEqual([

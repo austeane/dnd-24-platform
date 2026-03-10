@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "../db/index.ts";
 import {
   characterResourcePools,
@@ -14,6 +14,15 @@ import type {
   RestoreResourceInput,
   SpendResourceInput,
 } from "./types.ts";
+
+function assertPositiveResourceAmount(
+  amount: number,
+  verb: "spend" | "restore",
+): void {
+  if (!Number.isInteger(amount) || amount <= 0) {
+    throw new Error(`Resource ${verb} amount must be a positive integer`);
+  }
+}
 
 // --- Resource Pool CRUD ---
 
@@ -73,6 +82,7 @@ export async function initializeResourcePools(
           characterResourcePools.resourceName,
         ],
         set: {
+          currentUses: sql<number>`least(${characterResourcePools.currentUses}, ${pool.maxUses})`,
           maxUses: pool.maxUses,
           resetOn: pool.resetOn,
           sourceName: pool.sourceName,
@@ -81,10 +91,29 @@ export async function initializeResourcePools(
       })
       .returning();
 
-    results.push(row);
+    results.push(row!);
   }
 
   return results;
+}
+
+export async function syncCharacterResourcePools(
+  input: InitializeResourcePoolsInput,
+): Promise<CharacterResourcePoolRecord[]> {
+  const syncedRows = await initializeResourcePools(input);
+  const desiredResourceNames = new Set(input.pools.map((pool) => pool.resourceName));
+  const existingRows = await listCharacterResourcePools(input.characterId);
+  const staleIds = existingRows
+    .filter((row) => !desiredResourceNames.has(row.resourceName))
+    .map((row) => row.id);
+
+  if (staleIds.length > 0) {
+    await db
+      .delete(characterResourcePools)
+      .where(inArray(characterResourcePools.id, staleIds));
+  }
+
+  return syncedRows;
 }
 
 // --- Spend ---
@@ -104,6 +133,7 @@ export async function spendResource(
   }
 
   const amount = input.amount ?? 1;
+  assertPositiveResourceAmount(amount, "spend");
   if (pool.currentUses < amount) {
     throw new Error(
       `Insufficient uses for "${input.resourceName}": ${pool.currentUses} available, ${amount} requested`,
@@ -137,7 +167,7 @@ export async function spendResource(
     createdByLabel: input.createdByLabel,
   });
 
-  return updated;
+  return updated!;
 }
 
 // --- Restore ---
@@ -157,6 +187,7 @@ export async function restoreResource(
   }
 
   const amount = input.amount ?? 1;
+  assertPositiveResourceAmount(amount, "restore");
   const previousUses = pool.currentUses;
   const newUses = Math.min(pool.currentUses + amount, pool.maxUses);
 
@@ -184,7 +215,7 @@ export async function restoreResource(
     createdByLabel: input.createdByLabel,
   });
 
-  return updated;
+  return updated!;
 }
 
 // --- Rest Engines ---
@@ -269,7 +300,7 @@ export async function recordResourceEvent(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterResourceEvents(

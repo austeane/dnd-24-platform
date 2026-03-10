@@ -128,7 +128,7 @@ export async function recordCharacterSource(
     })
     .returning();
 
-  return row;
+  return row!;
 }
 
 export async function listCharacterSources(

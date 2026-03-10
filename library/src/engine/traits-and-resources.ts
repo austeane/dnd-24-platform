@@ -1,6 +1,7 @@
 import type {
   AbilityScoreSet,
   EvaluatedResource,
+  PersistedResourcePoolState,
   EvaluatedSense,
   EvaluatedTrait,
   ResourcePoolDefinition,
@@ -24,12 +25,25 @@ export function buildResources(
   effects: EffectEnvelope[],
   abilityScores: AbilityScoreSet,
   proficiencyBonus: number,
+  resourcePoolState: PersistedResourcePoolState[] = [],
 ): EvaluatedResource[] {
+  const trackedPoolsByName = new Map(
+    resourcePoolState.map((pool) => [pool.resourceName, pool] as const),
+  );
+
   return effects.flatMap((entry) => {
     if (entry.effect.type === "grant-resource") {
+      const tracked = trackedPoolsByName.get(entry.effect.resource.name);
+      const currentUses = tracked
+        ? Math.min(Math.max(tracked.currentUses, 0), entry.effect.resource.maxUses)
+        : entry.effect.resource.maxUses;
+
       return [{
         ...entry.effect.resource,
         sourceName: entry.sourceName,
+        currentUses,
+        isTracked: tracked !== undefined,
+        isDepleted: currentUses <= 0,
       }];
     }
 
@@ -40,14 +54,23 @@ export function buildResources(
         : resource.baseUses +
           getEffectAbilityModifier(abilityScores, resource.ability ?? "charisma") +
           (resource.bonus ?? 0);
+      const maxUses = Math.max(
+        resolvedUses,
+        resource.minimum,
+      );
+      const tracked = trackedPoolsByName.get(resource.name);
+      const currentUses = tracked
+        ? Math.min(Math.max(tracked.currentUses, 0), maxUses)
+        : maxUses;
+
       return [{
         name: resource.name,
-        maxUses: Math.max(
-          resolvedUses,
-          resource.minimum,
-        ),
+        maxUses,
         resetOn: resource.resetOn,
         sourceName: entry.sourceName,
+        currentUses,
+        isTracked: tracked !== undefined,
+        isDepleted: currentUses <= 0,
       }];
     }
 

@@ -15,9 +15,9 @@ import type {
 import type { Spell } from "../types/spell.ts";
 
 export const generatedContentManifest = {
-  "totalEntities": 103,
+  "totalEntities": 107,
   "packs": {
-    "srd-5e-2024": 71,
+    "srd-5e-2024": 75,
     "advanced-adventurers": 32,
     "campaign-private": 0
   },
@@ -25,7 +25,7 @@ export const generatedContentManifest = {
     "spell": 32,
     "rule": 4,
     "condition": 2,
-    "equipment": 8,
+    "equipment": 12,
     "feat": 5,
     "species": 3,
     "class": 5,
@@ -2300,6 +2300,33 @@ export const allCanonEntities = [
   },
   {
     "type": "equipment",
+    "id": "equipment:chain-mail",
+    "slug": "chain-mail",
+    "name": "Chain Mail",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Equipment/Chain Mail"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Heavy armor with AC 16, Strength 13 required, stealth disadvantage.",
+    "bodyMd": "Chain Mail sets AC to 16 with no Dexterity bonus. Requires Strength 13 and imposes Stealth disadvantage.",
+    "equipmentCategory": "armor",
+    "effects": [
+      {
+        "type": "set-ac-formula",
+        "formula": {
+          "base": 16,
+          "abilityModifiers": []
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
     "id": "equipment:dagger",
     "slug": "dagger",
     "name": "Dagger",
@@ -2351,6 +2378,33 @@ export const allCanonEntities = [
             "dexterity"
           ],
           "maxAC": 14
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
+    "id": "equipment:javelin",
+    "slug": "javelin",
+    "name": "Javelin",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Weapons/Javelin"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Simple melee weapon dealing 1d6 piercing with Thrown (30/120).",
+    "bodyMd": "Javelin is a simple thrown melee weapon with the Slow mastery property.",
+    "equipmentCategory": "weapon",
+    "effects": [
+      {
+        "type": "grant-trait",
+        "trait": {
+          "name": "Javelin",
+          "description": "Simple melee weapon: 1d6 piercing damage, Thrown (30/120), mastery Slow."
         }
       }
     ]
@@ -2413,6 +2467,33 @@ export const allCanonEntities = [
   },
   {
     "type": "equipment",
+    "id": "equipment:longsword",
+    "slug": "longsword",
+    "name": "Longsword",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Weapons/Longsword"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Martial melee weapon dealing 1d8 slashing, or 1d10 versatile.",
+    "bodyMd": "Longsword is a versatile martial melee weapon with the Sap mastery property.",
+    "equipmentCategory": "weapon",
+    "effects": [
+      {
+        "type": "grant-trait",
+        "trait": {
+          "name": "Longsword",
+          "description": "Martial melee weapon: 1d8 slashing damage, Versatile (1d10), mastery Sap."
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
     "id": "equipment-quarterstaff",
     "slug": "quarterstaff",
     "name": "Quarterstaff",
@@ -2439,6 +2520,33 @@ export const allCanonEntities = [
         "trait": {
           "name": "Quarterstaff",
           "description": "Simple melee weapon: 1d6 bludgeoning damage, Versatile (1d8), mastery Topple."
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
+    "id": "equipment:rapier",
+    "slug": "rapier",
+    "name": "Rapier",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Weapons/Rapier"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Martial finesse weapon dealing 1d8 piercing damage.",
+    "bodyMd": "Rapier is a finesse martial weapon with the Vex mastery property.",
+    "equipmentCategory": "weapon",
+    "effects": [
+      {
+        "type": "grant-trait",
+        "trait": {
+          "name": "Rapier",
+          "description": "Martial melee weapon: 1d8 piercing damage, Finesse, mastery Vex."
         }
       }
     ]
@@ -2549,8 +2657,11 @@ export const allCanonEntities = [
       {
         "type": "grant-trait",
         "trait": {
-          "name": "Initiative Proficiency",
-          "description": "Add your Proficiency Bonus to initiative rolls and you may swap initiative with a willing ally immediately after rolling."
+          "name": "Alert",
+          "description": "You add your Proficiency Bonus to initiative rolls. You can also swap initiative with a willing ally immediately after rolling.",
+          "tags": [
+            "initiative-proficiency-bonus"
+          ]
         }
       }
     ]
@@ -2578,14 +2689,26 @@ export const allCanonEntities = [
         "type": "grant-trait",
         "trait": {
           "name": "Magic Initiate",
-          "description": "Choose a Cleric, Druid, or Wizard list, learn two cantrips, and always have one chosen level 1 spell prepared with one free casting per long rest."
+          "description": "You learn two cantrips and one level 1 spell from a chosen class's spell list (Cleric, Druid, or Wizard). You always have the level 1 spell prepared and can cast it once per Long Rest without expending a spell slot.",
+          "tags": [
+            "choice-capture",
+            "free-cast-tracking"
+          ]
+        }
+      },
+      {
+        "type": "grant-resource",
+        "resource": {
+          "name": "Magic Initiate Free Cast",
+          "maxUses": 1,
+          "resetOn": "long"
         }
       }
     ]
   },
   {
     "type": "feat",
-    "id": "feat-musician",
+    "id": "feat:musician",
     "slug": "musician",
     "name": "Musician",
     "packId": "srd-5e-2024",
@@ -2603,8 +2726,15 @@ export const allCanonEntities = [
     "prerequisites": [],
     "effects": [
       {
-        "type": "unmodeled",
-        "description": "Musician affects party-rest behavior rather than a single-character numeric stat block, so it is tracked as a known feat pending party-rest automation."
+        "type": "grant-trait",
+        "trait": {
+          "name": "Musician",
+          "description": "When you finish a Short or Long Rest, you can play a song on a musical instrument and give Bardic Inspiration to allies who hear it. The number of allies equals your Proficiency Bonus.",
+          "tags": [
+            "short-rest-benefit",
+            "bardic-inspiration-recovery"
+          ]
+        }
       }
     ]
   },
@@ -2762,14 +2892,38 @@ export const allCanonEntities = [
         "type": "grant-trait",
         "trait": {
           "name": "Fey Ancestry",
-          "description": "You have advantage on saving throws you make to avoid or end the Charmed condition."
+          "description": "You have advantage on saving throws you make to avoid or end the Charmed condition.",
+          "tags": [
+            "advantage-vs-charmed"
+          ]
         }
       },
       {
         "type": "grant-trait",
         "trait": {
           "name": "Trance",
-          "description": "You do not need to sleep, magic cannot put you to sleep, and you can finish a Long Rest in 4 hours of meditation."
+          "description": "You do not need to sleep, magic cannot put you to sleep, and you can finish a Long Rest in 4 hours of meditation.",
+          "tags": [
+            "4-hour-long-rest"
+          ]
+        }
+      },
+      {
+        "type": "grant-spell-access",
+        "spell": {
+          "spellName": "Faerie Fire",
+          "spellEntityId": "spell-faerie-fire",
+          "spellPackId": "srd-5e-2024",
+          "alwaysPrepared": true,
+          "source": "Drow Lineage"
+        }
+      },
+      {
+        "type": "grant-resource",
+        "resource": {
+          "name": "Drow Faerie Fire Free Cast",
+          "maxUses": 1,
+          "resetOn": "long"
         }
       }
     ]
@@ -5518,6 +5672,33 @@ export const allCanonConditions = [
 export const allCanonEquipment = [
   {
     "type": "equipment",
+    "id": "equipment:chain-mail",
+    "slug": "chain-mail",
+    "name": "Chain Mail",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Equipment/Chain Mail"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Heavy armor with AC 16, Strength 13 required, stealth disadvantage.",
+    "bodyMd": "Chain Mail sets AC to 16 with no Dexterity bonus. Requires Strength 13 and imposes Stealth disadvantage.",
+    "equipmentCategory": "armor",
+    "effects": [
+      {
+        "type": "set-ac-formula",
+        "formula": {
+          "base": 16,
+          "abilityModifiers": []
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
     "id": "equipment:dagger",
     "slug": "dagger",
     "name": "Dagger",
@@ -5569,6 +5750,33 @@ export const allCanonEquipment = [
             "dexterity"
           ],
           "maxAC": 14
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
+    "id": "equipment:javelin",
+    "slug": "javelin",
+    "name": "Javelin",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Weapons/Javelin"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Simple melee weapon dealing 1d6 piercing with Thrown (30/120).",
+    "bodyMd": "Javelin is a simple thrown melee weapon with the Slow mastery property.",
+    "equipmentCategory": "weapon",
+    "effects": [
+      {
+        "type": "grant-trait",
+        "trait": {
+          "name": "Javelin",
+          "description": "Simple melee weapon: 1d6 piercing damage, Thrown (30/120), mastery Slow."
         }
       }
     ]
@@ -5631,6 +5839,33 @@ export const allCanonEquipment = [
   },
   {
     "type": "equipment",
+    "id": "equipment:longsword",
+    "slug": "longsword",
+    "name": "Longsword",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Weapons/Longsword"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Martial melee weapon dealing 1d8 slashing, or 1d10 versatile.",
+    "bodyMd": "Longsword is a versatile martial melee weapon with the Sap mastery property.",
+    "equipmentCategory": "weapon",
+    "effects": [
+      {
+        "type": "grant-trait",
+        "trait": {
+          "name": "Longsword",
+          "description": "Martial melee weapon: 1d8 slashing damage, Versatile (1d10), mastery Sap."
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
     "id": "equipment-quarterstaff",
     "slug": "quarterstaff",
     "name": "Quarterstaff",
@@ -5657,6 +5892,33 @@ export const allCanonEquipment = [
         "trait": {
           "name": "Quarterstaff",
           "description": "Simple melee weapon: 1d6 bludgeoning damage, Versatile (1d8), mastery Topple."
+        }
+      }
+    ]
+  },
+  {
+    "type": "equipment",
+    "id": "equipment:rapier",
+    "slug": "rapier",
+    "name": "Rapier",
+    "packId": "srd-5e-2024",
+    "sourceEdition": "srd-2024",
+    "sourceReference": {
+      "sourceTitle": "System Reference Document 5.2.1",
+      "locator": "chapter-07:Weapons/Rapier"
+    },
+    "adaptationMode": "verbatim",
+    "judgement": null,
+    "reviewStatus": "verified",
+    "summary": "Martial finesse weapon dealing 1d8 piercing damage.",
+    "bodyMd": "Rapier is a finesse martial weapon with the Vex mastery property.",
+    "equipmentCategory": "weapon",
+    "effects": [
+      {
+        "type": "grant-trait",
+        "trait": {
+          "name": "Rapier",
+          "description": "Martial melee weapon: 1d8 piercing damage, Finesse, mastery Vex."
         }
       }
     ]
@@ -5770,8 +6032,11 @@ export const allCanonFeats = [
       {
         "type": "grant-trait",
         "trait": {
-          "name": "Initiative Proficiency",
-          "description": "Add your Proficiency Bonus to initiative rolls and you may swap initiative with a willing ally immediately after rolling."
+          "name": "Alert",
+          "description": "You add your Proficiency Bonus to initiative rolls. You can also swap initiative with a willing ally immediately after rolling.",
+          "tags": [
+            "initiative-proficiency-bonus"
+          ]
         }
       }
     ]
@@ -5799,14 +6064,26 @@ export const allCanonFeats = [
         "type": "grant-trait",
         "trait": {
           "name": "Magic Initiate",
-          "description": "Choose a Cleric, Druid, or Wizard list, learn two cantrips, and always have one chosen level 1 spell prepared with one free casting per long rest."
+          "description": "You learn two cantrips and one level 1 spell from a chosen class's spell list (Cleric, Druid, or Wizard). You always have the level 1 spell prepared and can cast it once per Long Rest without expending a spell slot.",
+          "tags": [
+            "choice-capture",
+            "free-cast-tracking"
+          ]
+        }
+      },
+      {
+        "type": "grant-resource",
+        "resource": {
+          "name": "Magic Initiate Free Cast",
+          "maxUses": 1,
+          "resetOn": "long"
         }
       }
     ]
   },
   {
     "type": "feat",
-    "id": "feat-musician",
+    "id": "feat:musician",
     "slug": "musician",
     "name": "Musician",
     "packId": "srd-5e-2024",
@@ -5824,8 +6101,15 @@ export const allCanonFeats = [
     "prerequisites": [],
     "effects": [
       {
-        "type": "unmodeled",
-        "description": "Musician affects party-rest behavior rather than a single-character numeric stat block, so it is tracked as a known feat pending party-rest automation."
+        "type": "grant-trait",
+        "trait": {
+          "name": "Musician",
+          "description": "When you finish a Short or Long Rest, you can play a song on a musical instrument and give Bardic Inspiration to allies who hear it. The number of allies equals your Proficiency Bonus.",
+          "tags": [
+            "short-rest-benefit",
+            "bardic-inspiration-recovery"
+          ]
+        }
       }
     ]
   },
@@ -5932,14 +6216,38 @@ export const allCanonSpecies = [
         "type": "grant-trait",
         "trait": {
           "name": "Fey Ancestry",
-          "description": "You have advantage on saving throws you make to avoid or end the Charmed condition."
+          "description": "You have advantage on saving throws you make to avoid or end the Charmed condition.",
+          "tags": [
+            "advantage-vs-charmed"
+          ]
         }
       },
       {
         "type": "grant-trait",
         "trait": {
           "name": "Trance",
-          "description": "You do not need to sleep, magic cannot put you to sleep, and you can finish a Long Rest in 4 hours of meditation."
+          "description": "You do not need to sleep, magic cannot put you to sleep, and you can finish a Long Rest in 4 hours of meditation.",
+          "tags": [
+            "4-hour-long-rest"
+          ]
+        }
+      },
+      {
+        "type": "grant-spell-access",
+        "spell": {
+          "spellName": "Faerie Fire",
+          "spellEntityId": "spell-faerie-fire",
+          "spellPackId": "srd-5e-2024",
+          "alwaysPrepared": true,
+          "source": "Drow Lineage"
+        }
+      },
+      {
+        "type": "grant-resource",
+        "resource": {
+          "name": "Drow Faerie Fire Free Cast",
+          "maxUses": 1,
+          "resetOn": "long"
         }
       }
     ]
