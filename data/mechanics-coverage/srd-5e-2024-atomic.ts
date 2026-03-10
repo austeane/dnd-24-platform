@@ -38,6 +38,8 @@ const refs = {
   testsCasterFeatures: "library/tests/engine/class-features-casters.test.ts",
   testsFeatsSpecies: "library/tests/engine/feats-and-species.test.ts",
   testsLiveRoster: "library/tests/verification/live-roster-snapshot.test.ts",
+  testsSpendPlanPrep: "app/src/server/progression/spend-plan-preparation.test.ts",
+  testsPrereqEvaluator: "app/src/server/progression/prerequisite-evaluator.test.ts",
   engineAttacks: "library/src/engine/attack-profiles.ts",
   engineConditions: "library/src/engine/conditions.ts",
   engineWildShape: "library/src/engine/wild-shape.ts",
@@ -301,7 +303,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "Spend-plan preview validation",
     "partial",
     "Preview can normalize and price operations, but it still lacks full mechanic and choice coverage.",
-    { dependsOn: ["progression-spend-plan-parse"], refs: [refs.progressionService, refs.enginePrereqs], verificationGates: ["runtime", "tests", "fixtures"] },
+    { dependsOn: ["progression-spend-plan-parse"], refs: [refs.progressionService, refs.enginePrereqs, refs.testsSpendPlanPrep], verificationGates: ["runtime", "tests", "fixtures"] },
   ),
   atomic(
     "progression-class-level-commit",
@@ -310,7 +312,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "Spend-plan class-level commit",
     "partial",
     "Class-level commits write source rows and XP transactions, but downstream HP and choice effects are incomplete.",
-    { kind: "data", dependsOn: ["progression-spend-plan-preview"], refs: [refs.progressionService, refs.progressionSchema], verificationGates: ["persistence", "mutation", "tests", "fixtures"] },
+    { kind: "data", dependsOn: ["progression-spend-plan-preview"], refs: [refs.progressionService, refs.progressionSchema, refs.testsSpendPlanPrep], verificationGates: ["persistence", "mutation", "tests", "fixtures"] },
   ),
   atomic(
     "progression-canonical-source-commit",
@@ -319,7 +321,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "Spend-plan canonical-source commit",
     "partial",
     "Canonical feature and feat commits write source rows, but broad content coverage is still limited.",
-    { kind: "data", dependsOn: ["progression-spend-plan-preview"], refs: [refs.progressionService, refs.progressionSchema], verificationGates: ["persistence", "mutation", "tests", "fixtures"] },
+    { kind: "data", dependsOn: ["progression-spend-plan-preview"], refs: [refs.progressionService, refs.progressionSchema, refs.testsSpendPlanPrep], verificationGates: ["persistence", "mutation", "tests", "fixtures"] },
   ),
   atomic(
     "progression-spell-access-commit",
@@ -328,7 +330,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "Spend-plan spell-access commit",
     "partial",
     "Spell-access operations can be committed, but the system still lacks full known/prepared capacity enforcement.",
-    { kind: "data", dependsOn: ["progression-spend-plan-preview"], refs: [refs.progressionService, refs.progressionSchema], verificationGates: ["persistence", "mutation", "tests", "fixtures"] },
+    { kind: "data", dependsOn: ["progression-spend-plan-preview"], refs: [refs.progressionService, refs.progressionSchema, refs.testsSpendPlanPrep], verificationGates: ["persistence", "mutation", "tests", "fixtures"] },
   ),
   atomic(
     "progression-prerequisite-level",
@@ -373,7 +375,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "Prerequisite: source or ability match",
     "partial",
     "Source-name matching exists for AA-style requirements, but it still relies on loose string matching.",
-    { refs: [refs.enginePrereqs, refs.progressionService], verificationGates: ["runtime", "tests", "fixtures"] },
+    { refs: [refs.enginePrereqs, refs.progressionService, refs.testsPrereqEvaluator], verificationGates: ["runtime", "tests", "fixtures"] },
   ),
 ];
 
