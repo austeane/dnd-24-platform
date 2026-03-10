@@ -26,7 +26,7 @@ vi.mock("../db/index.ts", () => {
   function chainable(terminal?: unknown): Record<string, unknown> {
     const proxy: Record<string, unknown> = {};
     for (const method of ["select", "from", "where", "orderBy", "limit", "offset"]) {
-      proxy[method] = (...args: unknown[]) => {
+      proxy[method] = (..._args: unknown[]) => {
         if (method === "limit" && terminal !== undefined) return terminal;
         return proxy;
       };
