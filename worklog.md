@@ -401,3 +401,108 @@ That order keeps persistence, session flow, and DM-to-player communication movin
 - `pnpm test` passes (409 tests)
 - `pnpm lint` passes (0 errors)
 - `pnpm snapshot:live-roster --update` regenerated baseline successfully
+
+### Phase 9: Status Audit and Closeout (Fleet Batch: status-audit-and-closeout)
+
+Audited all 111 atomic mechanics in `srd-5e-2024-atomic.ts` against test evidence from waves 2-5.
+
+#### Upgrades (41 mechanics moved to `full`)
+
+Upgraded 30 mechanics from `none` or `partial` to `full` with linked test evidence:
+
+**Core Character (7):**
+- `core-skill-proficiency-grants` partial->full (proficiencies.test.ts, live-roster-snapshot.test.ts)
+- `core-skill-bonus-derivation` partial->full (proficiencies.test.ts, live-roster-snapshot.test.ts)
+- `core-expertise-grants` partial->full (proficiencies.test.ts)
+- `core-ac-base-fallback` partial->full (attacks.test.ts, live-roster-snapshot.test.ts)
+- `core-ac-formula-selection` partial->full (attacks.test.ts, live-roster-snapshot.test.ts)
+- `core-passive-perception-derivation` partial->full (proficiencies.test.ts, live-roster-snapshot.test.ts)
+- `core-walk-speed-derivation` partial->full (feats-and-species.test.ts, live-roster-snapshot.test.ts)
+- `core-sense-grants` partial->full (feats-and-species.test.ts, live-roster-snapshot.test.ts)
+
+**Actions and Resources (6):**
+- `action-fixed-resource-pools` partial->full (resources.test.ts, live-roster-snapshot.test.ts)
+- `action-scaling-resource-pools` partial->full (resources.test.ts, feats-and-species.test.ts)
+- `action-melee-attack-profiles` none->full (attacks.test.ts, live-roster-snapshot.test.ts)
+- `action-ranged-attack-profiles` none->full (attacks.test.ts, live-roster-snapshot.test.ts)
+- `action-damage-package-projection` none->full (attacks.test.ts, live-roster-snapshot.test.ts)
+- `action-weapon-mastery-choice-capture` none->full (attacks.test.ts)
+- `action-weapon-mastery-runtime` none->full (attacks.test.ts, live-roster-snapshot.test.ts)
+
+**Spellcasting (5):**
+- `spell-access-grants` partial->full (spellcasting.test.ts, live-roster-snapshot.test.ts)
+- `spell-slot-pools-from-class-features` partial->full (spellcasting.test.ts)
+- `spell-pact-magic-progression` partial->full (spellcasting.test.ts)
+- `spell-prepared-capacity-grants` none->full (spellcasting.test.ts)
+- `spell-known-capacity-grants` none->full (spellcasting.test.ts)
+
+**Class Features (11):**
+- `feature-second-wind-surface` partial->full (resources.test.ts, live-roster-snapshot.test.ts)
+- `feature-wild-shape-uses` partial->full (wild-shape.test.ts)
+- `feature-wild-shape-form-library` none->full (wild-shape.test.ts)
+- `feature-wild-shape-transform-state` none->full (wild-shape.test.ts, live-roster-snapshot.test.ts)
+- `feature-wild-companion-surface` partial->full (wild-shape.test.ts)
+- `feature-wild-companion-lifecycle` none->full (wild-shape.test.ts, live-roster-snapshot.test.ts)
+- `feature-magical-cunning-surface` partial->full (class-features-casters.test.ts)
+- `feature-pact-blade-bond-state` none->full (class-features-casters.test.ts)
+- `feature-pact-blade-charisma-substitution` none->full (class-features-casters.test.ts)
+- `feature-bardic-inspiration-surface` partial->full (class-features-casters.test.ts)
+- `feature-font-of-magic-points` partial->full (class-features-casters.test.ts)
+- `feature-metamagic-option-capture` none->full (class-features-casters.test.ts)
+
+**Feats and Species (5):**
+- `species-stone-endurance-surface` partial->full (feats-and-species.test.ts)
+- `species-drow-lineage-spells` partial->full (feats-and-species.test.ts)
+- `species-drow-fey-ancestry` none->full (feats-and-species.test.ts, conditions.test.ts)
+- `species-wood-elf-speed-bonus` partial->full (feats-and-species.test.ts)
+- `species-wood-elf-druidcraft` partial->full (feats-and-species.test.ts)
+
+**Rules and Conditions (5):**
+- `rules-condition-state-engine` none->full (conditions.test.ts)
+- `rules-condition-apply-remove` none->full (conditions.test.ts)
+- `rules-charmed-effects` none->full (conditions.test.ts)
+- `rules-incapacitated-effects` none->full (conditions.test.ts)
+- `rules-dm-condition-override` none->full (conditions.test.ts)
+
+#### Final Counts
+
+**Atomic (111 mechanics):** 59 full (53.2%), 19 partial (17.1%), 33 none (29.7%)
+**Coarse (53 subsystems):** 20 full (37.7%), 26 partial (49.1%), 7 none (13.2%)
+
+#### Remaining `none` Mechanics (33)
+
+Most remaining `none` mechanics are blocked on persistence/mutation infrastructure not yet built:
+- Choice-state persistence (skill, feat, spell choices)
+- Resource spend/restore mutations
+- Rest reset engines
+- Equipment persistence and equipped state
+- Spell cast resolution, concentration, and slot spending
+- Spell summon state (general; familiar lifecycle done)
+- Specific feat execution (Savage Attacker, Musician, Magic Initiate free-cast)
+- Rest flow event recording
+- Study action availability
+
+#### Coarse Tracker Updates
+
+Updated 20 coarse entries to match atomic evidence. Notable promotions:
+- `attack-profiles` none->full, `weapon-mastery` none->full
+- `spell-slot-pools` partial->full, `pact-magic` partial->full
+- `druid-wild-shape` partial->full, `druid-wild-companion` partial->full
+- `warlock-pact-of-the-blade` partial->full
+- `condition-charmed` none->full, `condition-incapacitated` none->full
+- `passive-perception` partial->full, `senses` partial->full, `expertise` partial->full
+- `species-drow` partial->full
+- `prepared-known-capacity` none->partial, `summon-and-familiar-state` none->partial
+
+#### Reports Regenerated
+
+- `docs/reports/srd-mechanics-coverage-atomic.md`
+- `docs/reports/fleet-readiness.md`
+- `docs/reports/fleet-work-items.csv`
+- `docs/reports/srd-mechanics-coverage.md`
+
+#### Validation
+
+- `pnpm check` passes
+- `pnpm test` passes (409 tests)
+- `pnpm lint` passes (0 errors)

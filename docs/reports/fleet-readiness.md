@@ -4,7 +4,7 @@ This report is the handoff deck for parallel agent execution.
 
 ## Summary
 
-- Atomic mechanics: 111 total, 17 full, 42 partial, 52 none
+- Atomic mechanics: 111 total, 59 full, 19 partial, 33 none
 - Fleet batches: 15 total
 - Ready now: 4
 - Blocked on dependencies: 11
