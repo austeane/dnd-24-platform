@@ -313,3 +313,52 @@ That order keeps persistence, session flow, and DM-to-player communication movin
   - `pnpm report:fleet-readiness`
   - `pnpm check`
   - `pnpm test`
+
+### 23:42:47 Verification Harness and Evidence Infrastructure
+
+- Built the verification harness batch (`verification-harness-and-live-snapshots`):
+
+#### Live-roster snapshot script
+- Added `scripts/snapshot-live-roster.ts` with `pnpm snapshot:live-roster` command.
+- Reads `data/real-campaign-intake/verified-characters.json`, builds `CharacterComputationInput` for all 5 characters using the same canonical lookup pipeline as the seed script (no DB required), calls `computeCharacterState`, and writes deterministic JSON snapshots.
+- Supports `--update` (overwrite baseline), `--check` (exit non-zero on drift), and default mode (compare + print diff).
+- Baseline stored at `data/fleet/snapshots/live-roster-baseline.json`.
+- Current roster baseline: Nara L2, Oriana L2, Ronan Wildspark L2, Tali L2, Vivennah L2.
+
+#### Fixture infrastructure
+- Added `data/fleet/fixture-patterns.ts` with `loadVerifiedRoster()`, `buildCharacterFixture(roster, slug)`, and `buildAllCharacterFixtures(roster)`.
+- These helpers let any batch test build a deterministic `CharacterComputationInput` from the verified roster without touching the database.
+- Exported `rosterSlugs` constant for the 5 seeded characters.
+
+#### Determinism tests
+- Added `library/tests/verification/report-determinism.test.ts` with 8 tests:
+  - Coarse mechanics report determinism
+  - Atomic mechanics summary determinism
+  - Fleet readiness summary determinism
+  - No duplicate IDs in coarse, atomic, or batch data
+  - All batch mechanic IDs reference valid atomic IDs
+  - All batch dependency IDs reference valid batch IDs
+
+#### Evidence gate enforcement
+- Added `checkEvidenceGates()` to `data/mechanics-coverage/types.ts`.
+- Evidence patterns: `.test.ts`, `.spec.ts`, `tests/`, `snapshots/`, `fixtures/`, `verified-characters.json`.
+- Integrated into `scripts/report-fleet-readiness.ts` main(): warns on violations, fails with `--strict`.
+- Added `library/tests/verification/evidence-gates.test.ts` (4 tests) to enforce that all `full` mechanics have evidence refs.
+- Fixed 5 `full` mechanics that were missing evidence refs by adding `testsEngine` ref.
+
+#### Live-roster computation tests
+- Added `library/tests/verification/live-roster-snapshot.test.ts` (8 tests):
+  - Loads all 5 characters, verifies computation succeeds
+  - Checks determinism across runs
+  - Verifies each character's sheet-baseline values (AC, HP, speed, PP, spell DC)
+
+#### Infrastructure changes
+- Updated `library/tsconfig.json` to include `../data/**/*.ts` (rootDir changed to `..`).
+- Added `snapshot:live-roster` script to root `package.json`.
+
+#### Validation
+- `pnpm check` passes
+- `pnpm test` passes (134 library tests + 4 app tests)
+- `pnpm lint` passes (0 warnings, 0 errors)
+- `pnpm snapshot:live-roster` produces no drift from baseline
+- `pnpm report:fleet-readiness` produces no evidence gate violations

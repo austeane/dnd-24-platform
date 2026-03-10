@@ -1,0 +1,268 @@
+{
+  "generatedAt": "2026-03-10T06:42:26.488Z",
+  "engineVersion": "0.1.0",
+  "characterCount": 5,
+  "characters": [
+    {
+      "slug": "nara",
+      "name": "Nara",
+      "level": 2,
+      "proficiencyBonus": 2,
+      "armorClass": 10,
+      "maxHP": 12,
+      "initiative": 0,
+      "speed": 30,
+      "passivePerception": 11,
+      "spellAttackBonus": 5,
+      "spellSaveDc": 13,
+      "spellCount": 0,
+      "slotPools": [
+        {
+          "source": "Spellcasting",
+          "resetOn": "long",
+          "slots": [
+            {
+              "level": 1,
+              "total": 3
+            }
+          ]
+        }
+      ],
+      "actionNames": [
+        "Create Spell Slot"
+      ],
+      "resourceNames": [
+        "Sorcery Points"
+      ],
+      "traitNames": [
+        "Convert Spell Slot to Sorcery Points",
+        "Magic Initiate",
+        "Metamagic",
+        "Sorcerer Sheet Notes"
+      ],
+      "senseNames": [],
+      "proficiencies": {
+        "savingThrows": [],
+        "skills": [],
+        "weapons": [],
+        "armors": [],
+        "tools": [],
+        "languages": []
+      },
+      "resistances": [],
+      "immunities": [],
+      "noteCount": 2,
+      "xpBanked": 0
+    },
+    {
+      "slug": "oriana",
+      "name": "Oriana",
+      "level": 2,
+      "proficiencyBonus": 2,
+      "armorClass": 12,
+      "maxHP": 18,
+      "initiative": 1,
+      "speed": 30,
+      "passivePerception": 13,
+      "spellAttackBonus": 5,
+      "spellSaveDc": 13,
+      "spellCount": 5,
+      "slotPools": [
+        {
+          "source": "Pact Magic",
+          "resetOn": "short",
+          "slots": [
+            {
+              "level": 1,
+              "total": 2
+            }
+          ]
+        }
+      ],
+      "actionNames": [
+        "Magical Cunning",
+        "Pact of the Blade"
+      ],
+      "resourceNames": [
+        "Magical Cunning"
+      ],
+      "traitNames": [
+        "Fey Ancestry",
+        "Pact Weapon",
+        "Skilled",
+        "Spell Slot Recovery",
+        "Trance"
+      ],
+      "senseNames": [
+        "Darkvision 120ft"
+      ],
+      "proficiencies": {
+        "savingThrows": [],
+        "skills": [],
+        "weapons": [],
+        "armors": [],
+        "tools": [],
+        "languages": []
+      },
+      "resistances": [],
+      "immunities": [],
+      "noteCount": 4,
+      "xpBanked": 0
+    },
+    {
+      "slug": "ronan-wildspark",
+      "name": "Ronan Wildspark",
+      "level": 2,
+      "proficiencyBonus": 2,
+      "armorClass": 14,
+      "maxHP": 22,
+      "initiative": 3,
+      "speed": 30,
+      "passivePerception": 10,
+      "spellAttackBonus": null,
+      "spellSaveDc": null,
+      "spellCount": 0,
+      "slotPools": [],
+      "actionNames": [
+        "Second Wind",
+        "Stone's Endurance"
+      ],
+      "resourceNames": [
+        "Second Wind",
+        "Stone's Endurance"
+      ],
+      "traitNames": [
+        "Giant Ancestry",
+        "Savage Attacker",
+        "Second Wind",
+        "Weapon Mastery"
+      ],
+      "senseNames": [],
+      "proficiencies": {
+        "savingThrows": [],
+        "skills": [],
+        "weapons": [],
+        "armors": [],
+        "tools": [],
+        "languages": []
+      },
+      "resistances": [],
+      "immunities": [],
+      "noteCount": 4,
+      "xpBanked": 0
+    },
+    {
+      "slug": "tali",
+      "name": "Tali",
+      "level": 2,
+      "proficiencyBonus": 2,
+      "armorClass": 13,
+      "maxHP": 19,
+      "initiative": 1,
+      "speed": 30,
+      "passivePerception": 13,
+      "spellAttackBonus": 5,
+      "spellSaveDc": 13,
+      "spellCount": 11,
+      "slotPools": [
+        {
+          "source": "Spellcasting",
+          "resetOn": "long",
+          "slots": [
+            {
+              "level": 1,
+              "total": 3
+            }
+          ]
+        }
+      ],
+      "actionNames": [
+        "Wild Companion",
+        "Wild Shape"
+      ],
+      "resourceNames": [
+        "Wild Shape"
+      ],
+      "traitNames": [
+        "Feerie Tollen",
+        "Hex Magic",
+        "Primal Order: Warden",
+        "Wild Companion Familiar",
+        "Wild Shape Forms"
+      ],
+      "senseNames": [
+        "Darkvision 60ft"
+      ],
+      "proficiencies": {
+        "savingThrows": [],
+        "skills": [],
+        "weapons": [
+          "Martial weapons"
+        ],
+        "armors": [
+          "Medium armor"
+        ],
+        "tools": [],
+        "languages": []
+      },
+      "resistances": [],
+      "immunities": [],
+      "noteCount": 4,
+      "xpBanked": 0
+    },
+    {
+      "slug": "vivennah",
+      "name": "Vivennah",
+      "level": 2,
+      "proficiencyBonus": 2,
+      "armorClass": 13,
+      "maxHP": 15,
+      "initiative": 4,
+      "speed": 35,
+      "passivePerception": 10,
+      "spellAttackBonus": 5,
+      "spellSaveDc": 13,
+      "spellCount": 7,
+      "slotPools": [
+        {
+          "source": "Spellcasting",
+          "resetOn": "long",
+          "slots": [
+            {
+              "level": 1,
+              "total": 3
+            }
+          ]
+        }
+      ],
+      "actionNames": [
+        "Bardic Inspiration"
+      ],
+      "resourceNames": [
+        "Bardic Inspiration"
+      ],
+      "traitNames": [
+        "Bardic Inspiration Die",
+        "Fey Ancestry",
+        "Musician",
+        "Musician",
+        "Trance"
+      ],
+      "senseNames": [
+        "Darkvision 60ft"
+      ],
+      "proficiencies": {
+        "savingThrows": [],
+        "skills": [],
+        "weapons": [],
+        "armors": [],
+        "tools": [],
+        "languages": []
+      },
+      "resistances": [],
+      "immunities": [],
+      "noteCount": 4,
+      "xpBanked": 0
+    }
+  ]
+}

@@ -1,0 +1,278 @@
+/**
+ * Fixture infrastructure for fleet batch testing.
+ *
+ * Each batch that requires `fixtures` or `live-roster` gates should use these
+ * helpers to build deterministic test inputs from the verified roster data.
+ *
+ * Usage in a batch test:
+ *   import { loadVerifiedRoster, buildCharacterFixture } from "../../data/fleet/fixture-patterns.ts";
+ *   const roster = loadVerifiedRoster();
+ *   const ronan = buildCharacterFixture(roster, "ronan-wildspark");
+ */
+import { readFileSync } from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+import type {
+  CharacterBaseSnapshot,
+  CharacterComputationInput,
+  Effect,
+  SourceWithEffects,
+} from "../../library/src/types/index.ts";
+import type { PackId } from "../../library/src/canon/types.ts";
+import {
+  getCanonicalEffectsForSource,
+  getCanonicalSpellByName,
+  normalizeCanonicalEntityId,
+} from "../../library/src/index.ts";
+
+const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
+const intakePath = path.join(rootDir, "data", "real-campaign-intake", "verified-characters.json");
+
+export interface VerifiedRoster {
+  campaign: {
+    progressionMode: "standard" | "aa-only" | "hybrid";
+    enabledPackIds: string[];
+  };
+  characters: VerifiedCharacterData[];
+}
+
+export interface VerifiedCharacterData {
+  reviewStatus: string;
+  identity: {
+    name: string;
+    slug: string;
+    className: string;
+    classId: string;
+    level: number;
+  };
+  tableState: {
+    armorClass: number;
+    maxHp: number;
+    speed: number;
+    passivePerception?: number;
+  };
+  abilities: {
+    strength: number;
+    dexterity: number;
+    constitution: number;
+    intelligence: number;
+    wisdom: number;
+    charisma: number;
+  };
+  spellcasting: {
+    ability: CharacterBaseSnapshot["spellcastingAbility"];
+    knownSpells: string[];
+  } | null;
+  sourceLedger: {
+    features: SeedFeature[];
+  };
+  xpLedger: Array<{
+    id: string;
+    amount: number;
+    category: "award" | "spend-aa" | "spend-level" | "refund" | "adjustment";
+    note: string;
+    sessionId?: string | null;
+  }>;
+}
+
+interface SeedFeature {
+  id: string;
+  label: string;
+  sourceKind: string;
+  sourceEntityId: string;
+  sourcePackId?: string | null;
+  rank?: number;
+  description?: string;
+  effects: Effect[];
+  notes: string[];
+}
+
+const defaultClassFeatureIds: Record<string, Array<{ minLevel: number; entityId: string; label: string }>> = {
+  fighter: [
+    { minLevel: 1, entityId: "class-feature:second-wind", label: "Second Wind" },
+    { minLevel: 1, entityId: "class-feature:weapon-mastery", label: "Weapon Mastery" },
+  ],
+  druid: [
+    { minLevel: 2, entityId: "class-feature:druidic-spellcasting-2", label: "Druidic Spellcasting (Level 2)" },
+    { minLevel: 2, entityId: "class-feature:wild-shape", label: "Wild Shape" },
+    { minLevel: 2, entityId: "class-feature:wild-companion", label: "Wild Companion" },
+  ],
+  warlock: [
+    { minLevel: 2, entityId: "class-feature:pact-magic-2", label: "Pact Magic (Level 2)" },
+    { minLevel: 2, entityId: "class-feature:magical-cunning", label: "Magical Cunning" },
+  ],
+  bard: [
+    { minLevel: 2, entityId: "class-feature:bard-spellcasting-2", label: "Bard Spellcasting (Level 2)" },
+    { minLevel: 1, entityId: "class-feature:bardic-inspiration", label: "Bardic Inspiration" },
+  ],
+  sorcerer: [
+    { minLevel: 2, entityId: "class-feature:sorcerous-spellcasting-2", label: "Sorcerous Spellcasting (Level 2)" },
+    { minLevel: 2, entityId: "class-feature:font-of-magic", label: "Font of Magic" },
+    { minLevel: 2, entityId: "class-feature:metamagic", label: "Metamagic" },
+  ],
+};
+
+function mergeEffects(canonical: Effect[], inline: Effect[]): Effect[] {
+  const merged = [...canonical, ...inline];
+  const seen = new Set<string>();
+  return merged.filter((effect) => {
+    const key = JSON.stringify(effect);
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+function buildSeedFeatures(character: VerifiedCharacterData): SeedFeature[] {
+  const merged = new Map<string, SeedFeature>();
+
+  for (const blueprint of defaultClassFeatureIds[character.identity.classId] ?? []) {
+    if (character.identity.level < blueprint.minLevel) continue;
+    const normalized = normalizeCanonicalEntityId(blueprint.entityId) ?? blueprint.entityId;
+    const key = `class-feature:${normalized}:1`;
+    merged.set(key, {
+      id: blueprint.entityId.replace("class-feature:", ""),
+      label: blueprint.label,
+      sourceKind: "class-feature",
+      sourceEntityId: blueprint.entityId,
+      sourcePackId: "srd-5e-2024",
+      effects: [],
+      notes: [],
+    });
+  }
+
+  for (const feature of character.sourceLedger.features) {
+    const normalized = normalizeCanonicalEntityId(feature.sourceEntityId) ?? feature.sourceEntityId;
+    const key = `${feature.sourceKind}:${normalized}:${feature.rank ?? 1}`;
+    merged.set(key, feature);
+  }
+
+  return [...merged.values()];
+}
+
+/** Load the verified roster from disk. Safe to call in tests (sync read). */
+export function loadVerifiedRoster(): VerifiedRoster {
+  const raw = readFileSync(intakePath, "utf8");
+  return JSON.parse(raw) as VerifiedRoster;
+}
+
+/** Build a CharacterComputationInput for a single character by slug. */
+export function buildCharacterFixture(
+  roster: VerifiedRoster,
+  slug: string,
+): CharacterComputationInput {
+  const character = roster.characters.find((c) => c.identity.slug === slug);
+  if (!character) {
+    throw new Error(`Character "${slug}" not found in verified roster`);
+  }
+
+  const enabledPackIds = roster.campaign.enabledPackIds as PackId[];
+  const seedFeatures = buildSeedFeatures(character);
+
+  const derivedWalkSpeedBonus = seedFeatures.reduce((sum, feature) => {
+    const canonical = getCanonicalEffectsForSource(feature.sourcePackId ?? undefined, feature.sourceEntityId);
+    const combined = [...canonical, ...feature.effects];
+    return sum + combined.reduce((inner, effect) => {
+      if (effect.type !== "speed-bonus" || effect.movementType !== "walk") return inner;
+      return inner + effect.value;
+    }, 0);
+  }, 0);
+
+  const base: CharacterBaseSnapshot = {
+    name: character.identity.name,
+    progressionMode: roster.campaign.progressionMode,
+    abilityScores: character.abilities,
+    baseArmorClass: character.tableState.armorClass,
+    baseMaxHP: character.tableState.maxHp,
+    baseSpeed: Math.max(character.tableState.speed - derivedWalkSpeedBonus, 0),
+    basePassivePerception: character.tableState.passivePerception,
+    spellcastingAbility: character.spellcasting?.ability,
+  };
+
+  const sources: SourceWithEffects[] = [];
+
+  sources.push({
+    source: {
+      id: `fixture:${slug}:class:${character.identity.classId}`,
+      kind: "class-level",
+      name: `${character.identity.className} ${character.identity.level}`,
+      rank: character.identity.level,
+    },
+    effects: [],
+  });
+
+  if (character.spellcasting && character.spellcasting.knownSpells.length > 0) {
+    sources.push({
+      source: {
+        id: `fixture:${slug}:spell-list`,
+        kind: "class-feature",
+        name: `${character.identity.className} spell list`,
+      },
+      effects: character.spellcasting.knownSpells.map((spellName) => {
+        const spell = getCanonicalSpellByName(spellName, enabledPackIds);
+        return {
+          type: "grant-spell-access" as const,
+          spell: {
+            spellName,
+            spellEntityId: spell?.id,
+            spellPackId: spell?.packId,
+            alwaysPrepared: false,
+            source: character.identity.className,
+          },
+        };
+      }),
+    });
+  }
+
+  for (const feature of seedFeatures) {
+    const canonical = getCanonicalEffectsForSource(feature.sourcePackId ?? undefined, feature.sourceEntityId);
+    sources.push({
+      source: {
+        id: `fixture:${slug}:feature:${feature.id}`,
+        kind: feature.sourceKind as SourceWithEffects["source"]["kind"],
+        name: feature.label,
+        description: feature.description,
+        entityId: feature.sourceEntityId,
+        packId: feature.sourcePackId ?? undefined,
+        rank: feature.rank,
+      },
+      effects: mergeEffects(canonical, feature.effects),
+    });
+  }
+
+  return {
+    base,
+    sources,
+    xpLedger: character.xpLedger.map((entry) => ({
+      id: entry.id,
+      timestamp: "2026-01-01T00:00:00.000Z",
+      amount: entry.amount,
+      category: entry.category,
+      note: entry.note,
+      sessionId: entry.sessionId ?? undefined,
+    })),
+  };
+}
+
+/** Build fixtures for all reviewed characters at once. */
+export function buildAllCharacterFixtures(
+  roster: VerifiedRoster,
+): Map<string, CharacterComputationInput> {
+  const fixtures = new Map<string, CharacterComputationInput>();
+  for (const character of roster.characters) {
+    if (character.reviewStatus === "needs-review") continue;
+    fixtures.set(character.identity.slug, buildCharacterFixture(roster, character.identity.slug));
+  }
+  return fixtures;
+}
+
+/** Slug list of the five seeded roster characters. */
+export const rosterSlugs = [
+  "nara",
+  "oriana",
+  "ronan-wildspark",
+  "tali",
+  "vivennah",
+] as const;
+
+export type RosterSlug = (typeof rosterSlugs)[number];

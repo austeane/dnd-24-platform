@@ -5,9 +5,10 @@ import { srdFleetBatches } from "../data/fleet/srd-fleet-batches.ts";
 import type { FleetBatch } from "../data/fleet/types.ts";
 import { srd2024AtomicMechanicsCoverage } from "../data/mechanics-coverage/srd-5e-2024-atomic.ts";
 import { srd2024MechanicsCoverage } from "../data/mechanics-coverage/srd-5e-2024.ts";
-import type {
-  AtomicMechanicsCoverageEntry,
-  CoverageStatus,
+import {
+  checkEvidenceGates,
+  type AtomicMechanicsCoverageEntry,
+  type CoverageStatus,
 } from "../data/mechanics-coverage/types.ts";
 
 const statusOrder: CoverageStatus[] = ["full", "partial", "none"];
@@ -382,6 +383,24 @@ function buildBatchCsv(batches: FleetBatch[]): string {
 async function main(): Promise<void> {
   validateAtomic(srd2024AtomicMechanicsCoverage);
   validateBatches(srd2024AtomicMechanicsCoverage, srdFleetBatches);
+
+  // Evidence gate enforcement: warn (or fail with --strict) if full mechanics lack evidence
+  const evidenceViolations = checkEvidenceGates(srd2024AtomicMechanicsCoverage);
+  if (evidenceViolations.length > 0) {
+    process.stderr.write(
+      `\nEvidence gate violations (${evidenceViolations.length}):\n`,
+    );
+    for (const violation of evidenceViolations) {
+      process.stderr.write(
+        `  ${violation.id}: ${violation.reason} refs=[${violation.refs.join(", ")}]\n`,
+      );
+    }
+    if (process.argv.includes("--strict")) {
+      process.exitCode = 1;
+      return;
+    }
+    process.stderr.write("  (pass --strict to fail on violations)\n\n");
+  }
 
   const rootDir = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
   const reportDir = path.join(rootDir, "docs", "reports");

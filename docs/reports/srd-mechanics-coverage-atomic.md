@@ -81,7 +81,7 @@ Status rule:
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
 | --- | --- | --- | --- | --- | --- |
 | Ability scores and modifiers | Ability modifier math | Full |  | `runtime`, `tests` | `library/src/engine/math.ts`, `library/tests/engine/character-computer.test.ts` |
-| Class level tracking | Class level aggregation | Full |  | `runtime`, `tests` | `library/src/engine/levels.ts`, `app/src/server/progression/service.ts` |
+| Class level tracking | Class level aggregation | Full |  | `runtime`, `tests` | `library/src/engine/levels.ts`, `app/src/server/progression/service.ts`, `library/tests/engine/character-computer.test.ts` |
 | Proficiency bonus progression | Proficiency bonus table | Full |  | `runtime`, `tests` | `library/src/engine/math.ts`, `library/tests/engine/character-computer.test.ts` |
 | Saving throw proficiencies | Saving throw proficiency grants | Full |  | `runtime`, `tests` | `library/src/engine/proficiencies.ts`, `library/tests/engine/character-computer.test.ts` |
 | Skill proficiencies and skill choice state | Skill proficiency grants | Partial |  | `runtime`, `tests`, `live-roster` | `library/src/engine/proficiencies.ts`, `data/real-campaign-intake/verified-characters.json` |
@@ -110,7 +110,7 @@ Status rule:
 
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
 | --- | --- | --- | --- | --- | --- |
-| Feat Alert | Alert-style initiative modifiers | Full |  | `runtime`, `tests` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/feats/` |
+| Feat Alert | Alert-style initiative modifiers | Full |  | `runtime`, `tests` | `library/src/engine/character-computer.ts`, `content/canon/packs/srd-5e-2024/feats/`, `library/tests/engine/character-computer.test.ts` |
 | Feat: Magic Initiate | Magic Initiate spell choice capture | None |  | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/db/schema/progression.ts`, `content/canon/packs/srd-5e-2024/feats/`, `data/real-campaign-intake/verified-characters.json` |
 | Feat: Magic Initiate | Magic Initiate free-cast tracking | None | `feat-magic-initiate-choice-capture`, `spell-free-cast-state` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/progression/service.ts`, `content/canon/packs/srd-5e-2024/feats/` |
 | Feat: Skilled | Skilled proficiency choice capture | None | `core-skill-choice-capture` | `persistence`, `mutation`, `tests`, `fixtures`, `live-roster` | `app/src/server/db/schema/progression.ts`, `content/canon/packs/srd-5e-2024/feats/`, `data/real-campaign-intake/verified-characters.json` |
@@ -134,9 +134,9 @@ Status rule:
 
 | Parent | Atomic Mechanic | Status | Depends On | Gates | Refs |
 | --- | --- | --- | --- | --- | --- |
-| XP ledger | XP award ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts` |
-| XP ledger | XP spend ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts` |
-| XP ledger | XP refund and adjustment ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts` |
+| XP ledger | XP award ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts`, `library/tests/engine/character-computer.test.ts` |
+| XP ledger | XP spend ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts`, `library/tests/engine/character-computer.test.ts` |
+| XP ledger | XP refund and adjustment ledger | Full |  | `persistence`, `runtime`, `tests` | `app/src/server/db/schema/progression.ts`, `library/src/engine/xp.ts`, `library/tests/engine/character-computer.test.ts` |
 | AA and level-up spend-plan preview | Spend-plan document parse and normalization | Full |  | `runtime`, `tests` | `app/src/server/progression/service.ts`, `app/src/server/progression/plan-document.test.ts` |
 | AA and level-up spend-plan preview | Spend-plan preview validation | Partial | `progression-spend-plan-parse` | `runtime`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `library/src/engine/prerequisite-evaluator.ts` |
 | AA and level-up spend-plan commit | Spend-plan class-level commit | Partial | `progression-spend-plan-preview` | `persistence`, `mutation`, `tests`, `fixtures` | `app/src/server/progression/service.ts`, `app/src/server/db/schema/progression.ts` |

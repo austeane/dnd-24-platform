@@ -25,6 +25,7 @@
     "db:studio": "pnpm -F @dnd/app db:studio",
     "report:mechanics-coverage": "tsx scripts/report-mechanics-coverage.ts",
     "report:fleet-readiness": "tsx scripts/report-fleet-readiness.ts",
+    "snapshot:live-roster": "tsx scripts/snapshot-live-roster.ts",
     "prepare": "husky"
   },
   "devDependencies": {

@@ -76,7 +76,7 @@ const coreCharacter: AtomicMechanicsCoverageEntry[] = [
     "Class level aggregation",
     "full",
     "Class-level sources are summed into total character level.",
-    { refs: [refs.engineLevels, refs.progressionService], verificationGates: ["runtime", "tests"] },
+    { refs: [refs.engineLevels, refs.progressionService, refs.testsEngine], verificationGates: ["runtime", "tests"] },
   ),
   atomic(
     "core-proficiency-bonus-table",
@@ -250,7 +250,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "XP award ledger",
     "full",
     "Award transactions are stored and projected into banked XP.",
-    { kind: "data", refs: [refs.progressionSchema, refs.engineXp], verificationGates: ["persistence", "runtime", "tests"] },
+    { kind: "data", refs: [refs.progressionSchema, refs.engineXp, refs.testsEngine], verificationGates: ["persistence", "runtime", "tests"] },
   ),
   atomic(
     "progression-xp-spend-ledger",
@@ -259,7 +259,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "XP spend ledger",
     "full",
     "AA and level-spend transactions are stored and projected into banked XP.",
-    { kind: "data", refs: [refs.progressionSchema, refs.engineXp], verificationGates: ["persistence", "runtime", "tests"] },
+    { kind: "data", refs: [refs.progressionSchema, refs.engineXp, refs.testsEngine], verificationGates: ["persistence", "runtime", "tests"] },
   ),
   atomic(
     "progression-xp-refund-adjustment-ledger",
@@ -268,7 +268,7 @@ const progression: AtomicMechanicsCoverageEntry[] = [
     "XP refund and adjustment ledger",
     "full",
     "Refund and adjustment transactions are stored and included in runtime totals.",
-    { kind: "data", refs: [refs.progressionSchema, refs.engineXp], verificationGates: ["persistence", "runtime", "tests"] },
+    { kind: "data", refs: [refs.progressionSchema, refs.engineXp, refs.testsEngine], verificationGates: ["persistence", "runtime", "tests"] },
   ),
   atomic(
     "progression-spend-plan-parse",
@@ -883,7 +883,7 @@ const featsAndSpecies: AtomicMechanicsCoverageEntry[] = [
     "Alert-style initiative modifiers",
     "full",
     "Initiative-modifying feat effects already resolve through generic modifier handling.",
-    { refs: [refs.engineCharacter, refs.canonFeats], verificationGates: ["runtime", "tests"] },
+    { refs: [refs.engineCharacter, refs.canonFeats, refs.testsEngine], verificationGates: ["runtime", "tests"] },
   ),
   atomic(
     "feat-magic-initiate-choice-capture",
