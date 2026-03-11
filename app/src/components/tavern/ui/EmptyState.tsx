@@ -10,11 +10,11 @@ export function EmptyState({
   description,
 }: EmptyStateProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-16 text-center">
-      <div className="mb-3 text-4xl text-border">{icon}</div>
-      <h3 className="mb-1 font-heading text-lg font-bold text-ink">{title}</h3>
+    <div className="empty-state-shell">
+      <div className="empty-state-icon" aria-hidden="true">{icon}</div>
+      <h3 className="empty-state-title">{title}</h3>
       {description && (
-        <p className="max-w-sm text-sm text-ink-soft">{description}</p>
+        <p className="empty-state-copy">{description}</p>
       )}
     </div>
   );

@@ -122,6 +122,7 @@ export {
 } from "./condition-state.ts";
 export {
   applyConditionWithEffects,
+  clearActiveConditionsByName,
   removeConditionWithEffects,
   overrideConditionWithEffects,
   getActiveConditionsWithEffects,

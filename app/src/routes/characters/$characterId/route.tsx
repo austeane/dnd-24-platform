@@ -2,25 +2,33 @@ import {
   Outlet,
   createFileRoute,
   notFound,
+  redirect,
+  useRouter,
 } from "@tanstack/react-router";
+import { startTransition, useState } from "react";
 import { TavernLayout } from "../../../components/tavern/layout/TavernLayout.tsx";
 import { TavernNav } from "../../../components/tavern/layout/TavernNav.tsx";
 import { ErrorCard } from "../../../components/tavern/ui/ErrorCard.tsx";
 import { Loading } from "../../../components/tavern/ui/Loading.tsx";
 import { NotFound } from "../../../components/tavern/ui/NotFound.tsx";
-import type { TavernShellData } from "./-server.ts";
+import { withBasePath } from "../../../lib/base-path.ts";
+import type { CharacterShellResponse, TavernShellData } from "./-server.ts";
 import { fetchCharacterShellData } from "./-server.ts";
 
 const characterRouteId = "/characters/$characterId" as const;
 
 export function requireCharacterShellData(
-  data: TavernShellData | null,
+  response: CharacterShellResponse,
 ): TavernShellData {
-  if (!data) {
+  if (response.redirectTo) {
+    throw redirect({ href: response.redirectTo });
+  }
+
+  if (!response.shell) {
     throw notFound({ routeId: characterRouteId });
   }
 
-  return data;
+  return response.shell;
 }
 
 export async function loadCharacterShellData(
@@ -43,12 +51,40 @@ export const Route = createFileRoute("/characters/$characterId")({
 
 function CharacterShellLayout() {
   const data = Route.useLoaderData();
+  const router = useRouter();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  async function handleLogout() {
+    setIsLoggingOut(true);
+    try {
+      const { logoutCampaignAccess } = await import(
+        "../../campaigns/$campaignSlug/-server.ts"
+      );
+      const response = await logoutCampaignAccess({
+        data: {
+          campaignId: data.campaign.id,
+          redirectTo: `/campaigns/${data.campaign.slug}/access`,
+        },
+      });
+      const payload = (await response.json()) as { redirectTo?: string };
+      startTransition(() => {
+        router.navigate({ href: payload.redirectTo ?? withBasePath("/") });
+      });
+    } finally {
+      setIsLoggingOut(false);
+    }
+  }
 
   return (
     <>
       <TavernNav
+        campaignId={data.campaign.id}
         campaignName={data.campaign.name}
+        campaignSlug={data.campaign.slug}
+        viewer={data.viewer}
         characterId={data.character.id}
+        isLoggingOut={isLoggingOut}
+        onLogout={handleLogout}
       />
       <TavernLayout>
         <Outlet />

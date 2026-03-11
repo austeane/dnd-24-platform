@@ -67,7 +67,10 @@ describe("buildSpellbookData", () => {
   });
 
   it("prefers granted spell identity inside the campaign-enabled packs", () => {
-    const data = buildSpellbookData(createSpellcastingState(), [
+    const data = buildSpellbookData({
+      spellcasting: createSpellcastingState(),
+      resources: [],
+    }, [
       "srd-5e-2024",
       "advanced-adventurers",
     ]);
@@ -87,7 +90,7 @@ describe("buildSpellbookData", () => {
         }),
       ]),
     );
-    expect(data.groups.find((group) => group.level === 2)?.slots).toMatchObject({
+    expect(data.groups.find((group) => group.level === 2)?.slots[0]).toMatchObject({
       total: 2,
       current: 2,
     });

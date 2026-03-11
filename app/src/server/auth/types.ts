@@ -72,3 +72,9 @@ export interface ListAccessSessionsInput {
   role?: AccessCredentialRole;
   characterId?: string | null;
 }
+
+export interface CampaignAccessStatus {
+  campaignId: string;
+  hasDmPassword: boolean;
+  playerCharacterIds: string[];
+}

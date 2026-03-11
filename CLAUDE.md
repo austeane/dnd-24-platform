@@ -46,10 +46,14 @@ Every commit must pass: `lint-staged` (oxlint on staged .ts/.tsx) → type-check
 Deploys to `www.austinwallace.ca/dnd` via Railway + SST Router. See `docs/deployment.md` for full details.
 
 - Railway project: `dnd-platform`, service: `app`
+- Railway Postgres service: `Postgres`
 - Railway origin: `https://app-production-0cb2.up.railway.app`
 - `VITE_BASE_PATH=/dnd/` set on Railway; defaults to `/` locally
 - SST Router config lives in `~/dev/austin-site/sst.config.ts`
 - SST deploy: `cd ~/dev/austin-site && AWS_PROFILE=prod npx sst deploy --stage production`
+- Production runbook: `pnpm db:check` -> migrate Railway Postgres with `DATABASE_PUBLIC_URL` -> deploy app -> smoke `https://www.austinwallace.ca/dnd/` in a browser, not just curl
+- Base-path gotcha: any server-built or plain-anchor app URL must go through `app/src/lib/base-path.ts`; the March 11, 2026 production bug was raw `/campaigns/...` and `/characters/...` hrefs bypassing `/dnd`
+- After destructive Railway reseed, bootstrap DM at `/campaigns/<slug>/access?role=dm&next=%2Fdnd%2Fcampaigns%2F<slug>%2Fdm`, then set player passwords from the DM dashboard `Access` section. Do not commit live credentials to docs.
 
 ## Fleet Execution
 
@@ -77,10 +81,13 @@ Key rules:
 
 ## Tavern Round 7
 
-- DB/bootstrap: `pnpm db:test:up && eval "$(pnpm db:test:env)"` (`db:test:up` now creates/reuses the disposable Postgres and runs migrations).
-- Fast Tavern loop: `pnpm -F @dnd/app test:integration -- progression/resource-rest.integration.test.ts progression/hit-point-state.integration.test.ts`, `pnpm test:acceptance:tavern`, `pnpm test:accessibility:tavern`, `pnpm snapshot:tavern-session --check`.
+- DB/bootstrap: `pnpm db:test:up && eval "$(pnpm --silent db:test:env)"` (`--silent` matters; plain `pnpm db:test:env` can pollute the exported env).
+- Fast Tavern loop: `pnpm test:fixtures:tavern`, `pnpm -F @dnd/app test:integration -- progression/resource-rest.integration.test.ts progression/hit-point-state.integration.test.ts`, `pnpm test:acceptance:tavern`, `pnpm test:accessibility:tavern`, `pnpm snapshot:tavern-session --check`.
 - Progression + HP seams: `app/src/server/progression/{projection.ts,derived-state.ts,hit-point-state.ts,resource-rest.integration.test.ts}`, `app/src/server/db/schema/hit-points.ts`, `app/src/server/db/seed-real-campaign.ts`.
-- Tavern UI + a11y seams: `app/src/routes/__root.tsx`, `app/src/routes/index.tsx`, `app/src/routes/characters/$characterId/{route.tsx,index.tsx,spellbook.tsx,inventory.tsx,journal.tsx,compendium.tsx}`, `tests/acceptance/tavern-session.spec.ts`.
+- Tavern UI + a11y seams: `app/src/routes/__root.tsx`, `app/src/routes/index.tsx`, `app/src/routes/characters/$characterId/{route.tsx,index.tsx,spellbook.tsx,inventory.tsx,journal.tsx,compendium.tsx}`, `app/src/test/fixtures/tavern/`, `tests/acceptance/tavern-session.spec.ts`.
+- Write-mode seams: `app/src/routes/campaigns/$campaignSlug/{access.tsx,dm.tsx}`, `app/src/routes/characters/$characterId/{-server.ts,level-up.tsx,route.tsx}`, `app/src/server/{auth/web-session.ts,tavern/viewer.ts}`, `app/src/server/progression/condition-service.ts` (concentration is now tracked and cleared on incapacitated/long rest).
+- Production smoke seams: `app/src/server/tavern/{home.ts,viewer.ts}`, `app/src/routes/campaigns/$campaignSlug/{-server.ts,access.tsx,dm.tsx}`, `app/src/routes/characters/$characterId/route.tsx`, `app/src/lib/base-path.ts`.
+- As of March 11, 2026 the live public smoke bar is: home renders `/dnd/...` links, DM access works, Tali player login works, and a live HP write+restore succeeds on the public domain.
 - Read `docs/guides/testing-tavern-frontend.md` before changing Tavern gates or smoke checks.
 
 ## Plans

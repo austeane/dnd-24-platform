@@ -1,6 +1,14 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+export const tavernAccessPasswords = {
+  dm: "hearthstone-dm",
+  playerBySlug: {
+    tali: "tali-player-pass",
+    vivennah: "vivennah-player-pass",
+  },
+} as const;
+
 export interface TavernSessionSeedSummary {
   campaignId: string;
   characterId: string;
@@ -23,6 +31,10 @@ export interface TavernSessionSeedSummary {
     campaigns: number;
     characters: number;
     sessions: number;
+  };
+  access: {
+    dmPassword: string;
+    playerCharacterSlugs: string[];
   };
 }
 
@@ -55,6 +67,7 @@ function requireDestructiveFlag(): void {
 
 export async function seedTavernSessionDatabase(options?: {
   databaseUrl?: string;
+  closeClient?: boolean;
 }): Promise<TavernSessionSeedSummary> {
   const databaseUrl = options?.databaseUrl ?? getDatabaseUrl();
   process.env.NODE_ENV = "test";
@@ -67,17 +80,47 @@ export async function seedTavernSessionDatabase(options?: {
     { runMigrations },
     { resetAndSeedRealCampaign },
     { runTavernSessionScenario },
+    { getCampaignBySlug, listCampaignRoster },
+    { setCharacterPassword, setDmPassword },
   ] = await Promise.all([
     import("../app/src/server/db/index.ts"),
     import("../app/src/server/db/migrate.ts"),
     import("../app/src/server/test/integration-helpers.ts"),
     import("../app/src/server/tavern/session-scenario-runner.ts"),
+    import("../app/src/server/campaigns/service.ts"),
+    import("../app/src/server/auth/service.ts"),
   ]);
 
   try {
     await runMigrations({ databaseUrl });
     await resetAndSeedRealCampaign();
     const result = await runTavernSessionScenario();
+    const campaign = await getCampaignBySlug("real-aa-campaign");
+    if (!campaign) {
+      throw new Error("real-aa-campaign not found after Tavern seed");
+    }
+    const roster = await listCampaignRoster(campaign.id);
+
+    await setDmPassword({
+      campaignId: campaign.id,
+      password: tavernAccessPasswords.dm,
+      actorLabel: "tavern-seed",
+    });
+
+    for (const [slug, password] of Object.entries(tavernAccessPasswords.playerBySlug)) {
+      const character = roster.find((entry) => entry.slug === slug);
+      if (!character) {
+        throw new Error(`Character ${slug} not found while seeding Tavern access`);
+      }
+
+      await setCharacterPassword({
+        campaignId: campaign.id,
+        characterId: character.id,
+        password,
+        actorLabel: "tavern-seed",
+      });
+    }
+
     const counts = await client<Array<{ campaigns: number; characters: number; sessions: number }>>`
       select
         (select count(*)::int from campaigns) as campaigns,
@@ -108,6 +151,10 @@ export async function seedTavernSessionDatabase(options?: {
         characters: 0,
         sessions: 0,
       },
+      access: {
+        dmPassword: tavernAccessPasswords.dm,
+        playerCharacterSlugs: Object.keys(tavernAccessPasswords.playerBySlug),
+      },
     };
 
     process.stdout.write(
@@ -115,7 +162,9 @@ export async function seedTavernSessionDatabase(options?: {
     );
     return summary;
   } finally {
-    await client.end({ timeout: 5 });
+    if (options?.closeClient ?? true) {
+      await client.end({ timeout: 5 });
+    }
   }
 }
 

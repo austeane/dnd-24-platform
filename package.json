@@ -34,6 +34,7 @@
     "snapshot:fixture-roster": "tsx scripts/snapshot-fixture-roster.ts",
     "snapshot:tavern-session": "tsx scripts/snapshot-tavern-session.ts",
     "seed:tavern-session": "tsx scripts/seed-tavern-session.ts",
+    "test:fixtures:tavern": "pnpm -F @dnd/app test:fixtures:tavern",
     "test:acceptance:tavern": "playwright test -c playwright.tavern.config.ts",
     "test:accessibility:tavern": "tsx scripts/test-tavern-accessibility.ts",
     "verify:railway:tavern": "tsx scripts/verify-railway-tavern-smoke.ts",

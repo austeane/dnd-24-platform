@@ -83,6 +83,29 @@ Before the first browser acceptance run on a machine, install the Playwright bro
 pnpm exec playwright install chromium
 ```
 
+## Lightweight Fixture Loop
+
+For Tavern UI work that does not need real progression/DB truth, use the fixture layer first:
+
+```bash
+pnpm test:fixtures:tavern
+```
+
+Fixture builders, named scenarios, and the in-memory Tavern router live under:
+
+- `app/src/test/fixtures/tavern/fixtures.ts`
+- `app/src/test/fixtures/tavern/render.tsx`
+- `app/src/test/fixtures/tavern/scenes.tsx`
+
+Current named scenarios cover:
+
+- multi-campaign home
+- damaged HP overview
+- empty journal
+- filtered compendium detail
+
+Use this layer for fast UI regression work. Keep the DB-backed Tavern scenario as the authority for read-model and end-to-end correctness.
+
 ## What The Tavern Scenario Verifies
 
 The scripted scenario uses `real-aa-campaign` and Tali.
@@ -117,12 +140,13 @@ The browser spec proves this user-visible flow:
 
 1. Home page renders the seeded campaign and roster.
 2. Tali’s shell reflects the post-scenario level-up state.
-3. Spellbook, inventory, and journal tabs render the expected seeded data.
-4. Invalid character ids render the Tavern not-found state.
-5. Vivennah’s journal hits the empty-state path.
-6. Skip link and route-focus restoration work across tab navigation.
-7. Compendium search and filter state survive in the URL across reload.
-8. The seeded flow still passes at `480`, `768`, and `1024` widths.
+3. HP, concentration/conditions, spell slots, resources, and rests mutate and persist through reload.
+4. Spellbook, inventory, and journal tabs render the expected seeded data.
+5. Invalid character ids render the Tavern not-found state.
+6. Vivennah’s journal hits the empty-state path.
+7. Skip link and route-focus restoration work across tab navigation.
+8. Compendium search and filter state survive in the URL across reload.
+9. The seeded flow still passes at `480`, `768`, and `1024` widths.
 
 Targeted browser work is still single-campaign only; multi-campaign roster assertions remain deferred until the lightweight Tavern fixture surface exists.
 
@@ -168,6 +192,13 @@ If parity is missing, the script fails early with a missing-table summary and sk
 
 As of March 11, 2026, the linked Railway production database was migrated to Tavern parity and successfully reseeded with the Tavern session scenario. The verified remote fixture state is 1 campaign, 5 characters, 1 session, 1 published communication item, 1 committed spend plan, and 2 XP transactions.
 
+If the Railway DB was reseeded or the auth tables were truncated, the public app will still load but the write surface will not be usable until you:
+
+1. create the first DM password at `/dnd/campaigns/<slug>/access?role=dm&next=%2Fdnd%2Fcampaigns%2F<slug>%2Fdm`
+2. set/reset player passwords from the DM dashboard `Access` section
+
+Do not store live credentials in git or docs.
+
 To reseed a Railway-linked database with the verified campaign plus the Tavern session scenario:
 
 ```bash
@@ -192,6 +223,13 @@ Check:
 4. `Inventory` shows equipment plus runtime attacks/resources.
 5. `Journal` shows the published session note.
 6. `Compendium` filters only to the character’s enabled packs.
+
+For production deploy smoke on `https://www.austinwallace.ca/dnd/`, also verify:
+
+1. home-page DM and character links include the `/dnd` base path
+2. DM access page loads and can reach the dashboard
+3. at least one player login works
+4. one live write mutation succeeds and is restored
 
 ## Failure Interpretation
 

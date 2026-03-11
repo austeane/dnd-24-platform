@@ -15,16 +15,6 @@ export function ProgressBar({
 }: ProgressBarProps) {
   const pct = max > 0 ? Math.min(100, Math.round((current / max) * 100)) : 0;
 
-  const trackColors = {
-    hp: "bg-border-light",
-    xp: "bg-border-light",
-  };
-
-  const fillColors = {
-    hp: "bg-forest",
-    xp: "bg-ember",
-  };
-
   return (
     <div className="space-y-1">
       {(label || showNumbers) && (
@@ -40,7 +30,7 @@ export function ProgressBar({
         </div>
       )}
       <div
-        className={`h-2.5 w-full overflow-hidden rounded-[var(--radius-tag)] ${trackColors[variant]}`}
+        className={`progress-track progress-track-${variant}`}
         role="progressbar"
         aria-valuenow={current}
         aria-valuemin={0}
@@ -48,7 +38,7 @@ export function ProgressBar({
         aria-label={label ?? `${variant === "hp" ? "Hit Points" : "Experience"}`}
       >
         <div
-          className={`h-full rounded-[var(--radius-tag)] transition-[width] duration-300 ${fillColors[variant]}`}
+          className={`progress-fill progress-fill-${variant}`}
           style={{ width: `${pct}%` }}
         />
       </div>

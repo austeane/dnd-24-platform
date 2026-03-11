@@ -13,7 +13,7 @@ The SST Router in `austin-site` prefix-matches `/dnd` and forwards all requests 
 
 ## Current Railway State
 
-As of March 9, 2026, this repo is linked to:
+As of March 11, 2026, this repo is linked to:
 
 - Project: `dnd-platform`
 - Environment: `production`
@@ -92,12 +92,13 @@ For local commands against Railway Postgres, set `DATABASE_PUBLIC_URL`.
 2. Apply migrations to Railway Postgres using `DATABASE_PUBLIC_URL`
 3. Deploy the app to Railway
 4. Verify the production app and DB-backed routes
+5. If the database was reseeded or the auth tables are empty, bootstrap DM access and set player passwords from the DM dashboard
 
 ## Deploy Flow
 
 ### Code deploy
 
-The app service auto-deploys from git on Railway.
+The app service can auto-deploy from git on Railway, or you can deploy the current linked workspace directly. The important part is that the DB migration and the app deploy stay in lockstep.
 
 ### Schema deploy
 
@@ -109,12 +110,28 @@ Use generated migrations. The intended order is:
 
 Do not rely on `db:push` for normal production changes. Use generated migrations so schema history stays in git.
 
+## March 11 Production Runbook
+
+This is the runbook that brought the first full write-enabled Tavern build live:
+
+1. `pnpm db:check`
+2. Set `DATABASE_PUBLIC_URL` to the Railway Postgres public proxy URL
+3. `pnpm db:migrate`
+4. Deploy the Railway `app` service in the `production` environment
+5. Verify `https://www.austinwallace.ca/dnd/` in a real browser
+6. If the DB was reseeded, visit `/dnd/campaigns/<slug>/access?role=dm&next=%2Fdnd%2Fcampaigns%2F<slug>%2Fdm` and create the first DM password
+7. Use the DM dashboard `Access` section to create/reset player passwords
+
+The production bug caught during that deploy was not a DB issue. It was raw server-built `/campaigns/...` and `/characters/...` links bypassing the `/dnd` base path.
+
 ## Base Path Configuration
 
 `VITE_BASE_PATH` is read in two places:
 
 1. **`app/vite.config.ts`** — Sets Vite `base` (asset paths) and Nitro `baseURL` (server routes)
 2. **`app/src/router.tsx`** — Sets TanStack Router `basepath` (client-side routing)
+
+Any plain string `href` or redirect emitted outside TanStack Router also needs the base path. Use `app/src/lib/base-path.ts` and do not hand-build raw `/campaigns/...` or `/characters/...` URLs for server responses or plain anchors.
 
 Locally, `VITE_BASE_PATH` is unset, so everything defaults to `/` and dev works normally at `http://localhost:3001/`.
 
@@ -140,3 +157,8 @@ cd ~/dev/austin-site && AWS_PROFILE=prod npx sst deploy --stage production
 3. **Migration set**: `pnpm db:check` passes
 4. **Production DB**: migrations apply cleanly against Railway Postgres
 5. **Production**: `https://www.austinwallace.ca/dnd` loads the app, client-side navigation works, API routes respond at `/dnd/api/...`
+6. **Public Tavern smoke**:
+   - home renders `/dnd/...` DM and character links
+   - DM access loads at `/dnd/campaigns/<slug>/access`
+   - at least one player login succeeds
+   - one write mutation such as HP damage + heal restore succeeds on the public domain

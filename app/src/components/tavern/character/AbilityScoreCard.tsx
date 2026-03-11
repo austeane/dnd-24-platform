@@ -12,26 +12,19 @@ function formatModifier(mod: number): string {
 
 export function AbilityScoreCard({
   name,
-  abbreviation,
   score,
   modifier,
   isPrimary,
 }: AbilityScoreCardProps) {
   return (
     <div
-      className={`tavern-card flex flex-col items-center rounded-[var(--radius-ability)] px-3 py-3 ${
-        isPrimary ? "ring-2 ring-ember/40" : ""
-      }`}
+      className="ability-card"
       data-primary={isPrimary || undefined}
       aria-label={`${name}: ${score} (${formatModifier(modifier)})`}
     >
-      <span className="text-[10px] font-semibold tracking-wider text-ink-soft uppercase">
-        {abbreviation}
-      </span>
-      <span className="font-heading text-2xl font-bold text-ink">
-        {formatModifier(modifier)}
-      </span>
-      <span className="font-mono text-xs text-ink-soft">{score}</span>
+      <span className="ability-label">{name}</span>
+      <span className="ability-score">{score}</span>
+      <span className="ability-mod">{formatModifier(modifier)}</span>
     </div>
   );
 }

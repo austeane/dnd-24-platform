@@ -11,6 +11,7 @@ import { characters, sessions } from "./campaigns.ts";
 
 export const conditionNames = [
   "charmed",
+  "concentration",
   "incapacitated",
 ] as const;
 export type ConditionName = (typeof conditionNames)[number];

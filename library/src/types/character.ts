@@ -192,7 +192,7 @@ export interface PrerequisiteEvaluation {
 }
 
 /** A condition name recognized by the rules engine */
-export type ConditionName = "charmed" | "incapacitated";
+export type ConditionName = "charmed" | "concentration" | "incapacitated";
 
 /** An active condition on a character, as input to the engine */
 export interface ActiveCondition {

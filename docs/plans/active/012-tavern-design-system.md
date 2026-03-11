@@ -121,7 +121,7 @@ TanStack file-based route at `/characters/:characterId`. Uses a `loader` that ca
 ### 3d. Page composition
 
 ```tsx
-<TavernNav brandName="Hearthstone" activeTab="character" campaignName={...} />
+<TavernNav brandName="Campaignion" activeTab="character" campaignName={...} />
 <TavernLayout>
   <CharacterCard {...} />
   <XPProgressBar {...} />

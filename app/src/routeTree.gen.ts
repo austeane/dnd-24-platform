@@ -13,9 +13,12 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CharactersCharacterIdRouteRouteImport } from './routes/characters/$characterId/route'
 import { Route as CharactersCharacterIdIndexRouteImport } from './routes/characters/$characterId/index'
 import { Route as CharactersCharacterIdSpellbookRouteImport } from './routes/characters/$characterId/spellbook'
+import { Route as CharactersCharacterIdLevelUpRouteImport } from './routes/characters/$characterId/level-up'
 import { Route as CharactersCharacterIdJournalRouteImport } from './routes/characters/$characterId/journal'
 import { Route as CharactersCharacterIdInventoryRouteImport } from './routes/characters/$characterId/inventory'
 import { Route as CharactersCharacterIdCompendiumRouteImport } from './routes/characters/$characterId/compendium'
+import { Route as CampaignsCampaignSlugDmRouteImport } from './routes/campaigns/$campaignSlug/dm'
+import { Route as CampaignsCampaignSlugAccessRouteImport } from './routes/campaigns/$campaignSlug/access'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -40,6 +43,12 @@ const CharactersCharacterIdSpellbookRoute =
     path: '/spellbook',
     getParentRoute: () => CharactersCharacterIdRouteRoute,
   } as any)
+const CharactersCharacterIdLevelUpRoute =
+  CharactersCharacterIdLevelUpRouteImport.update({
+    id: '/level-up',
+    path: '/level-up',
+    getParentRoute: () => CharactersCharacterIdRouteRoute,
+  } as any)
 const CharactersCharacterIdJournalRoute =
   CharactersCharacterIdJournalRouteImport.update({
     id: '/journal',
@@ -58,21 +67,38 @@ const CharactersCharacterIdCompendiumRoute =
     path: '/compendium',
     getParentRoute: () => CharactersCharacterIdRouteRoute,
   } as any)
+const CampaignsCampaignSlugDmRoute = CampaignsCampaignSlugDmRouteImport.update({
+  id: '/campaigns/$campaignSlug/dm',
+  path: '/campaigns/$campaignSlug/dm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CampaignsCampaignSlugAccessRoute =
+  CampaignsCampaignSlugAccessRouteImport.update({
+    id: '/campaigns/$campaignSlug/access',
+    path: '/campaigns/$campaignSlug/access',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/characters/$characterId': typeof CharactersCharacterIdRouteRouteWithChildren
+  '/campaigns/$campaignSlug/access': typeof CampaignsCampaignSlugAccessRoute
+  '/campaigns/$campaignSlug/dm': typeof CampaignsCampaignSlugDmRoute
   '/characters/$characterId/compendium': typeof CharactersCharacterIdCompendiumRoute
   '/characters/$characterId/inventory': typeof CharactersCharacterIdInventoryRoute
   '/characters/$characterId/journal': typeof CharactersCharacterIdJournalRoute
+  '/characters/$characterId/level-up': typeof CharactersCharacterIdLevelUpRoute
   '/characters/$characterId/spellbook': typeof CharactersCharacterIdSpellbookRoute
   '/characters/$characterId/': typeof CharactersCharacterIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/campaigns/$campaignSlug/access': typeof CampaignsCampaignSlugAccessRoute
+  '/campaigns/$campaignSlug/dm': typeof CampaignsCampaignSlugDmRoute
   '/characters/$characterId/compendium': typeof CharactersCharacterIdCompendiumRoute
   '/characters/$characterId/inventory': typeof CharactersCharacterIdInventoryRoute
   '/characters/$characterId/journal': typeof CharactersCharacterIdJournalRoute
+  '/characters/$characterId/level-up': typeof CharactersCharacterIdLevelUpRoute
   '/characters/$characterId/spellbook': typeof CharactersCharacterIdSpellbookRoute
   '/characters/$characterId': typeof CharactersCharacterIdIndexRoute
 }
@@ -80,9 +106,12 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/characters/$characterId': typeof CharactersCharacterIdRouteRouteWithChildren
+  '/campaigns/$campaignSlug/access': typeof CampaignsCampaignSlugAccessRoute
+  '/campaigns/$campaignSlug/dm': typeof CampaignsCampaignSlugDmRoute
   '/characters/$characterId/compendium': typeof CharactersCharacterIdCompendiumRoute
   '/characters/$characterId/inventory': typeof CharactersCharacterIdInventoryRoute
   '/characters/$characterId/journal': typeof CharactersCharacterIdJournalRoute
+  '/characters/$characterId/level-up': typeof CharactersCharacterIdLevelUpRoute
   '/characters/$characterId/spellbook': typeof CharactersCharacterIdSpellbookRoute
   '/characters/$characterId/': typeof CharactersCharacterIdIndexRoute
 }
@@ -91,26 +120,35 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/characters/$characterId'
+    | '/campaigns/$campaignSlug/access'
+    | '/campaigns/$campaignSlug/dm'
     | '/characters/$characterId/compendium'
     | '/characters/$characterId/inventory'
     | '/characters/$characterId/journal'
+    | '/characters/$characterId/level-up'
     | '/characters/$characterId/spellbook'
     | '/characters/$characterId/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/campaigns/$campaignSlug/access'
+    | '/campaigns/$campaignSlug/dm'
     | '/characters/$characterId/compendium'
     | '/characters/$characterId/inventory'
     | '/characters/$characterId/journal'
+    | '/characters/$characterId/level-up'
     | '/characters/$characterId/spellbook'
     | '/characters/$characterId'
   id:
     | '__root__'
     | '/'
     | '/characters/$characterId'
+    | '/campaigns/$campaignSlug/access'
+    | '/campaigns/$campaignSlug/dm'
     | '/characters/$characterId/compendium'
     | '/characters/$characterId/inventory'
     | '/characters/$characterId/journal'
+    | '/characters/$characterId/level-up'
     | '/characters/$characterId/spellbook'
     | '/characters/$characterId/'
   fileRoutesById: FileRoutesById
@@ -118,6 +156,8 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CharactersCharacterIdRouteRoute: typeof CharactersCharacterIdRouteRouteWithChildren
+  CampaignsCampaignSlugAccessRoute: typeof CampaignsCampaignSlugAccessRoute
+  CampaignsCampaignSlugDmRoute: typeof CampaignsCampaignSlugDmRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -150,6 +190,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CharactersCharacterIdSpellbookRouteImport
       parentRoute: typeof CharactersCharacterIdRouteRoute
     }
+    '/characters/$characterId/level-up': {
+      id: '/characters/$characterId/level-up'
+      path: '/level-up'
+      fullPath: '/characters/$characterId/level-up'
+      preLoaderRoute: typeof CharactersCharacterIdLevelUpRouteImport
+      parentRoute: typeof CharactersCharacterIdRouteRoute
+    }
     '/characters/$characterId/journal': {
       id: '/characters/$characterId/journal'
       path: '/journal'
@@ -171,6 +218,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CharactersCharacterIdCompendiumRouteImport
       parentRoute: typeof CharactersCharacterIdRouteRoute
     }
+    '/campaigns/$campaignSlug/dm': {
+      id: '/campaigns/$campaignSlug/dm'
+      path: '/campaigns/$campaignSlug/dm'
+      fullPath: '/campaigns/$campaignSlug/dm'
+      preLoaderRoute: typeof CampaignsCampaignSlugDmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/campaigns/$campaignSlug/access': {
+      id: '/campaigns/$campaignSlug/access'
+      path: '/campaigns/$campaignSlug/access'
+      fullPath: '/campaigns/$campaignSlug/access'
+      preLoaderRoute: typeof CampaignsCampaignSlugAccessRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -178,6 +239,7 @@ interface CharactersCharacterIdRouteRouteChildren {
   CharactersCharacterIdCompendiumRoute: typeof CharactersCharacterIdCompendiumRoute
   CharactersCharacterIdInventoryRoute: typeof CharactersCharacterIdInventoryRoute
   CharactersCharacterIdJournalRoute: typeof CharactersCharacterIdJournalRoute
+  CharactersCharacterIdLevelUpRoute: typeof CharactersCharacterIdLevelUpRoute
   CharactersCharacterIdSpellbookRoute: typeof CharactersCharacterIdSpellbookRoute
   CharactersCharacterIdIndexRoute: typeof CharactersCharacterIdIndexRoute
 }
@@ -187,6 +249,7 @@ const CharactersCharacterIdRouteRouteChildren: CharactersCharacterIdRouteRouteCh
     CharactersCharacterIdCompendiumRoute: CharactersCharacterIdCompendiumRoute,
     CharactersCharacterIdInventoryRoute: CharactersCharacterIdInventoryRoute,
     CharactersCharacterIdJournalRoute: CharactersCharacterIdJournalRoute,
+    CharactersCharacterIdLevelUpRoute: CharactersCharacterIdLevelUpRoute,
     CharactersCharacterIdSpellbookRoute: CharactersCharacterIdSpellbookRoute,
     CharactersCharacterIdIndexRoute: CharactersCharacterIdIndexRoute,
   }
@@ -199,6 +262,8 @@ const CharactersCharacterIdRouteRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CharactersCharacterIdRouteRoute: CharactersCharacterIdRouteRouteWithChildren,
+  CampaignsCampaignSlugAccessRoute: CampaignsCampaignSlugAccessRoute,
+  CampaignsCampaignSlugDmRoute: CampaignsCampaignSlugDmRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

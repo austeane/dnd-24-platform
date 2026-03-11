@@ -27,7 +27,16 @@ import type {
   TavernJournalData,
   TavernSessionScenario,
   TavernShellData,
+  TavernViewer,
 } from "./types.ts";
+
+const scenarioViewer: TavernViewer = {
+  role: "dm",
+  characterId: null,
+  sessionLabel: "scenario-runner",
+  canEditCharacter: true,
+  canManageCampaign: true,
+};
 
 export interface TavernSessionSnapshot {
   shell: TavernShellData;
@@ -53,7 +62,7 @@ export interface TavernSessionScenarioResult {
 async function loadSnapshot(characterId: string): Promise<TavernSessionSnapshot> {
   const [shell, journal, compendium, inventoryItems, playerCards, xpTransactions, spendPlans] =
     await Promise.all([
-      getCharacterShellData(characterId),
+      getCharacterShellData(characterId, scenarioViewer),
       getJournalData(characterId),
       getCompendiumData({
         characterId,
@@ -63,7 +72,7 @@ async function loadSnapshot(characterId: string): Promise<TavernSessionSnapshot>
       }),
       getInventoryItemsData(characterId),
       (async () => {
-        const shellData = await getCharacterShellData(characterId);
+        const shellData = await getCharacterShellData(characterId, scenarioViewer);
         if (!shellData) {
           return [];
         }

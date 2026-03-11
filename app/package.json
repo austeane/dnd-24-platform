@@ -9,6 +9,7 @@
     "start": "node .output/server/index.mjs",
     "check": "tsc --noEmit",
     "test": "vitest run --config vitest.unit.config.ts",
+    "test:fixtures:tavern": "vitest run --config vitest.unit.config.ts src/test/fixtures/tavern/tavern-fixtures.test.tsx",
     "test:integration": "tsx src/server/test/run-integration-tests.ts",
     "db:generate": "drizzle-kit generate --config=drizzle.config.ts",
     "db:migrate": "tsx src/server/db/migrate.ts",

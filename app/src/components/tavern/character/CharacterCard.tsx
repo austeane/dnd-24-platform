@@ -1,5 +1,4 @@
-import { Button } from "../ui/Button.tsx";
-import { Card } from "../ui/Card.tsx";
+import { Link } from "@tanstack/react-router";
 import { StatBadge } from "../ui/StatBadge.tsx";
 import { TAVERN_ROUTE_HEADING_ATTR } from "../layout/accessibility.ts";
 
@@ -9,6 +8,7 @@ export interface CharacterCardProps {
   level: number;
   className: string;
   species: string;
+  levelUpHref?: string | null;
 }
 
 export function CharacterCard({
@@ -17,57 +17,41 @@ export function CharacterCard({
   level,
   className: charClassName,
   species,
+  levelUpHref = null,
 }: CharacterCardProps) {
   return (
-    <Card className="p-6">
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-        <div className="flex items-start gap-4">
-          {/* Avatar placeholder */}
-          <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-full bg-parchment font-heading text-2xl font-bold text-wood">
-            {name.charAt(0)}
-          </div>
-          <div>
-            <h1
-              className="font-heading text-2xl font-bold text-ink"
-              {...{
-                [TAVERN_ROUTE_HEADING_ATTR]: "true",
-              }}
-              tabIndex={-1}
-            >
-              {name}
-            </h1>
-            <p className="mt-0.5 text-sm text-ink-soft">{subtitle}</p>
-            <div className="mt-2 flex flex-wrap gap-1.5">
-              <StatBadge label={`Level ${level}`} variant="ember" />
-              <StatBadge label={charClassName} variant="forest" />
-              <StatBadge label={species} variant="sky" />
-            </div>
-          </div>
-        </div>
-
-        <div className="flex gap-2 sm:flex-col">
-          <Button
-            variant="warm"
-            aria-disabled="true"
-            tabIndex={-1}
-            onClick={undefined}
-          >
-            Level Up
-          </Button>
-          <Button
-            variant="outline"
-            aria-disabled="true"
-            tabIndex={-1}
-            onClick={undefined}
-          >
-            Long Rest
-          </Button>
+    <section className="char-card animate-fade-up">
+      <div className="char-avatar" aria-hidden="true">
+        <span>{name.charAt(0)}</span>
+      </div>
+      <div className="char-info">
+        <h1
+          className="char-heading font-heading text-2xl font-semibold text-ink sm:text-[2rem]"
+          {...{
+            [TAVERN_ROUTE_HEADING_ATTR]: "true",
+          }}
+          tabIndex={-1}
+        >
+          {name}
+        </h1>
+        <p>{subtitle}</p>
+        <div className="char-meta">
+          <StatBadge label={`Level ${level}`} variant="ember" />
+          <StatBadge label={charClassName} variant="forest" />
+          <StatBadge label={species} variant="sky" />
         </div>
       </div>
 
-      <p className="mt-3 text-xs text-ink-soft/60">
-        Level Up and Long Rest are not yet available in this version.
-      </p>
-    </Card>
+      {levelUpHref ? (
+        <div className="char-actions">
+          <Link
+            to={levelUpHref as never}
+            className="btn btn-warm inline-flex items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
+          >
+            Level Up
+          </Link>
+        </div>
+      ) : null}
+    </section>
   );
 }

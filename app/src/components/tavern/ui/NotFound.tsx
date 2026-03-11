@@ -6,10 +6,10 @@ export interface NotFoundProps {
 
 export function NotFound({ entity = "Page" }: NotFoundProps) {
   return (
-    <div className="flex flex-col items-center justify-center py-24 text-center">
-      <div className="mb-4 font-mono text-6xl font-bold text-border">404</div>
+    <div className="empty-state-shell">
+      <div className="empty-state-icon font-mono text-6xl font-bold text-border">404</div>
       <h1
-        className="mb-2 font-heading text-xl font-bold text-ink"
+        className="empty-state-title"
         {...{
           [TAVERN_ROUTE_HEADING_ATTR]: "true",
         }}
@@ -17,7 +17,7 @@ export function NotFound({ entity = "Page" }: NotFoundProps) {
       >
         {entity} Not Found
       </h1>
-      <p className="max-w-sm text-sm text-ink-soft">
+      <p className="empty-state-copy">
         The {entity.toLowerCase()} you are looking for does not exist or may
         have been moved.
       </p>

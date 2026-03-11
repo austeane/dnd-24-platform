@@ -3,6 +3,7 @@ import type { ProgressionMode } from "../db/schema/campaigns.ts";
 
 export interface TavernCampaignData {
   id: string;
+  slug: string;
   name: string;
   progressionMode: ProgressionMode;
   enabledPackIds: string[];
@@ -22,6 +23,21 @@ export interface TavernAbilityScore {
   isPrimary: boolean;
 }
 
+export interface TavernViewer {
+  role: "dm" | "player";
+  characterId: string | null;
+  sessionLabel: string | null;
+  canEditCharacter: boolean;
+  canManageCampaign: boolean;
+}
+
+export interface TavernConditionData {
+  id: string;
+  name: string;
+  note: string | null;
+  sourceCreature: string | null;
+}
+
 export interface TavernCombatData {
   maxHp: number;
   currentHp: number;
@@ -32,6 +48,7 @@ export interface TavernCombatData {
   speed: number;
   spellSaveDc: number | null;
   proficiencyBonus: number;
+  conditions: TavernConditionData[];
 }
 
 export interface TavernSkillData {
@@ -71,9 +88,18 @@ export interface TavernSpellData {
   concentration: boolean;
   ritual: boolean;
   alwaysPrepared: boolean;
+  freeCast:
+    | {
+        resourceName: string;
+        current: number;
+        max: number;
+      }
+    | null;
 }
 
 export interface TavernSpellSlotPoolData {
+  resourceName: string;
+  kind: "standard" | "pact";
   level: number;
   total: number;
   current: number;
@@ -83,7 +109,7 @@ export interface TavernSpellGroupData {
   level: number;
   label: string;
   spells: TavernSpellData[];
-  slots: TavernSpellSlotPoolData | null;
+  slots: TavernSpellSlotPoolData[];
 }
 
 export interface TavernSpellbookData {
@@ -111,6 +137,7 @@ export interface TavernInventoryAttackProfile {
 }
 
 export interface TavernInventoryResource {
+  resourceName: string;
   name: string;
   current: number;
   max: number;
@@ -135,6 +162,7 @@ export interface TavernInventoryData
 export interface TavernShellData {
   campaign: TavernCampaignData;
   character: TavernCharacterData;
+  viewer: TavernViewer;
   summary: TavernCharacterSummary;
   spellbook: TavernSpellbookData;
   inventoryRuntime: TavernInventoryRuntimeData;

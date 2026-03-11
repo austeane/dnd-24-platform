@@ -12,14 +12,14 @@ export interface FeaturesPanelProps {
 export function FeaturesPanel({ features }: FeaturesPanelProps) {
   return (
     <Card style={{ gridArea: "features" }}>
-      <CardHeader title="Features" count={features.length} />
-      <div className="divide-y divide-border-light">
-        {features.map((feature, i) => (
-          <div key={`${feature.name}-${i}`} className="px-4 py-2.5">
-            <div className="text-sm font-semibold text-ink">
+      <CardHeader title="Features" count={features.length} countTone="features" />
+      <div className="feature-list">
+        {features.map((feature) => (
+          <div key={`${feature.name}-${feature.origin}`} className="feature-item">
+            <div className="feature-name">
               {feature.name}
             </div>
-            <div className="text-xs text-ink-soft">{feature.origin}</div>
+            <div className="feature-origin">{feature.origin}</div>
           </div>
         ))}
       </div>

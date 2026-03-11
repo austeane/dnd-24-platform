@@ -23,6 +23,7 @@ export async function getTavernCharacterContext(
       characterName: characters.name,
       ownerLabel: characters.ownerLabel,
       campaignId: campaigns.id,
+      campaignSlug: campaigns.slug,
       campaignName: campaigns.name,
       progressionMode: campaigns.progressionMode,
       enabledPackIds: campaigns.enabledPackIds,
@@ -48,6 +49,7 @@ export async function getTavernCharacterContext(
   return {
     campaign: {
       id: row.campaignId,
+      slug: row.campaignSlug,
       name: row.campaignName,
       progressionMode: row.progressionMode,
       enabledPackIds:

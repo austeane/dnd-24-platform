@@ -14,6 +14,7 @@ import {
 } from "./crypto.ts";
 import type {
   AccessCredentialRecord,
+  CampaignAccessStatus,
   AccessSessionRecord,
   AccessSessionToken,
   CreateAccessSessionInput,
@@ -242,6 +243,43 @@ export async function listAccessSessions(
     .select()
     .from(accessSessions)
     .where(and(...conditions));
+}
+
+export async function getCampaignAccessStatus(
+  campaignId: string,
+): Promise<CampaignAccessStatus> {
+  const rows = await db
+    .select({
+      role: accessCredentials.role,
+      characterId: accessCredentials.characterId,
+    })
+    .from(accessCredentials)
+    .where(
+      and(
+        eq(accessCredentials.campaignId, campaignId),
+        isNull(accessCredentials.revokedAt),
+      ),
+    );
+
+  return {
+    campaignId,
+    hasDmPassword: rows.some((row) => row.role === "dm"),
+    playerCharacterIds: rows
+      .filter((row) => row.role === "player" && row.characterId !== null)
+      .map((row) => row.characterId!)
+      .filter((characterId) => characterId.length > 0),
+  };
+}
+
+export async function bootstrapDmPassword(
+  input: SetDmPasswordInput,
+): Promise<AccessCredentialRecord> {
+  const status = await getCampaignAccessStatus(input.campaignId);
+  if (status.hasDmPassword) {
+    throw new Error("DM password is already configured for this campaign");
+  }
+
+  return setDmPassword(input);
 }
 
 export function isDmAccessSession(

@@ -12,6 +12,7 @@ import {
   performLongRest,
 } from "./resource-state.ts";
 import { restoreHitPointsForLongRest } from "./hit-point-state.ts";
+import { clearActiveConditionsByName } from "./condition-service.ts";
 import type {
   ResourceEventRecord,
   RestInput,
@@ -51,11 +52,18 @@ export async function executeLongRest(
 }> {
   const resourceEvent = await performLongRest(input);
   await restoreHitPointsForLongRest(input);
+  const clearedConcentration = await clearActiveConditionsByName({
+    characterId: input.characterId,
+    conditionName: "concentration",
+    removedByLabel: input.createdByLabel,
+    note: "Concentration ended during a long rest.",
+    sessionId: input.sessionId,
+  });
 
   return {
     resourceEvent,
     hitDiceRecovered: 0, // TODO: hit dice recovery during long rests
-    conditionsCleared: [], // TODO: condition clearance during long rests
+    conditionsCleared: clearedConcentration.length > 0 ? ["concentration"] : [],
     additionalEffects: [],
   };
 }

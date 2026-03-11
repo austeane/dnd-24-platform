@@ -18,6 +18,9 @@ coverage/
 *.log
 pnpm-debug.log*
 
+# Local Codex screenshots
+.codex-*.png
+
 # Editors
 .idea/
 .vscode/

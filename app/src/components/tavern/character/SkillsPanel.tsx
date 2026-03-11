@@ -16,23 +16,24 @@ function formatModifier(mod: number): string {
 }
 
 export function SkillsPanel({ skills }: SkillsPanelProps) {
+  const proficientCount = skills.filter(
+    (skill) => skill.proficient || skill.expertise,
+  ).length;
+
   return (
     <Card style={{ gridArea: "skills" }}>
-      <CardHeader title="Skills" count={skills.length} />
-      <div className="divide-y divide-border-light">
+      <CardHeader title="Skills" count={`${proficientCount} prof`} countTone="skills" />
+      <div className="card-body">
         {skills.map((skill) => (
-          <div
-            key={skill.name}
-            className="flex items-center justify-between px-4 py-1.5"
-          >
-            <div className="flex items-center gap-2">
+          <div key={skill.name} className="skill-item">
+            <div className="flex min-w-0 flex-1 items-center gap-2">
               <ProficiencyDot
                 proficient={skill.proficient}
                 expertise={skill.expertise}
               />
-              <span className="text-sm text-ink">{skill.name}</span>
+              <span className="skill-name">{skill.name}</span>
             </div>
-            <span className="font-mono text-sm font-medium text-ink-soft">
+            <span className="skill-bonus">
               {formatModifier(skill.bonus)}
             </span>
           </div>
@@ -52,7 +53,7 @@ function ProficiencyDot({
   if (expertise) {
     return (
       <span
-        className="inline-flex h-3 w-3 items-center justify-center rounded-full bg-ember"
+        className="skill-dot prof inline-flex items-center justify-center"
         aria-label="Expertise"
       >
         <span className="h-1.5 w-1.5 rounded-full bg-cream" />
@@ -63,7 +64,7 @@ function ProficiencyDot({
   if (proficient) {
     return (
       <span
-        className="inline-block h-3 w-3 rounded-full bg-ember"
+        className="skill-dot prof inline-block"
         aria-label="Proficient"
       />
     );
@@ -71,7 +72,7 @@ function ProficiencyDot({
 
   return (
     <span
-      className="inline-block h-3 w-3 rounded-full border border-border bg-paper"
+      className="skill-dot inline-block"
       aria-label="Not proficient"
     />
   );

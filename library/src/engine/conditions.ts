@@ -7,6 +7,7 @@ import type {
 /** All condition names recognized by the engine */
 export const ALL_CONDITION_NAMES: readonly ConditionName[] = [
   "charmed",
+  "concentration",
   "incapacitated",
 ] as const;
 
@@ -32,6 +33,8 @@ function getEffectsForCondition(
   switch (condition.conditionName) {
     case "charmed":
       return computeCharmedEffects(condition);
+    case "concentration":
+      return computeConcentrationEffects(condition);
     case "incapacitated":
       return computeIncapacitatedEffects();
   }
@@ -52,6 +55,20 @@ function computeCharmedEffects(
       conditionName: "charmed",
       description: `${charmer} has advantage on ability checks to interact socially with you.`,
       tags: ["disadvantage-ability-check", "social"],
+    },
+  ];
+}
+
+function computeConcentrationEffects(
+  condition: ActiveCondition,
+): ConditionMechanicalEffect[] {
+  return [
+    {
+      conditionName: "concentration",
+      description: condition.note?.trim()
+        ? `Maintaining concentration: ${condition.note.trim()}`
+        : "Maintaining concentration on a spell or effect.",
+      tags: ["concentration-active"],
     },
   ];
 }

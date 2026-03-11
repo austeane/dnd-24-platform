@@ -40,6 +40,33 @@ function effectDescriptions(effects: ReturnType<typeof computeConditionEffects>)
   return effects.map((e) => e.description);
 }
 
+export async function clearActiveConditionsByName(input: {
+  characterId: string;
+  conditionName: ApplyConditionInput["conditionName"];
+  removedByLabel: string;
+  note?: string | null;
+  sessionId?: string | null;
+}): Promise<CharacterConditionRecord[]> {
+  const activeConditions = await listActiveConditions(input.characterId);
+  const matchingConditions = activeConditions.filter((condition) =>
+    condition.conditionName === input.conditionName
+  );
+
+  const removedConditions: CharacterConditionRecord[] = [];
+  for (const condition of matchingConditions) {
+    removedConditions.push(
+      await removeCondition({
+        conditionId: condition.id,
+        removedByLabel: input.removedByLabel,
+        note: input.note,
+        sessionId: input.sessionId,
+      }),
+    );
+  }
+
+  return removedConditions;
+}
+
 /**
  * Apply a condition with full mechanical effect resolution.
  * Persists the condition and returns the computed mechanical effects.
@@ -50,6 +77,26 @@ export async function applyConditionWithEffects(
   condition: CharacterConditionRecord;
   mechanicalEffects: string[];
 }> {
+  if (input.conditionName === "concentration") {
+    await clearActiveConditionsByName({
+      characterId: input.characterId,
+      conditionName: "concentration",
+      removedByLabel: input.appliedByLabel,
+      note: "Previous concentration ended.",
+      sessionId: input.sessionId,
+    });
+  }
+
+  if (input.conditionName === "incapacitated") {
+    await clearActiveConditionsByName({
+      characterId: input.characterId,
+      conditionName: "concentration",
+      removedByLabel: input.appliedByLabel,
+      note: "Concentration ended after becoming incapacitated.",
+      sessionId: input.sessionId,
+    });
+  }
+
   const condition = await applyCondition(input);
   const activeCondition = recordToActiveCondition(condition);
   const effects = computeConditionEffects([activeCondition]);

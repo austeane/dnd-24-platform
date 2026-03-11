@@ -12,10 +12,10 @@ export function ErrorCard({
   onRetry,
 }: ErrorCardProps) {
   return (
-    <div className="tavern-card mx-auto max-w-lg p-8 text-center">
-      <div className="mb-3 text-3xl">&#9888;</div>
+    <div className="error-card">
+      <div className="empty-state-icon text-3xl" aria-hidden="true">&#9888;</div>
       <h1
-        className="mb-2 font-heading text-lg font-bold text-ink"
+        className="empty-state-title"
         {...{
           [TAVERN_ROUTE_HEADING_ATTR]: "true",
         }}
@@ -23,12 +23,12 @@ export function ErrorCard({
       >
         {title}
       </h1>
-      <p className="mb-4 text-sm text-ink-soft">{message}</p>
+      <p className="empty-state-copy">{message}</p>
       {onRetry && (
         <button
           type="button"
           onClick={onRetry}
-          className="rounded-[var(--radius-button)] border border-border bg-paper px-4 py-2 text-sm font-semibold text-ink-soft transition-colors hover:border-wood-light hover:bg-cream"
+          className="btn btn-outline"
         >
           Try Again
         </button>

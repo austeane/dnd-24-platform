@@ -1,4 +1,3 @@
-import { Card } from "../ui/Card.tsx";
 import { ProgressBar } from "../ui/ProgressBar.tsx";
 
 export interface XPProgressBarProps {
@@ -19,21 +18,22 @@ export function XPProgressBar({
   }
 
   return (
-    <Card className="p-4">
-      <ProgressBar
-        current={totalSpent}
-        max={totalEarned}
-        variant="xp"
-        label="Experience Points"
-      />
-      <div className="mt-2 flex items-center justify-between text-xs text-ink-soft">
-        <span>
-          {banked} XP banked
-        </span>
-        <span className="font-mono">
-          {totalSpent} / {totalEarned} spent
-        </span>
+    <section className="xp-section animate-fade-up" style={{ ["--delay" as string]: "0.05s" }}>
+      <div className="xp-label">Experience</div>
+      <div className="xp-bar-wrap">
+        <ProgressBar
+          current={totalSpent}
+          max={totalEarned}
+          variant="xp"
+          showNumbers={false}
+        />
+        <div className="xp-numbers">
+          <span>{banked} XP banked</span>
+          <span>
+            {totalSpent} / {totalEarned} spent
+          </span>
+        </div>
       </div>
-    </Card>
+    </section>
   );
 }

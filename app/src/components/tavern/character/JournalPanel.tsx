@@ -50,8 +50,8 @@ export function JournalPanel({ cards }: JournalPanelProps) {
   return (
     <div className="space-y-4">
       {cards.map((card) => (
-        <article key={card.id} className="tavern-card p-5">
-          <div className="mb-3 flex items-start justify-between gap-3">
+        <article key={card.id} className="journal-entry-card">
+          <div className="journal-entry-header">
             <div className="flex items-center gap-2">
               <h3 className="font-heading text-lg font-bold text-ink">
                 {card.title}
@@ -81,7 +81,7 @@ export function JournalPanel({ cards }: JournalPanelProps) {
             </div>
           </div>
           {card.summary && (
-            <p className="mb-2 text-sm text-ink-soft">{card.summary}</p>
+            <p className="journal-summary">{card.summary}</p>
           )}
           <ProseContent content={card.bodyMd} />
         </article>

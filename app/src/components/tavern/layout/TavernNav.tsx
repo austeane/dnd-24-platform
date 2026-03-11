@@ -1,9 +1,15 @@
 import { Link, useMatches, type LinkProps } from "@tanstack/react-router";
+import type { TavernViewer } from "../../../server/tavern/types.ts";
 
 export interface TavernNavProps {
   brandName?: string;
+  campaignId?: string;
+  campaignSlug?: string;
   campaignName?: string;
   characterId?: string;
+  viewer?: TavernViewer;
+  isLoggingOut?: boolean;
+  onLogout?: () => void;
 }
 
 interface NavTab {
@@ -12,9 +18,14 @@ interface NavTab {
 }
 
 export function TavernNav({
-  brandName = "Hearthstone",
+  brandName = "Campaignion",
+  campaignId,
+  campaignSlug,
   campaignName,
   characterId,
+  viewer,
+  isLoggingOut = false,
+  onLogout,
 }: TavernNavProps) {
   const matches = useMatches();
   const lastMatch = matches[matches.length - 1];
@@ -30,24 +41,30 @@ export function TavernNav({
       ]
     : [];
 
+  const viewerLabel = viewer
+    ? viewer.role === "dm"
+      ? "DM"
+      : "Player"
+    : null;
+  const dmDashboardPath = campaignSlug ? `/campaigns/${campaignSlug}/dm` : null;
+  const showDashboardLink =
+    viewer?.canManageCampaign &&
+    campaignSlug &&
+    dmDashboardPath !== null &&
+    currentPath !== dmDashboardPath;
+
   return (
     <nav className="tavern-nav" aria-label="Main navigation">
-      <div className="relative z-10 mx-auto flex max-w-6xl items-center gap-6 px-6 py-3">
-        <Link
-          to="/"
-          className="font-heading text-lg font-bold text-cream hover:text-brass transition-colors"
-        >
-          {brandName}
+      <div className="tavern-nav-shell">
+        <Link to="/" className="tavern-nav-brand">
+          <span className="nav-brand-icon" aria-hidden="true">
+            &#9878;
+          </span>
+          <span>{brandName}</span>
         </Link>
 
-        {campaignName && (
-          <span className="hidden text-sm text-cream/60 sm:inline">
-            {campaignName}
-          </span>
-        )}
-
         {characterTabs.length > 0 && (
-          <div className="ml-auto flex items-center gap-1">
+          <div className="tavern-nav-tabs" role="list">
             {characterTabs.map((tab) => {
               const isActive =
                 currentPath === tab.to ||
@@ -64,11 +81,7 @@ export function TavernNav({
                   key={tab.to}
                   {...linkProps}
                   aria-current={isActive ? "page" : undefined}
-                  className={`rounded-[var(--radius-button)] px-3 py-1.5 text-sm font-medium transition-colors ${
-                    isActive
-                      ? "bg-cream/15 text-cream"
-                      : "text-cream/70 hover:bg-cream/10 hover:text-cream"
-                  }`}
+                  className={`tavern-nav-tab ${isActive ? "is-active" : ""}`}
                 >
                   {tab.label}
                 </Link>
@@ -76,6 +89,33 @@ export function TavernNav({
             })}
           </div>
         )}
+
+        <div className="tavern-nav-right">
+          {campaignName && (
+            <span className="campaign-badge">
+              {viewerLabel ? `${campaignName} · ${viewerLabel}` : campaignName}
+            </span>
+          )}
+          {showDashboardLink && (
+            <Link
+              to="/campaigns/$campaignSlug/dm"
+              params={{ campaignSlug }}
+              className="tavern-nav-utility"
+            >
+              Dashboard
+            </Link>
+          )}
+          {viewer && campaignId && onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              disabled={isLoggingOut}
+              className="tavern-nav-button"
+            >
+              {isLoggingOut ? "Signing out..." : "Sign out"}
+            </button>
+          )}
+        </div>
       </div>
     </nav>
   );

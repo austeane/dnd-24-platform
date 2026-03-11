@@ -22,6 +22,9 @@ export function toCharacterCardProps(data: TavernShellData): CharacterCardProps 
     level: data.summary.level,
     className: data.summary.className,
     species: data.summary.species,
+    levelUpHref: data.viewer.canEditCharacter
+      ? `/characters/${data.character.id}/level-up`
+      : null,
   };
 }
 
@@ -50,6 +53,7 @@ export function toCombatPanelProps(data: TavernShellData): CombatPanelProps {
     speed: data.summary.combat.speed,
     spellSaveDc: data.summary.combat.spellSaveDc ?? undefined,
     proficiencyBonus: data.summary.combat.proficiencyBonus,
+    conditions: data.summary.combat.conditions,
   };
 }
 

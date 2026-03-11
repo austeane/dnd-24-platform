@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { getCampaignBySlug, listCampaignRoster } from "../campaigns/index.ts";
 import { resetAndSeedRealCampaign } from "../test/integration-helpers.ts";
 import { getCharacterRuntimeState } from "./character-state.ts";
+import { executeLongRest } from "./rest-service.ts";
 import {
   applyConditionWithEffects,
   getActiveConditionsWithEffects,
@@ -105,6 +106,26 @@ describe("condition state persistence", () => {
         "charmed",
         "incapacitated",
       ]);
+    });
+
+    it("stores concentration as an active tracked state", async () => {
+      const characterId = await getRosterCharacterId("tali");
+
+      const applied = await applyConditionWithEffects({
+        characterId,
+        conditionName: "concentration",
+        appliedByLabel: "DM",
+        note: "Entangle",
+      });
+
+      expect(applied.condition.conditionName).toBe("concentration");
+      expect(applied.mechanicalEffects).toEqual([
+        "Maintaining concentration: Entangle",
+      ]);
+
+      const active = await listActiveConditions(characterId);
+      expect(active).toHaveLength(1);
+      expect(active[0]!.conditionName).toBe("concentration");
     });
 
     it("errors when removing an already-removed condition", async () => {
@@ -362,13 +383,23 @@ describe("condition state persistence", () => {
     it("incapacitated breaks concentration", async () => {
       const characterId = await getRosterCharacterId("oriana");
 
-      await applyCondition({
+      await applyConditionWithEffects({
+        characterId,
+        conditionName: "concentration",
+        appliedByLabel: "DM",
+        note: "Hex",
+      });
+
+      await applyConditionWithEffects({
         characterId,
         conditionName: "incapacitated",
         appliedByLabel: "DM",
       });
 
       const state = await getCharacterRuntimeState(characterId);
+      expect(
+        state!.conditions.active.map((condition) => condition.conditionName),
+      ).not.toContain("concentration");
       const concentrationEffect = state!.conditions.effects.find((e) =>
         e.tags.includes("concentration-broken"),
       );
@@ -460,6 +491,49 @@ describe("condition state persistence", () => {
       );
       expect(incapEntry).toBeDefined();
       expect(incapEntry!.mechanicalEffects).toHaveLength(2);
+    });
+
+    it("replaces an existing concentration state when a new one starts", async () => {
+      const characterId = await getRosterCharacterId("tali");
+
+      await applyConditionWithEffects({
+        characterId,
+        conditionName: "concentration",
+        appliedByLabel: "DM",
+        note: "Entangle",
+      });
+
+      await applyConditionWithEffects({
+        characterId,
+        conditionName: "concentration",
+        appliedByLabel: "DM",
+        note: "Hex",
+      });
+
+      const active = await listActiveConditions(characterId);
+      expect(active).toHaveLength(1);
+      expect(active[0]!.conditionName).toBe("concentration");
+      expect(active[0]!.note).toBe("Hex");
+    });
+
+    it("long rest clears active concentration", async () => {
+      const characterId = await getRosterCharacterId("tali");
+
+      await applyConditionWithEffects({
+        characterId,
+        conditionName: "concentration",
+        appliedByLabel: "DM",
+        note: "Entangle",
+      });
+
+      const result = await executeLongRest({
+        characterId,
+        createdByLabel: "DM",
+      });
+
+      expect(result.conditionsCleared).toContain("concentration");
+      const active = await listActiveConditions(characterId);
+      expect(active).toHaveLength(0);
     });
   });
 

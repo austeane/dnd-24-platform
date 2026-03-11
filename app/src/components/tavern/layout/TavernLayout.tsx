@@ -10,7 +10,7 @@ export function TavernLayout({ children, className = "" }: TavernLayoutProps) {
     <main
       id={TAVERN_MAIN_CONTENT_ID}
       tabIndex={-1}
-      className={`relative z-1 mx-auto max-w-6xl px-4 py-6 sm:px-6 ${className}`}
+      className={`tavern-main relative z-1 mx-auto max-w-[1120px] px-4 py-6 sm:px-8 sm:py-10 ${className}`}
     >
       {children}
     </main>

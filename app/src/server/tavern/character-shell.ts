@@ -1,8 +1,13 @@
 import { getTavernCharacterContext } from "./context.ts";
 import { buildInventoryRuntimeData } from "./inventory.ts";
 import { buildSpellbookData } from "./spellbook.ts";
+import { listActiveConditions } from "../progression/condition-state.ts";
 import type { CharacterRuntimeState } from "../progression/types.ts";
-import type { TavernShellData } from "./types.ts";
+import type {
+  TavernConditionData,
+  TavernShellData,
+  TavernViewer,
+} from "./types.ts";
 
 function abilityModifier(score: number): number {
   return Math.floor((score - 10) / 2);
@@ -17,6 +22,7 @@ function extractSourceLabel(
 
 function buildSummary(
   runtime: CharacterRuntimeState,
+  conditions: TavernConditionData[],
 ): TavernShellData["summary"] {
   const abilityOrder = [
     "strength",
@@ -56,6 +62,7 @@ function buildSummary(
       speed: runtime.speed,
       spellSaveDc: runtime.spellcasting?.spellSaveDc ?? null,
       proficiencyBonus: runtime.proficiencyBonus,
+      conditions,
     },
     skills: runtime.skillState.skills.map((skill) => ({
       name: skill.skillName,
@@ -77,6 +84,10 @@ function buildSummary(
 
 export function buildCharacterShellData(
   context: NonNullable<Awaited<ReturnType<typeof getTavernCharacterContext>>>,
+  options: {
+    viewer: TavernViewer;
+    conditions: TavernConditionData[];
+  },
 ): TavernShellData {
   if (!context.runtime) {
     throw new Error("Tavern shell data requires runtime state.");
@@ -85,9 +96,10 @@ export function buildCharacterShellData(
   return {
     campaign: context.campaign,
     character: context.character,
-    summary: buildSummary(context.runtime),
+    viewer: options.viewer,
+    summary: buildSummary(context.runtime, options.conditions),
     spellbook: buildSpellbookData(
-      context.runtime.spellcasting,
+      context.runtime,
       context.campaign.enabledPackIds,
     ),
     inventoryRuntime: buildInventoryRuntimeData(context.runtime),
@@ -96,11 +108,23 @@ export function buildCharacterShellData(
 
 export async function getCharacterShellData(
   characterId: string,
+  viewer: TavernViewer,
 ): Promise<TavernShellData | null> {
-  const context = await getTavernCharacterContext(characterId);
+  const [context, activeConditions] = await Promise.all([
+    getTavernCharacterContext(characterId),
+    listActiveConditions(characterId),
+  ]);
   if (!context?.runtime) {
     return null;
   }
 
-  return buildCharacterShellData(context);
+  return buildCharacterShellData(context, {
+    viewer,
+    conditions: activeConditions.map((condition) => ({
+      id: condition.id,
+      name: condition.conditionName,
+      note: condition.note,
+      sourceCreature: condition.sourceCreature,
+    })),
+  });
 }

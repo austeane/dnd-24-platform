@@ -9,7 +9,7 @@ export interface AbilityScoreRowProps {
 
 export function AbilityScoreRow({ abilities }: AbilityScoreRowProps) {
   return (
-    <div className="grid grid-cols-3 gap-2 sm:grid-cols-6">
+    <div className="abilities-row">
       {abilities.map((ability) => (
         <AbilityScoreCard key={ability.name} {...ability} />
       ))}

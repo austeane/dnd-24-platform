@@ -43,6 +43,7 @@ function mapResources(
   return resources
     .filter((resource) => resource.isTracked)
     .map((resource) => ({
+      resourceName: resource.name,
       name: resource.name,
       current: resource.currentUses,
       max: resource.maxUses,

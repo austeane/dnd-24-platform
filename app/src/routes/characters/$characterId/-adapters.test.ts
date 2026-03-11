@@ -12,6 +12,7 @@ import type { TavernShellData } from "./-server.ts";
 const shellData: TavernShellData = {
   campaign: {
     id: "campaign-1",
+    slug: "real-aa-campaign",
     name: "Real AA Campaign",
     progressionMode: "hybrid",
     enabledPackIds: ["srd-5e-2024", "advanced-adventurers"],
@@ -21,6 +22,13 @@ const shellData: TavernShellData = {
     slug: "tali",
     name: "Tali",
     ownerLabel: "Austin",
+  },
+  viewer: {
+    role: "player",
+    characterId: "character-1",
+    sessionLabel: "player-web",
+    canEditCharacter: true,
+    canManageCampaign: false,
   },
   summary: {
     subtitle: "Druid 2 · Sage",
@@ -45,6 +53,7 @@ const shellData: TavernShellData = {
       speed: 30,
       spellSaveDc: 13,
       proficiencyBonus: 2,
+      conditions: [],
     },
     skills: [
       { name: "Nature", bonus: 4, proficient: true, expertise: false },
@@ -78,6 +87,7 @@ describe("tavern route adapters", () => {
       level: 2,
       className: "Druid",
       species: "Elf",
+      levelUpHref: "/characters/character-1/level-up",
     });
     expect(toCombatPanelProps(shellData)).toMatchObject({
       maxHp: 17,

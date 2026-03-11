@@ -1,7 +1,8 @@
 import {
+  type CharacterSpellcastingState,
+  type CharacterState,
   getCanonicalEntity,
   getCanonicalSpellByName,
-  type CharacterSpellcastingState,
   type PackId,
 } from "@dnd/library";
 import { getTavernCharacterContext } from "./context.ts";
@@ -57,14 +58,27 @@ export function resolveGrantedSpell(
 }
 
 export function buildSpellbookData(
-  spellcasting: CharacterSpellcastingState | null | undefined,
+  runtime: Pick<CharacterState, "spellcasting" | "resources"> | null | undefined,
   enabledPackIds: string[],
 ): TavernSpellbookData {
+  const spellcasting = runtime?.spellcasting;
   if (!spellcasting) {
     return getEmptySpellbookData();
   }
 
   const canonicalPackIds = toCanonicalPackIds(enabledPackIds);
+  const freeCastBySpell = new Map(
+    (runtime?.resources ?? [])
+      .filter((resource) => resource.name.startsWith("Free Cast: "))
+      .map((resource) => [
+        resource.name.replace(/^Free Cast:\s*/, ""),
+        {
+          resourceName: resource.name,
+          current: resource.currentUses,
+          max: resource.maxUses,
+        },
+      ]),
+  );
   const enrichedSpells: Array<TavernSpellData & { level: number }> =
     spellcasting.grantedSpells.map((grantedSpell) => {
       const canonical = resolveGrantedSpell(grantedSpell, canonicalPackIds);
@@ -76,6 +90,7 @@ export function buildSpellbookData(
         concentration: canonical?.concentration ?? false,
         ritual: canonical?.ritual ?? false,
         alwaysPrepared: grantedSpell.alwaysPrepared,
+        freeCast: freeCastBySpell.get(grantedSpell.spellName) ?? null,
       };
     });
 
@@ -86,29 +101,22 @@ export function buildSpellbookData(
     spellsByLevel.set(spell.level, levelSpells);
   }
 
-  const slotsByLevel = new Map<
-    number,
-    {
-      level: number;
-      total: number;
-      current: number;
-    }
-  >();
+  const slotsByLevel = new Map<number, TavernSpellbookData["groups"][number]["slots"]>();
 
   for (const pool of spellcasting.slotPools) {
     for (const slot of pool.slots) {
-      const existing = slotsByLevel.get(slot.level);
-      if (existing) {
-        existing.total += slot.total;
-        existing.current += slot.current;
-        continue;
-      }
-
-      slotsByLevel.set(slot.level, {
+      const levelSlots = slotsByLevel.get(slot.level) ?? [];
+      levelSlots.push({
+        resourceName:
+          pool.source === "pact-magic"
+            ? `Pact Magic Slot (Level ${slot.level})`
+            : `Spell Slot (Level ${slot.level})`,
+        kind: pool.source === "pact-magic" ? "pact" : "standard",
         level: slot.level,
         total: slot.total,
         current: slot.current,
       });
+      slotsByLevel.set(slot.level, levelSlots);
     }
   }
 
@@ -129,7 +137,7 @@ export function buildSpellbookData(
         level,
         label: LEVEL_LABELS[level] ?? `Level ${level}`,
         spells,
-        slots: level > 0 ? (slotsByLevel.get(level) ?? null) : null,
+        slots: level > 0 ? (slotsByLevel.get(level) ?? []) : [],
       };
     }),
   };
@@ -144,7 +152,7 @@ export async function getSpellbookData(
   }
 
   return buildSpellbookData(
-    context.runtime.spellcasting,
+    context.runtime,
     context.campaign.enabledPackIds,
   );
 }

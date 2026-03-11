@@ -17,6 +17,7 @@ describe("CombatPanel", () => {
         speed={35}
         spellSaveDc={13}
         proficiencyBonus={2}
+        conditions={[]}
       />,
     );
 
@@ -27,6 +28,38 @@ describe("CombatPanel", () => {
     expect(screen.getByText("Temporary HP: +2")).toBeInTheDocument();
     expect(
       screen.queryByText("Current HP tracking is not yet modeled"),
+    ).not.toBeInTheDocument();
+  });
+
+  it("renders a dedicated concentration toggle instead of a generic clear chip", () => {
+    render(
+      <CombatPanel
+        currentHp={15}
+        tempHp={0}
+        maxHp={19}
+        armorClass={14}
+        acBreakdown="Leather Armor +2"
+        initiative={3}
+        speed={35}
+        spellSaveDc={13}
+        proficiencyBonus={2}
+        editable
+        conditions={[
+          {
+            id: "condition-concentration",
+            name: "concentration",
+            note: "Entangle",
+            sourceCreature: null,
+          },
+        ]}
+      />,
+    );
+
+    expect(
+      screen.getByRole("button", { name: "End Concentration" }),
+    ).toBeInTheDocument();
+    expect(
+      screen.queryByRole("button", { name: /Clear concentration/i }),
     ).not.toBeInTheDocument();
   });
 });

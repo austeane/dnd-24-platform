@@ -71,39 +71,47 @@ function EntryDetailView({
       <button
         type="button"
         onClick={onBack}
-        className="mb-4 flex items-center gap-1 text-sm font-medium text-wood hover:text-ember"
+        className="compendium-back-link"
       >
         <span aria-hidden="true">&larr;</span> Back to list
       </button>
-      <div className="tavern-card p-6">
-        <div className="mb-4 flex items-start justify-between gap-3">
-          <h2 className="font-heading text-2xl font-bold text-ink">
-            {detail.name}
-          </h2>
-          <div className="flex shrink-0 items-center gap-2">
+      <div className="compendium-detail-card">
+        <div className="compendium-detail-header">
+          <div className="min-w-0">
+            <div className="tavern-page-kicker">Reference Entry</div>
+            <h2 className="compendium-detail-title">
+              {detail.name}
+            </h2>
+            {detail.summary && (
+              <p className="compendium-detail-summary">{detail.summary}</p>
+            )}
+          </div>
+          <div className="compendium-detail-meta">
             <span
               className={`inline-block rounded-[var(--radius-tag)] px-2.5 py-0.5 text-xs font-medium ${typeColors[detail.type] ?? "bg-border-light text-ink-soft"}`}
             >
               {typeLabels[detail.type] ?? detail.type}
             </span>
-            <span className="text-xs text-ink-soft">
+            <span className="compendium-pack-label">
               {packLabels[detail.packId] ?? detail.packId}
             </span>
           </div>
         </div>
         {detail.tags.length > 0 && (
-          <div className="mb-4 flex flex-wrap gap-1.5">
+          <div className="compendium-tag-list">
             {detail.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-[var(--radius-tag)] bg-cream-warm px-2 py-0.5 text-xs text-ink-soft"
+                className="compendium-tag"
               >
                 {tag}
               </span>
             ))}
           </div>
         )}
-        <ProseContent content={detail.bodyMd} />
+        <div className="compendium-detail-body">
+          <ProseContent content={detail.bodyMd} className="compendium-detail-prose" />
+        </div>
       </div>
     </div>
   );
@@ -125,12 +133,21 @@ export function CompendiumPanel({
   onBackToList,
 }: CompendiumPanelProps) {
   if (detail) {
-    return <EntryDetailView detail={detail} onBack={onBackToList} />;
+      return <EntryDetailView detail={detail} onBack={onBackToList} />;
   }
 
   return (
     <div className="space-y-4">
-      <div className="tavern-card p-4">
+      <div className="compendium-search-card">
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <div>
+            <div className="tavern-page-kicker">Reference Library</div>
+            <div className="font-heading text-xl font-bold text-ink">Search the compendium</div>
+          </div>
+          <div className="text-xs text-ink-soft">
+            {totalCount} {totalCount === 1 ? "entry" : "entries"}
+          </div>
+        </div>
         <input
           type="search"
           value={query}
@@ -175,17 +192,13 @@ export function CompendiumPanel({
         </div>
       </div>
 
-      <p className="text-xs text-ink-soft">
-        {totalCount} {totalCount === 1 ? "entry" : "entries"} found
-      </p>
-
-      <div className="space-y-2">
+      <div className="space-y-3">
         {entries.map((entry) => (
           <button
             key={`${entry.packId}:${entry.entityId}`}
             type="button"
             onClick={() => onEntrySelect(entry.packId, entry.entityId)}
-            className="tavern-card w-full cursor-pointer p-4 text-left transition-shadow hover:shadow-[var(--shadow-tavern-md)]"
+            className="compendium-entry-card"
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
@@ -233,11 +246,7 @@ function FilterChip({
       onClick={onClick}
       aria-label={ariaLabel}
       aria-pressed={isActive}
-      className={`rounded-[var(--radius-tag)] px-3 py-1 text-xs font-medium transition-colors ${
-        isActive
-          ? "bg-wood text-cream"
-          : "bg-cream-warm text-ink-soft hover:bg-border-light hover:text-ink"
-      }`}
+      className={`filter-chip ${isActive ? "is-active" : ""}`}
     >
       {label}
     </button>

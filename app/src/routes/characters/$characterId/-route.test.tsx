@@ -10,7 +10,10 @@ import { requireCharacterShellData } from "./route.tsx";
 describe("requireCharacterShellData", () => {
   it("throws a TanStack notFound error for missing characters", () => {
     try {
-      requireCharacterShellData(null);
+      requireCharacterShellData({
+        shell: null,
+        redirectTo: null,
+      });
       throw new Error("Expected notFound to be thrown");
     } catch (error) {
       expect(isNotFound(error)).toBe(true);

@@ -54,6 +54,7 @@ describe("buildInventoryRuntimeData", () => {
     ]);
     expect(data.resources).toEqual([
       {
+        resourceName: "Wild Shape",
         name: "Wild Shape",
         current: 1,
         max: 2,

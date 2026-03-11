@@ -1,11 +1,102 @@
 @import "tailwindcss";
+@import "./tavern.css";
 
-* {
-  box-sizing: border-box;
+/* ── Non-theme custom properties (consumed via var() in components) ── */
+:root {
+  --radius-button: 12px;
+  --radius-tag: 100px;
+  --radius-ability: 16px;
+  --radius-card: 20px;
+  --shadow-tavern-md: 0 8px 20px rgba(62, 36, 21, 0.12);
+  --shadow-tavern-lg: 0 18px 42px rgba(62, 36, 21, 0.1);
+  --shadow-tavern-nav: 0 10px 24px rgba(62, 36, 21, 0.34);
 }
 
-html,
-body {
-  min-height: 100%;
-  margin: 0;
+/* ── Theme tokens → generates Tailwind utilities (bg-paper, text-ink, font-heading, etc.) ── */
+@theme inline {
+  /* Colors */
+  --color-paper: #fffaf1;
+  --color-paper-deep: #f8efdf;
+  --color-parchment: #efe4ca;
+  --color-cream: #faf6ee;
+  --color-cream-warm: #f5edd8;
+  --color-ink: #2a1d10;
+  --color-ink-soft: #5c4a35;
+  --color-wood: #6b4226;
+  --color-wood-dark: #3e2415;
+  --color-wood-light: #8b6040;
+  --color-ember: #c44d1a;
+  --color-ember-glow: #e86830;
+  --color-forest: #3a6b4a;
+  --color-forest-light: #5a9468;
+  --color-sky: #4a7a9b;
+  --color-brass: #c79b57;
+  --color-border: #d8cbb0;
+  --color-border-light: #e8ddc4;
+
+  /* Fonts */
+  --font-heading: "Fraunces", Georgia, serif;
+  --font-body: "Source Sans 3", Georgia, serif;
+  --font-mono: "IBM Plex Mono", monospace;
+}
+
+/* ── Base styles ── */
+@layer base {
+  * { box-sizing: border-box; }
+  html, body { min-height: 100%; margin: 0; }
+
+  body {
+    background:
+      radial-gradient(circle at 15% 0%, rgba(232, 174, 92, 0.18), transparent 20%),
+      radial-gradient(circle at 86% 6%, rgba(196, 77, 26, 0.16), transparent 18%),
+      linear-gradient(180deg, rgba(255, 251, 244, 0.96), rgba(247, 239, 225, 0.98)),
+      #f3ebdb;
+    color: var(--color-ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+  }
+
+  /* Paper texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
+    pointer-events: none;
+    opacity: 0.8;
+    z-index: 1000;
+  }
+
+  /* Edge vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(90deg, rgba(62, 36, 21, 0.18), transparent 10%, transparent 90%, rgba(62, 36, 21, 0.16)),
+      radial-gradient(circle at center, transparent 56%, rgba(62, 36, 21, 0.08) 100%);
+    pointer-events: none;
+    z-index: 0;
+  }
+}
+
+/* ── Animations ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Prose (markdown content wrapper used by ProseContent.tsx) ── */
+.prose-tavern {
+  max-width: 72ch;
 }

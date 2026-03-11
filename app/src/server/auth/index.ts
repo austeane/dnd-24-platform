@@ -1,5 +1,6 @@
 export type {
   AccessCredentialRecord,
+  CampaignAccessStatus,
   AccessSessionRecord,
   AccessSessionToken,
   CreateAccessSessionInput,
@@ -9,7 +10,9 @@ export type {
   ValidateAccessSessionInput,
 } from "./types.ts";
 export {
+  bootstrapDmPassword,
   createAccessSession,
+  getCampaignAccessStatus,
   isDmAccessSession,
   listAccessSessions,
   requireCampaignAccess,
@@ -20,3 +23,10 @@ export {
   setDmPassword,
   validateAccessSession,
 } from "./service.ts";
+export {
+  clearAccessSessionCookie,
+  createAccessSessionCookie,
+  readAccessSessionToken,
+  requestContextMiddleware,
+  resolveCampaignAccessSession,
+} from "./web-session.ts";

@@ -1,7 +1,12 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, redirect, useNavigate } from "@tanstack/react-router";
 import { CompendiumPanel } from "../../../components/tavern/character/CompendiumPanel.tsx";
 import { TAVERN_ROUTE_HEADING_ATTR } from "../../../components/tavern/layout/accessibility.ts";
-import { fetchCompendiumData, type TavernCompendiumQuery } from "./-server.ts";
+import {
+  type CharacterTabResponse,
+  fetchCompendiumData,
+  type TavernCompendiumData,
+  type TavernCompendiumQuery,
+} from "./-server.ts";
 
 interface CompendiumSearchParams {
   q?: string;
@@ -63,6 +68,12 @@ export const Route = createFileRoute(
   loader: ({ params, deps }) =>
     fetchCompendiumData({
       data: toCompendiumQuery(params.characterId, deps),
+    }).then((response: CharacterTabResponse<TavernCompendiumData>) => {
+      if (response.redirectTo) {
+        throw redirect({ href: response.redirectTo });
+      }
+
+      return response.data;
     }),
   component: CompendiumRoute,
 });
@@ -74,15 +85,21 @@ function CompendiumRoute() {
 
   return (
     <div className="animate-fade-up space-y-4">
-      <h1
-        className="font-heading text-2xl font-bold text-ink"
-        {...{
-          [TAVERN_ROUTE_HEADING_ATTR]: "true",
-        }}
-        tabIndex={-1}
-      >
-        Compendium
-      </h1>
+      <header className="tavern-page-header">
+        <div className="tavern-page-kicker">Library</div>
+        <h1
+          className="font-heading text-2xl font-bold text-ink"
+          {...{
+            [TAVERN_ROUTE_HEADING_ATTR]: "true",
+          }}
+          tabIndex={-1}
+        >
+          Compendium
+        </h1>
+        <p className="text-sm text-ink-soft">
+          Search SRD, Advanced Adventurers, and campaign references without leaving the current character.
+        </p>
+      </header>
       <CompendiumPanel
         entries={data.entries}
         totalCount={data.totalCount}

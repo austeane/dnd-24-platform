@@ -28,6 +28,13 @@ const baseIncapacitated: ActiveCondition = {
   appliedByLabel: "DM",
 };
 
+const baseConcentration: ActiveCondition = {
+  conditionName: "concentration",
+  appliedAt: "2026-03-10T12:00:00.000Z",
+  appliedByLabel: "DM",
+  note: "Entangle",
+};
+
 const sampleInput: CharacterComputationInput = {
   base: {
     name: "Ronan Wildspark",
@@ -74,10 +81,11 @@ const sampleInput: CharacterComputationInput = {
 // --- Tests ---
 
 describe("ALL_CONDITION_NAMES", () => {
-  it("lists charmed and incapacitated", () => {
+  it("lists charmed, concentration, and incapacitated", () => {
     expect(ALL_CONDITION_NAMES).toContain("charmed");
+    expect(ALL_CONDITION_NAMES).toContain("concentration");
     expect(ALL_CONDITION_NAMES).toContain("incapacitated");
-    expect(ALL_CONDITION_NAMES).toHaveLength(2);
+    expect(ALL_CONDITION_NAMES).toHaveLength(3);
   });
 });
 
@@ -144,13 +152,32 @@ describe("computeConditionEffects", () => {
     });
   });
 
-  it("accumulates effects from multiple conditions", () => {
-    const effects = computeConditionEffects([baseCharmed, baseIncapacitated]);
+  describe("Concentration", () => {
+    it("produces an active concentration effect", () => {
+      const effects = computeConditionEffects([baseConcentration]);
 
-    expect(effects).toHaveLength(4);
+      expect(effects).toHaveLength(1);
+      expect(effects[0]!.conditionName).toBe("concentration");
+      expect(effects[0]!.tags).toContain("concentration-active");
+      expect(effects[0]!.description).toContain("Entangle");
+    });
+  });
+
+  it("accumulates effects from multiple conditions", () => {
+    const effects = computeConditionEffects([
+      baseCharmed,
+      baseConcentration,
+      baseIncapacitated,
+    ]);
+
+    expect(effects).toHaveLength(5);
     const charmedEffects = effects.filter((e) => e.conditionName === "charmed");
+    const concentrationEffects = effects.filter((e) =>
+      e.conditionName === "concentration"
+    );
     const incapEffects = effects.filter((e) => e.conditionName === "incapacitated");
     expect(charmedEffects).toHaveLength(2);
+    expect(concentrationEffects).toHaveLength(1);
     expect(incapEffects).toHaveLength(2);
   });
 });
@@ -235,7 +262,11 @@ describe("getActiveConditionTags", () => {
   });
 
   it("deduplicates across multiple conditions", () => {
-    const tags = getActiveConditionTags([baseCharmed, baseIncapacitated]);
+    const tags = getActiveConditionTags([
+      baseCharmed,
+      baseConcentration,
+      baseIncapacitated,
+    ]);
     const uniqueTags = [...new Set(tags)];
     expect(tags).toEqual(uniqueTags);
   });
@@ -253,15 +284,16 @@ describe("computeCharacterState with conditions", () => {
   it("computes condition effects from activeConditions input", () => {
     const inputWithConditions: CharacterComputationInput = {
       ...sampleInput,
-      activeConditions: [baseCharmed, baseIncapacitated],
+      activeConditions: [baseCharmed, baseConcentration, baseIncapacitated],
     };
 
     const state = computeCharacterState(inputWithConditions);
 
-    expect(state.conditions.active).toHaveLength(2);
-    expect(state.conditions.effects).toHaveLength(4);
+    expect(state.conditions.active).toHaveLength(3);
+    expect(state.conditions.effects).toHaveLength(5);
     expect(state.conditions.active[0]!.conditionName).toBe("charmed");
-    expect(state.conditions.active[1]!.conditionName).toBe("incapacitated");
+    expect(state.conditions.active[1]!.conditionName).toBe("concentration");
+    expect(state.conditions.active[2]!.conditionName).toBe("incapacitated");
   });
 
   it("preserves DM audit fields in active conditions", () => {

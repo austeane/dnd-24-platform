@@ -1,0 +1,1 @@
+ALTER TYPE "condition_name" ADD VALUE 'concentration' BEFORE 'incapacitated';

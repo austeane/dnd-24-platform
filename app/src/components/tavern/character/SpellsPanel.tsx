@@ -1,3 +1,4 @@
+import { Button } from "../ui/Button.tsx";
 import { EmptyState } from "../ui/EmptyState.tsx";
 
 export interface SpellDisplayProps {
@@ -7,9 +8,16 @@ export interface SpellDisplayProps {
   concentration: boolean;
   ritual: boolean;
   alwaysPrepared: boolean;
+  freeCast: {
+    resourceName: string;
+    current: number;
+    max: number;
+  } | null;
 }
 
 export interface SlotPoolDisplayProps {
+  resourceName: string;
+  kind: "standard" | "pact";
   level: number;
   total: number;
   current: number;
@@ -19,7 +27,7 @@ export interface SpellGroupDisplayProps {
   level: number;
   label: string;
   spells: SpellDisplayProps[];
-  slots: SlotPoolDisplayProps | null;
+  slots: SlotPoolDisplayProps[];
 }
 
 export interface SpellsPanelProps {
@@ -27,19 +35,20 @@ export interface SpellsPanelProps {
   spellSaveDC: number | null;
   spellAttackBonus: number | null;
   groups: SpellGroupDisplayProps[];
+  editable?: boolean;
+  onSpendSlot?: (slot: SlotPoolDisplayProps) => Promise<void>;
+  onSpendFreeCast?: (spellName: string) => Promise<void>;
 }
 
 function SlotDots({ total, current }: { total: number; current: number }) {
+  const dotNumbers = Array.from({ length: total }, (_, dotNumber) => dotNumber + 1);
+
   return (
-    <div className="flex items-center gap-1" role="group" aria-label={`${current} of ${total} spell slots available`}>
-      {Array.from({ length: total }, (_, i) => (
+    <div className="slot-row" role="group" aria-label={`${current} of ${total} spell slots available`}>
+      {dotNumbers.map((dotNumber) => (
         <span
-          key={i}
-          className={`inline-block h-2.5 w-2.5 rounded-full border border-wood/40 ${
-            i < current
-              ? "bg-ember"
-              : "bg-cream-warm"
-          }`}
+          key={dotNumber}
+          className={`slot-circle ${dotNumber <= current ? "filled" : ""}`}
           aria-hidden="true"
         />
       ))}
@@ -50,50 +59,107 @@ function SlotDots({ total, current }: { total: number; current: number }) {
   );
 }
 
-function SpellRow({ spell }: { spell: SpellDisplayProps }) {
+function SpellRow({
+  spell,
+  editable,
+  onSpendFreeCast,
+}: {
+  spell: SpellDisplayProps;
+  editable: boolean;
+  onSpendFreeCast?: (spellName: string) => Promise<void>;
+}) {
   return (
-    <div className="flex items-center justify-between gap-2 border-b border-border-light/60 px-3 py-2 last:border-b-0">
+    <div className="spell-item">
       <div className="min-w-0 flex-1">
-        <span className="text-sm font-medium text-ink">{spell.name}</span>
+        <div className="spell-item-name">{spell.name}</div>
+        <div className="spell-item-meta">
+          <span>{spell.school}</span>
+          <span>&middot;</span>
+          <span>{spell.castingTime}</span>
+        </div>
+      </div>
+      <div className="spell-item-tags">
         {spell.alwaysPrepared && (
-          <span className="ml-1.5 inline-block rounded-[var(--radius-tag)] bg-forest/10 px-1.5 py-0.5 text-[10px] font-medium text-forest">
+          <span className="spell-tag spell-tag-forest">
             Always
           </span>
         )}
-      </div>
-      <div className="flex shrink-0 items-center gap-2 text-[11px] text-ink-soft">
-        <span>{spell.school}</span>
-        <span className="text-border">|</span>
-        <span>{spell.castingTime}</span>
+        {spell.freeCast && (
+          <span className="spell-tag spell-tag-sky">
+            Free Cast {spell.freeCast.current}/{spell.freeCast.max}
+          </span>
+        )}
         {spell.concentration && (
-          <>
-            <span className="text-border">|</span>
-            <span className="font-medium text-ember" title="Concentration">C</span>
-          </>
+          <span className="spell-tag spell-tag-ember" title="Concentration">Concentration</span>
         )}
         {spell.ritual && (
-          <>
-            <span className="text-border">|</span>
-            <span className="font-medium text-sky" title="Ritual">R</span>
-          </>
+          <span className="spell-tag spell-tag-brass" title="Ritual">Ritual</span>
+        )}
+        {editable && spell.freeCast && spell.freeCast.current > 0 && onSpendFreeCast && (
+          <Button
+            type="button"
+            variant="outline"
+            className="px-2 py-1 text-[10px]"
+            onClick={() => {
+              void onSpendFreeCast(spell.name);
+            }}
+          >
+            Spend Free Cast
+          </Button>
         )}
       </div>
     </div>
   );
 }
 
-function SpellGroup({ group }: { group: SpellGroupDisplayProps }) {
+function SpellGroup({
+  group,
+  editable,
+  onSpendSlot,
+  onSpendFreeCast,
+}: {
+  group: SpellGroupDisplayProps;
+  editable: boolean;
+  onSpendSlot?: (slot: SlotPoolDisplayProps) => Promise<void>;
+  onSpendFreeCast?: (spellName: string) => Promise<void>;
+}) {
   return (
-    <div className="tavern-card overflow-hidden">
-      <div className="flex items-center justify-between bg-cream-warm/50 px-3 py-2">
-        <h4 className="font-heading text-sm font-bold text-ink">{group.label}</h4>
-        {group.slots && (
-          <SlotDots total={group.slots.total} current={group.slots.current} />
-        )}
+    <section className="spell-group">
+      <div className="spell-group-header">
+        <h4 className="spell-group-name">{group.label}</h4>
+        <div className="flex flex-col items-end gap-2">
+          {group.slots.map((slot) => (
+            <div key={slot.resourceName} className="text-right">
+              <div className="text-[10px] font-semibold uppercase tracking-wide text-wood">
+                {slot.kind === "pact" ? "Pact" : "Slots"}
+              </div>
+              <div className="mt-1 flex items-center gap-2">
+                <SlotDots total={slot.total} current={slot.current} />
+                {editable && slot.current > 0 && onSpendSlot && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="px-2 py-1 text-[10px]"
+                    onClick={() => {
+                      void onSpendSlot(slot);
+                    }}
+                  >
+                    Spend
+                  </Button>
+                )}
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
-      <div>
+      <div className="spell-pills">
         {group.spells.map((spell) => (
-          <SpellRow key={spell.name} spell={spell} />
+          <SpellRow
+            key={spell.name}
+            spell={spell}
+            editable={editable}
+            onSpendFreeCast={onSpendFreeCast}
+          />
         ))}
         {group.spells.length === 0 && (
           <div className="px-3 py-3 text-center text-xs text-ink-soft">
@@ -101,7 +167,7 @@ function SpellGroup({ group }: { group: SpellGroupDisplayProps }) {
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }
 
@@ -110,6 +176,9 @@ export function SpellsPanel({
   spellSaveDC,
   spellAttackBonus,
   groups,
+  editable = false,
+  onSpendSlot,
+  onSpendFreeCast,
 }: SpellsPanelProps) {
   if (!castingAbility) {
     return (
@@ -122,25 +191,24 @@ export function SpellsPanel({
 
   return (
     <div className="flex flex-col gap-4">
-      {/* Casting stats header */}
-      <div className="tavern-card">
-        <div className="flex items-center justify-around px-4 py-3">
+      <div className="spellbook-stats-card">
+        <div className="spellbook-stats-grid">
           <div className="text-center">
-            <div className="text-xs text-ink-soft">Casting Ability</div>
+            <div className="spellbook-stat-label">Casting Ability</div>
             <div className="font-heading text-sm font-bold text-ink">
               {castingAbility}
             </div>
           </div>
-          <div className="h-6 w-px bg-border-light" />
+          <div className="spellbook-divider" />
           <div className="text-center">
-            <div className="text-xs text-ink-soft">Spell Save DC</div>
+            <div className="spellbook-stat-label">Spell Save DC</div>
             <div className="font-heading text-lg font-bold text-ink">
               {spellSaveDC ?? "--"}
             </div>
           </div>
-          <div className="h-6 w-px bg-border-light" />
+          <div className="spellbook-divider" />
           <div className="text-center">
-            <div className="text-xs text-ink-soft">Spell Attack</div>
+            <div className="spellbook-stat-label">Spell Attack</div>
             <div className="font-heading text-lg font-bold text-ink">
               {spellAttackBonus !== null
                 ? spellAttackBonus >= 0
@@ -152,9 +220,14 @@ export function SpellsPanel({
         </div>
       </div>
 
-      {/* Spell groups */}
       {groups.map((group) => (
-        <SpellGroup key={group.level} group={group} />
+        <SpellGroup
+          key={group.level}
+          group={group}
+          editable={editable}
+          onSpendSlot={onSpendSlot}
+          onSpendFreeCast={onSpendFreeCast}
+        />
       ))}
 
       {groups.length === 0 && (

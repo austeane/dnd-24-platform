@@ -1,3 +1,4 @@
+import { Button } from "../ui/Button.tsx";
 import { EmptyState } from "../ui/EmptyState.tsx";
 
 export interface InventoryItemProps {
@@ -18,6 +19,7 @@ export interface AttackProfileProps {
 }
 
 export interface ResourceProps {
+  resourceName: string;
   name: string;
   current: number;
   max: number;
@@ -30,11 +32,14 @@ export interface InventoryPanelProps {
   carriedItems: InventoryItemProps[];
   attackProfiles: AttackProfileProps[];
   resources: ResourceProps[];
+  editable?: boolean;
+  onSpendResource?: (resourceName: string) => Promise<void>;
+  onRestoreResource?: (resourceName: string) => Promise<void>;
 }
 
 function ItemRow({ item }: { item: InventoryItemProps }) {
   return (
-    <div className="flex items-center justify-between border-b border-border-light/60 px-3 py-2 last:border-b-0">
+    <div className="inventory-row">
       <div className="flex items-center gap-2">
         <span className="text-sm font-medium text-ink">{item.name}</span>
         {item.quantity > 1 && (
@@ -52,11 +57,11 @@ function ItemRow({ item }: { item: InventoryItemProps }) {
 
 function AttackRow({ profile }: { profile: AttackProfileProps }) {
   return (
-    <div className="flex items-center justify-between border-b border-border-light/60 px-3 py-2 last:border-b-0">
+    <div className="inventory-row">
       <div className="min-w-0 flex-1">
-        <span className="text-sm font-medium text-ink">{profile.weaponName}</span>
+        <div className="text-sm font-medium text-ink">{profile.weaponName}</div>
         {profile.masteryProperty && (
-          <span className="ml-1.5 inline-block rounded-[var(--radius-tag)] bg-ember/10 px-1.5 py-0.5 text-[10px] font-medium text-ember">
+          <span className="spell-tag spell-tag-ember mt-1 inline-flex">
             {profile.masteryProperty}
           </span>
         )}
@@ -78,10 +83,20 @@ function AttackRow({ profile }: { profile: AttackProfileProps }) {
   );
 }
 
-function ResourceBar({ resource }: { resource: ResourceProps }) {
+function ResourceBar({
+  resource,
+  editable,
+  onSpendResource,
+  onRestoreResource,
+}: {
+  resource: ResourceProps;
+  editable: boolean;
+  onSpendResource?: (resourceName: string) => Promise<void>;
+  onRestoreResource?: (resourceName: string) => Promise<void>;
+}) {
   const pct = resource.max > 0 ? (resource.current / resource.max) * 100 : 0;
   return (
-    <div className="border-b border-border-light/60 px-3 py-2 last:border-b-0">
+    <div className="inventory-row">
       <div className="flex items-center justify-between">
         <div>
           <span className="text-sm font-medium text-ink">{resource.name}</span>
@@ -91,9 +106,9 @@ function ResourceBar({ resource }: { resource: ResourceProps }) {
           {resource.current}/{resource.max}
         </span>
       </div>
-      <div className="mt-1 h-1.5 w-full overflow-hidden rounded-full bg-cream-warm">
+      <div className="resource-track mt-1">
         <div
-          className="h-full rounded-full bg-ember transition-all"
+          className="resource-fill"
           style={{ width: `${pct}%` }}
           role="progressbar"
           aria-valuenow={resource.current}
@@ -103,29 +118,54 @@ function ResourceBar({ resource }: { resource: ResourceProps }) {
         />
       </div>
       <div className="mt-0.5 text-[10px] text-ink-soft">{resource.source}</div>
+      {editable && (
+        <div className="mt-2 flex gap-2">
+          <Button
+            type="button"
+            variant="outline"
+            className="px-2 py-1 text-[10px]"
+            disabled={resource.current <= 0}
+            onClick={() => {
+              if (!onSpendResource) return;
+              void onSpendResource(resource.resourceName);
+            }}
+          >
+            Spend
+          </Button>
+          <Button
+            type="button"
+            variant="outline"
+            className="px-2 py-1 text-[10px]"
+            disabled={resource.current >= resource.max}
+            onClick={() => {
+              if (!onRestoreResource) return;
+              void onRestoreResource(resource.resourceName);
+            }}
+          >
+            Restore
+          </Button>
+        </div>
+      )}
     </div>
   );
 }
 
 function SectionCard({
   title,
+  meta,
   children,
-  empty,
 }: {
   title: string;
+  meta?: React.ReactNode;
   children: React.ReactNode;
-  empty?: string;
 }) {
   return (
-    <div className="tavern-card overflow-hidden">
-      <div className="bg-cream-warm/50 px-3 py-2">
+    <div className="inventory-section-card">
+      <div className="inventory-section-header">
         <h4 className="font-heading text-sm font-bold text-ink">{title}</h4>
+        {meta}
       </div>
-      {children ?? (
-        <div className="px-3 py-3 text-center text-xs text-ink-soft">
-          {empty ?? "None"}
-        </div>
-      )}
+      {children}
     </div>
   );
 }
@@ -135,6 +175,9 @@ export function InventoryPanel({
   carriedItems,
   attackProfiles,
   resources,
+  editable = false,
+  onSpendResource,
+  onRestoreResource,
 }: InventoryPanelProps) {
   const hasContent =
     equippedItems.length > 0 ||
@@ -152,39 +195,53 @@ export function InventoryPanel({
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      {/* Attack Profiles */}
+    <div className="inventory-grid">
       {attackProfiles.length > 0 && (
-        <SectionCard title="Attacks">
+        <SectionCard
+          title="Attacks"
+          meta={<span className="card-count">{attackProfiles.length}</span>}
+        >
           {attackProfiles.map((profile) => (
             <AttackRow key={profile.weaponName} profile={profile} />
           ))}
         </SectionCard>
       )}
 
-      {/* Equipped Items */}
       {equippedItems.length > 0 && (
-        <SectionCard title="Equipped">
+        <SectionCard
+          title="Equipped"
+          meta={<span className="card-count">{equippedItems.length}</span>}
+        >
           {equippedItems.map((item) => (
             <ItemRow key={item.id} item={item} />
           ))}
         </SectionCard>
       )}
 
-      {/* Carried Items */}
       {carriedItems.length > 0 && (
-        <SectionCard title="Carried">
+        <SectionCard
+          title="Carried"
+          meta={<span className="card-count">{carriedItems.length}</span>}
+        >
           {carriedItems.map((item) => (
             <ItemRow key={item.id} item={item} />
           ))}
         </SectionCard>
       )}
 
-      {/* Resources */}
       {resources.length > 0 && (
-        <SectionCard title="Resources">
+        <SectionCard
+          title="Resources"
+          meta={<span className="card-count combat">{resources.length}</span>}
+        >
           {resources.map((resource) => (
-            <ResourceBar key={resource.name} resource={resource} />
+            <ResourceBar
+              key={resource.resourceName}
+              resource={resource}
+              editable={editable}
+              onSpendResource={onSpendResource}
+              onRestoreResource={onRestoreResource}
+            />
           ))}
         </SectionCard>
       )}
