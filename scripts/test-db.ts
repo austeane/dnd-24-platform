@@ -70,6 +70,36 @@ function runDocker(
   return stdout;
 }
 
+function runPnpm(
+  args: string[],
+  options?: {
+    env?: NodeJS.ProcessEnv;
+  },
+): void {
+  const result = spawnSync("pnpm", args, {
+    cwd: process.cwd(),
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+    env: {
+      ...process.env,
+      ...options?.env,
+    },
+  });
+
+  if (result.error) {
+    throw new Error(
+      "pnpm is required to run test database migrations. Ensure pnpm is installed and on PATH.",
+    );
+  }
+
+  if (result.status !== 0) {
+    const stderr = result.stderr?.trim() ?? "";
+    const stdout = result.stdout?.trim() ?? "";
+    const details = stderr || stdout || "(no output)";
+    throw new Error(`pnpm ${args.join(" ")} failed:\n${details}`);
+  }
+}
+
 function checkDockerAvailable(): void {
   runDocker(["info"], { quiet: true });
 }
@@ -183,6 +213,16 @@ async function ensureRunning(): Promise<string> {
   return buildDatabaseUrl(resolveHostPort());
 }
 
+function migrateDatabase(databaseUrl: string): void {
+  runPnpm(["-F", "@dnd/app", "db:migrate"], {
+    env: {
+      DATABASE_TEST_URL: databaseUrl,
+      DATABASE_URL: databaseUrl,
+      DATABASE_PUBLIC_URL: databaseUrl,
+    },
+  });
+}
+
 async function printEnv(): Promise<void> {
   const databaseUrl = await ensureRunning();
   process.stdout.write(`export DATABASE_TEST_URL='${databaseUrl}'\n`);
@@ -243,12 +283,14 @@ function removeContainer(): void {
 
 async function startContainer(): Promise<void> {
   const databaseUrl = await ensureRunning();
+  migrateDatabase(databaseUrl);
   process.stdout.write(
     [
       "Disposable Postgres is ready.",
       `Container: ${config.containerName}`,
       `Image: ${config.image}`,
       `URL: ${databaseUrl}`,
+      "Schema: migrated",
       'Run `eval "$(pnpm db:test:env)"` to export DATABASE_TEST_URL in your shell.',
       "Stop and remove it with `pnpm db:test:down`.",
     ].join("\n") + "\n",

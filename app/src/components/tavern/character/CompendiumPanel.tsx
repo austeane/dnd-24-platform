@@ -142,6 +142,7 @@ export function CompendiumPanel({
         <div className="mt-3 flex flex-wrap gap-2">
           <FilterChip
             label="All Types"
+            ariaLabel="Filter type: all"
             isActive={activeType === ""}
             onClick={() => onTypeChange("")}
           />
@@ -149,6 +150,7 @@ export function CompendiumPanel({
             <FilterChip
               key={type}
               label={typeLabels[type] ?? type}
+              ariaLabel={`Filter type: ${typeLabels[type] ?? type}`}
               isActive={activeType === type}
               onClick={() => onTypeChange(type)}
             />
@@ -157,6 +159,7 @@ export function CompendiumPanel({
         <div className="mt-2 flex flex-wrap gap-2">
           <FilterChip
             label="All Packs"
+            ariaLabel="Filter pack: all"
             isActive={activePack === ""}
             onClick={() => onPackChange("")}
           />
@@ -164,6 +167,7 @@ export function CompendiumPanel({
             <FilterChip
               key={pack}
               label={packLabels[pack] ?? pack}
+              ariaLabel={`Filter pack: ${packLabels[pack] ?? pack}`}
               isActive={activePack === pack}
               onClick={() => onPackChange(pack)}
             />
@@ -214,10 +218,12 @@ export function CompendiumPanel({
 
 function FilterChip({
   label,
+  ariaLabel,
   isActive,
   onClick,
 }: {
   label: string;
+  ariaLabel: string;
   isActive: boolean;
   onClick: () => void;
 }) {
@@ -225,6 +231,8 @@ function FilterChip({
     <button
       type="button"
       onClick={onClick}
+      aria-label={ariaLabel}
+      aria-pressed={isActive}
       className={`rounded-[var(--radius-tag)] px-3 py-1 text-xs font-medium transition-colors ${
         isActive
           ? "bg-wood text-cream"

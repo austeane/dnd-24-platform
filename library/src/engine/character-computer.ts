@@ -9,7 +9,10 @@ import {
   buildCasterClassFeatureEffects,
   extractPactBladeBond,
 } from "./class-features-casters.ts";
-import { buildFeatAndSpeciesDynamicEffects } from "./feats-and-species.ts";
+import {
+  applyFeatAndSpeciesSourceOverrides,
+  buildFeatAndSpeciesDynamicEffects,
+} from "./feats-and-species.ts";
 import { getCharacterLevel } from "./levels.ts";
 import { getAbilityModifier, getProficiencyBonusForLevel } from "./math.ts";
 import { buildPassivePerception, buildProficiencies, buildSkillState } from "./proficiencies.ts";
@@ -33,14 +36,15 @@ import { computeConditionEffects } from "./conditions.ts";
 export { getAbilityModifier } from "./math.ts";
 
 export function computeCharacterState(input: CharacterComputationInput): CharacterState {
-  const baseEffects = flattenEffects(input.sources);
-  const level = getCharacterLevel(input.sources);
+  const effectiveSources = applyFeatAndSpeciesSourceOverrides(input.sources);
+  const baseEffects = flattenEffects(effectiveSources);
+  const level = getCharacterLevel(effectiveSources);
   const baseProficiencyBonus = getProficiencyBonusForLevel(level);
   const proficiencyBonusModifiers = getNumericModifierContributors(baseEffects, "proficiency-bonus");
   const proficiencyBonus = baseProficiencyBonus + sumContributors(proficiencyBonusModifiers);
   const dynamicEffects = [
-    ...buildFeatAndSpeciesDynamicEffects(input.sources, proficiencyBonus),
-    ...buildCasterClassFeatureEffects(input.sources),
+    ...buildFeatAndSpeciesDynamicEffects(effectiveSources, proficiencyBonus),
+    ...buildCasterClassFeatureEffects(effectiveSources),
   ];
   const effects = [...baseEffects, ...dynamicEffects];
   const proficiencies = buildProficiencies(effects);
@@ -55,7 +59,7 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
     )
     .map((entry) => entry.effect.value);
 
-  const pactBladeBond = extractPactBladeBond(input.sources);
+  const pactBladeBond = extractPactBladeBond(effectiveSources);
   const attackProfiles = buildAttackProfiles(input, effects, proficiencyBonus, proficiencies)
     .map((profile) =>
       applyPactBladeCharismaSubstitution(
@@ -65,6 +69,13 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
         proficiencyBonus,
       )
     );
+
+  const maxHP = input.base.baseMaxHP + sumContributors(hpContributors);
+  const currentHP = Math.min(
+    Math.max(input.hitPointState?.currentHP ?? maxHP, 0),
+    maxHP,
+  );
+  const tempHP = Math.max(input.hitPointState?.tempHP ?? 0, 0);
 
   return {
     name: input.base.name,
@@ -77,7 +88,9 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
     ),
     progressionMode: input.base.progressionMode,
     abilityScores: input.base.abilityScores,
-    maxHP: input.base.baseMaxHP + sumContributors(hpContributors),
+    maxHP,
+    currentHP,
+    tempHP,
     maxHPExplanation: createExplanation("Base HP", input.base.baseMaxHP, hpContributors),
     armorClass: buildArmorClass(input, effects),
     acBreakdown: buildACBreakdown(input, effects),
@@ -109,9 +122,9 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
       proficiencyBonus,
       input.resourcePoolState,
     ),
-    traits: buildTraits(input.sources, effects),
+    traits: buildTraits(effectiveSources, effects),
     senses: buildSenses(effects),
-    notes: buildNotes(input.sources, effects),
+    notes: buildNotes(effectiveSources, effects),
     proficiencies,
     skillState: buildSkillState(input.base.abilityScores, proficiencyBonus, effects),
     resistances: effects.flatMap((entry) =>
@@ -138,7 +151,7 @@ export function computeCharacterState(input: CharacterComputationInput): Charact
       active: input.activeConditions ?? [],
       effects: computeConditionEffects(input.activeConditions ?? []),
     },
-    sources: input.sources,
+    sources: effectiveSources,
     xp: buildXpSummary(input.xpLedger),
   };
 }

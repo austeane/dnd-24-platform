@@ -14,9 +14,10 @@ const appRoot = path.resolve(
 );
 
 const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const extraArgs = process.argv.slice(2).filter((arg) => arg !== "--");
 const child = spawn(
   pnpmCommand,
-  ["exec", "vitest", "run", "--config", "vitest.integration.config.ts"],
+  ["exec", "vitest", "run", "--config", "vitest.integration.config.ts", ...extraArgs],
   {
     cwd: appRoot,
     stdio: "inherit",

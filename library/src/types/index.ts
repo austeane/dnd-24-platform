@@ -97,6 +97,7 @@ export type {
   EvaluatedResource,
   EvaluatedSense,
   EvaluatedTrait,
+  PersistedHitPointState,
   PersistedResourcePoolState,
   ResourcePoolDefinition,
   SpellSlotPoolDefinition,

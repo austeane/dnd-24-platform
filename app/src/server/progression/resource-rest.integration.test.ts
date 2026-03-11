@@ -37,25 +37,24 @@ describe("resource rest integration", () => {
   });
 
   describe("short rest", () => {
-    it("resets short-rest pools and records an event", async () => {
-      // Vivennah has Bardic Inspiration (short rest due to Musician)
-      const characterId = await getRosterCharacterId("vivennah");
+    it("resets built-in short-rest pools and records an event", async () => {
+      const characterId = await getRosterCharacterId("ronan-wildspark");
 
       // Spend a resource so there's something to reset
       await spendResource({
         characterId,
-        resourceName: "Bardic Inspiration",
-        amount: 2,
+        resourceName: "Second Wind",
+        amount: 1,
         createdByLabel: "integration-test",
       });
 
       // Verify it's spent
       const poolsBefore = await listCharacterResourcePools(characterId);
-      const bardicBefore = poolsBefore.find(
-        (pool) => pool.resourceName === "Bardic Inspiration",
+      const secondWindBefore = poolsBefore.find(
+        (pool) => pool.resourceName === "Second Wind",
       );
-      expect(bardicBefore).toBeDefined();
-      expect(bardicBefore!.currentUses).toBe(bardicBefore!.maxUses - 2);
+      expect(secondWindBefore).toBeDefined();
+      expect(secondWindBefore!.currentUses).toBe(secondWindBefore!.maxUses - 1);
 
       // Short rest
       const event = await performShortRest({
@@ -68,13 +67,53 @@ describe("resource rest integration", () => {
       expect(event.characterId).toBe(characterId);
       expect(event.changesJson.length).toBeGreaterThan(0);
 
+      const secondWindChange = event.changesJson.find(
+        (change) => change.resourceName === "Second Wind",
+      );
+      expect(secondWindChange).toBeDefined();
+      expect(secondWindChange!.newUses).toBe(secondWindBefore!.maxUses);
+
+      // Verify pool is back to max
+      const poolsAfter = await listCharacterResourcePools(characterId);
+      const secondWindAfter = poolsAfter.find(
+        (pool) => pool.resourceName === "Second Wind",
+      );
+      expect(secondWindAfter!.currentUses).toBe(secondWindAfter!.maxUses);
+    });
+
+    it("restores Musician-adjusted Bardic Inspiration on short rest", async () => {
+      const characterId = await getRosterCharacterId("vivennah");
+
+      await spendResource({
+        characterId,
+        resourceName: "Bardic Inspiration",
+        amount: 2,
+        createdByLabel: "integration-test",
+      });
+
+      const poolsBefore = await listCharacterResourcePools(characterId);
+      const bardicBefore = poolsBefore.find(
+        (pool) => pool.resourceName === "Bardic Inspiration",
+      );
+      expect(bardicBefore).toBeDefined();
+      expect(bardicBefore!.resetOn).toBe("short");
+      expect(bardicBefore!.currentUses).toBe(bardicBefore!.maxUses - 2);
+
+      const event = await performShortRest({
+        characterId,
+        createdByLabel: "integration-test",
+        note: "Short rest after encounter",
+      });
+
+      expect(event.eventKind).toBe("short-rest-reset");
+      expect(event.characterId).toBe(characterId);
+
       const bardicChange = event.changesJson.find(
         (change) => change.resourceName === "Bardic Inspiration",
       );
       expect(bardicChange).toBeDefined();
       expect(bardicChange!.newUses).toBe(bardicBefore!.maxUses);
 
-      // Verify pool is back to max
       const poolsAfter = await listCharacterResourcePools(characterId);
       const bardicAfter = poolsAfter.find(
         (pool) => pool.resourceName === "Bardic Inspiration",
@@ -83,33 +122,32 @@ describe("resource rest integration", () => {
     });
 
     it("does not reset long-rest-only pools on short rest", async () => {
-      const characterId = await getRosterCharacterId("vivennah");
+      const characterId = await getRosterCharacterId("nara");
 
       const pools = await listCharacterResourcePools(characterId);
-      const longRestPools = pools.filter((pool) => pool.resetOn === "long");
+      const sorceryPoints = pools.find(
+        (pool) => pool.resourceName === "Sorcery Points",
+      );
+      expect(sorceryPoints).toBeDefined();
+      expect(sorceryPoints!.resetOn).toBe("long");
 
-      if (longRestPools.length > 0) {
-        // Spend from a long-rest pool
-        const longPool = longRestPools[0]!;
-        await spendResource({
-          characterId,
-          resourceName: longPool.resourceName,
-          amount: 1,
-          createdByLabel: "integration-test",
-        });
+      await spendResource({
+        characterId,
+        resourceName: "Sorcery Points",
+        amount: 1,
+        createdByLabel: "integration-test",
+      });
 
-        // Short rest should NOT reset it
-        await performShortRest({
-          characterId,
-          createdByLabel: "integration-test",
-        });
+      await performShortRest({
+        characterId,
+        createdByLabel: "integration-test",
+      });
 
-        const poolsAfter = await listCharacterResourcePools(characterId);
-        const poolAfter = poolsAfter.find(
-          (pool) => pool.resourceName === longPool.resourceName,
-        );
-        expect(poolAfter!.currentUses).toBe(longPool.maxUses - 1);
-      }
+      const poolsAfter = await listCharacterResourcePools(characterId);
+      const sorceryPointsAfter = poolsAfter.find(
+        (pool) => pool.resourceName === "Sorcery Points",
+      );
+      expect(sorceryPointsAfter!.currentUses).toBe(sorceryPoints!.maxUses - 1);
     });
   });
 

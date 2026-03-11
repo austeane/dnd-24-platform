@@ -1,4 +1,9 @@
-import type { CharacterState, PackId, ResourcePoolDefinition } from "@dnd/library";
+import type {
+  CharacterState,
+  PackId,
+  PersistedHitPointState,
+  ResourcePoolDefinition,
+} from "@dnd/library";
 import type { InferInsertModel, InferSelectModel } from "drizzle-orm";
 import type {
   CharacterSourceKind,
@@ -6,6 +11,7 @@ import type {
   CharacterSpendPlanState,
   ConditionName,
   EquipmentSlot,
+  HitPointEventKind,
   ResourceEventChange,
   ResourceEventKind,
   SkillChoiceSource,
@@ -15,6 +21,7 @@ import {
   characterConditions,
   characterEquipment,
   characterFeatChoices,
+  characterHitPoints,
   characterMetamagicChoices,
   characterPactBladeBonds,
   characterResourcePools,
@@ -23,6 +30,7 @@ import {
   characterSpendPlans,
   characterWeaponMasteries,
   conditionEvents,
+  hitPointEvents,
   resourceEvents,
   xpTransactions,
 } from "../db/schema/index.ts";
@@ -237,6 +245,8 @@ export interface RecordPactBladeBondInput {
 
 export type CharacterResourcePoolRecord = InferSelectModel<typeof characterResourcePools>;
 export type ResourceEventRecord = InferSelectModel<typeof resourceEvents>;
+export type CharacterHitPointRecord = InferSelectModel<typeof characterHitPoints>;
+export type HitPointEventRecord = InferSelectModel<typeof hitPointEvents>;
 
 // --- Resource Pool Input Types ---
 
@@ -276,6 +286,41 @@ export interface RecordResourceEventInput {
   sessionId?: string | null;
   eventKind: ResourceEventKind;
   changes: ResourceEventChange[];
+  note?: string;
+  createdByLabel: string;
+}
+
+// --- Hit Point State Input Types ---
+
+export interface SyncHitPointsInput extends PersistedHitPointState {
+  characterId: string;
+  maxHP: number;
+}
+
+export interface HitPointMutationInput {
+  characterId: string;
+  amount?: number;
+  sessionId?: string | null;
+  note?: string;
+  createdByLabel: string;
+}
+
+export interface ClearTemporaryHitPointsInput {
+  characterId: string;
+  sessionId?: string | null;
+  note?: string;
+  createdByLabel: string;
+}
+
+export interface RecordHitPointEventInput {
+  id?: string;
+  characterId: string;
+  sessionId?: string | null;
+  eventKind: HitPointEventKind;
+  previousCurrentHp: number;
+  newCurrentHp: number;
+  previousTempHp: number;
+  newTempHp: number;
   note?: string;
   createdByLabel: string;
 }

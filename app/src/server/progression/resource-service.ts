@@ -14,6 +14,7 @@ import {
   performShortRest,
   performLongRest,
 } from "./resource-state.ts";
+import { restoreHitPointsForLongRest } from "./hit-point-state.ts";
 import { syncCharacterDerivedState } from "./derived-state.ts";
 import type {
   CharacterResourcePoolRecord,
@@ -76,5 +77,7 @@ export async function orchestrateShortRest(
 export async function orchestrateLongRest(
   input: RestInput,
 ): Promise<ResourceEventRecord> {
-  return performLongRest(input);
+  const resourceEvent = await performLongRest(input);
+  await restoreHitPointsForLongRest(input);
+  return resourceEvent;
 }

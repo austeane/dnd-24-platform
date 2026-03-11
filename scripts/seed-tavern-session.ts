@@ -1,6 +1,31 @@
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
+export interface TavernSessionSeedSummary {
+  campaignId: string;
+  characterId: string;
+  sessionId: string;
+  communicationId: string;
+  before: {
+    slug: string;
+    level: number;
+    journalCards: number;
+    spendPlans: number;
+  };
+  after: {
+    slug: string;
+    level: number;
+    journalCards: number;
+    spendPlans: number;
+    xpTransactions: number;
+  };
+  counts: {
+    campaigns: number;
+    characters: number;
+    sessions: number;
+  };
+}
+
 function getDatabaseUrl(): string {
   const databaseUrl =
     process.env.DATABASE_PUBLIC_URL ??
@@ -30,7 +55,7 @@ function requireDestructiveFlag(): void {
 
 export async function seedTavernSessionDatabase(options?: {
   databaseUrl?: string;
-}): Promise<void> {
+}): Promise<TavernSessionSeedSummary> {
   const databaseUrl = options?.databaseUrl ?? getDatabaseUrl();
   process.env.NODE_ENV = "test";
   process.env.DATABASE_URL = databaseUrl;
@@ -60,36 +85,35 @@ export async function seedTavernSessionDatabase(options?: {
         (select count(*)::int from sessions) as sessions
     `;
 
+    const summary: TavernSessionSeedSummary = {
+      campaignId: result.campaignId,
+      characterId: result.characterId,
+      sessionId: result.sessionId,
+      communicationId: result.communicationId,
+      before: {
+        slug: result.before.shell.character.slug,
+        level: result.before.shell.summary.level,
+        journalCards: result.before.journal.cards.length,
+        spendPlans: result.before.spendPlans.length,
+      },
+      after: {
+        slug: result.after.shell.character.slug,
+        level: result.after.shell.summary.level,
+        journalCards: result.after.journal.cards.length,
+        spendPlans: result.after.spendPlans.length,
+        xpTransactions: result.after.xpTransactions.length,
+      },
+      counts: counts[0] ?? {
+        campaigns: 0,
+        characters: 0,
+        sessions: 0,
+      },
+    };
+
     process.stdout.write(
-      `${JSON.stringify(
-        {
-          campaignId: result.campaignId,
-          characterId: result.characterId,
-          sessionId: result.sessionId,
-          communicationId: result.communicationId,
-          before: {
-            slug: result.before.shell.character.slug,
-            level: result.before.shell.summary.level,
-            journalCards: result.before.journal.cards.length,
-            spendPlans: result.before.spendPlans.length,
-          },
-          after: {
-            slug: result.after.shell.character.slug,
-            level: result.after.shell.summary.level,
-            journalCards: result.after.journal.cards.length,
-            spendPlans: result.after.spendPlans.length,
-            xpTransactions: result.after.xpTransactions.length,
-          },
-          counts: counts[0] ?? {
-            campaigns: 0,
-            characters: 0,
-            sessions: 0,
-          },
-        },
-        null,
-        2,
-      )}\n`,
+      `${JSON.stringify(summary, null, 2)}\n`,
     );
+    return summary;
   } finally {
     await client.end({ timeout: 5 });
   }

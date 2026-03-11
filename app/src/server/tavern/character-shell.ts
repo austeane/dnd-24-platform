@@ -48,6 +48,8 @@ function buildSummary(
     })),
     combat: {
       maxHp: runtime.maxHP,
+      currentHp: runtime.currentHP,
+      tempHp: runtime.tempHP,
       armorClass: runtime.armorClass.total,
       acBreakdown: acBreakdown || `Base ${runtime.armorClass.total}`,
       initiative: runtime.initiative.total,

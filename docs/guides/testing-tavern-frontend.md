@@ -31,7 +31,8 @@ eval "$(pnpm db:test:env)"
 ```
 
 The checked-in helper reuses or creates a disposable Docker container named
-`dnd-tavern-test` on port `55433` by default. It exports:
+`dnd-tavern-test` on port `55433` by default, and `db:test:up` also applies the
+current app migrations. It exports:
 
 - `DATABASE_TEST_URL`
 - `DATABASE_URL`
@@ -61,6 +62,7 @@ pnpm -F @dnd/app test
 DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm -F @dnd/app test:integration
 DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm snapshot:tavern-session --check
 DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm test:acceptance:tavern
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm test:accessibility:tavern
 pnpm -F @dnd/app build
 ```
 
@@ -116,7 +118,35 @@ The browser spec proves this user-visible flow:
 1. Home page renders the seeded campaign and roster.
 2. Tali’s shell reflects the post-scenario level-up state.
 3. Spellbook, inventory, and journal tabs render the expected seeded data.
-4. Compendium search resolves the Advanced Adventurers `Hex` detail view.
+4. Invalid character ids render the Tavern not-found state.
+5. Vivennah’s journal hits the empty-state path.
+6. Skip link and route-focus restoration work across tab navigation.
+7. Compendium search and filter state survive in the URL across reload.
+8. The seeded flow still passes at `480`, `768`, and `1024` widths.
+
+Targeted browser work is still single-campaign only; multi-campaign roster assertions remain deferred until the lightweight Tavern fixture surface exists.
+
+## Accessibility Gate
+
+The Lighthouse accessibility gate uses the same seeded Tavern data, a production build, and Playwright Chromium.
+
+```bash
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm test:accessibility:tavern
+```
+
+Current threshold:
+
+- `/` accessibility score must be `>= 90`
+- `/characters/<tali-id>` accessibility score must be `>= 90`
+
+Reports are written to `test-results/tavern-accessibility/`.
+
+For focused progression repros, the integration runner now forwards trailing Vitest args:
+
+```bash
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm -F @dnd/app test:integration -- progression/resource-rest.integration.test.ts
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm -F @dnd/app test:integration -- progression/hit-point-state.integration.test.ts
+```
 
 ## Railway Smoke
 

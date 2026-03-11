@@ -11,6 +11,7 @@ import {
   performShortRest,
   performLongRest,
 } from "./resource-state.ts";
+import { restoreHitPointsForLongRest } from "./hit-point-state.ts";
 import type {
   ResourceEventRecord,
   RestInput,
@@ -49,6 +50,7 @@ export async function executeLongRest(
   additionalEffects: string[];
 }> {
   const resourceEvent = await performLongRest(input);
+  await restoreHitPointsForLongRest(input);
 
   return {
     resourceEvent,

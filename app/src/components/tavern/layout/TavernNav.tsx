@@ -63,6 +63,7 @@ export function TavernNav({
                 <Link
                   key={tab.to}
                   {...linkProps}
+                  aria-current={isActive ? "page" : undefined}
                   className={`rounded-[var(--radius-button)] px-3 py-1.5 text-sm font-medium transition-colors ${
                     isActive
                       ? "bg-cream/15 text-cream"

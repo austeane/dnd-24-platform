@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { CompendiumPanel } from "../../../components/tavern/character/CompendiumPanel.tsx";
+import { TAVERN_ROUTE_HEADING_ATTR } from "../../../components/tavern/layout/accessibility.ts";
 import { fetchCompendiumData, type TavernCompendiumQuery } from "./-server.ts";
 
 interface CompendiumSearchParams {
@@ -72,7 +73,16 @@ function CompendiumRoute() {
   const navigate = useNavigate({ from: Route.fullPath });
 
   return (
-    <div className="animate-fade-up">
+    <div className="animate-fade-up space-y-4">
+      <h1
+        className="font-heading text-2xl font-bold text-ink"
+        {...{
+          [TAVERN_ROUTE_HEADING_ATTR]: "true",
+        }}
+        tabIndex={-1}
+      >
+        Compendium
+      </h1>
       <CompendiumPanel
         entries={data.entries}
         totalCount={data.totalCount}

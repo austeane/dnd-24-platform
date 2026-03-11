@@ -24,6 +24,8 @@ export interface TavernAbilityScore {
 
 export interface TavernCombatData {
   maxHp: number;
+  currentHp: number;
+  tempHp: number;
   armorClass: number;
   acBreakdown: string;
   initiative: number;

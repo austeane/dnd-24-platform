@@ -63,6 +63,8 @@
         ],
         "combat": {
           "maxHp": 19,
+          "currentHp": 15,
+          "tempHp": 2,
           "armorClass": 11,
           "acBreakdown": "Base AC +10, Dexterity +1",
           "initiative": 1,
@@ -485,6 +487,8 @@
         ],
         "combat": {
           "maxHp": 19,
+          "currentHp": 15,
+          "tempHp": 2,
           "armorClass": 11,
           "acBreakdown": "Base AC +10, Dexterity +1",
           "initiative": 1,

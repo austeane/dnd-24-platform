@@ -4,6 +4,7 @@ import {
   type ActiveCondition,
   type CharacterComputationInput,
   type Effect,
+  type PersistedHitPointState,
   type PersistedResourcePoolState,
   type SourceWithEffects,
   type XPLedgerEntry,
@@ -14,6 +15,7 @@ import {
   characterConditions,
   characterEquipment,
   characterFeatChoices,
+  characterHitPoints,
   characterMetamagicChoices,
   characterPactBladeBonds,
   characterResourcePools,
@@ -27,6 +29,7 @@ import type {
   CharacterConditionRecord,
   CharacterEquipmentRecord,
   CharacterFeatChoiceRecord,
+  CharacterHitPointRecord,
   CharacterMetamagicChoiceRecord,
   CharacterPactBladeBondRecord,
   CharacterResourcePoolRecord,
@@ -42,6 +45,7 @@ export interface CharacterProjectionRows {
   xpRecords: XpTransactionRecord[];
   activeConditionRecords: CharacterConditionRecord[];
   resourcePoolRecords: CharacterResourcePoolRecord[];
+  hitPointRecord: CharacterHitPointRecord | null;
   skillChoiceRecords: CharacterSkillChoiceRecord[];
   featChoiceRecords: CharacterFeatChoiceRecord[];
   equipmentRecords: CharacterEquipmentRecord[];
@@ -220,6 +224,19 @@ function mapResourcePoolState(
   }));
 }
 
+function mapHitPointState(
+  record: CharacterHitPointRecord | null,
+): PersistedHitPointState | undefined {
+  if (!record) {
+    return undefined;
+  }
+
+  return {
+    currentHP: record.currentHp,
+    tempHP: record.tempHp,
+  };
+}
+
 export async function loadCharacterProjectionRows(
   characterId: string,
 ): Promise<CharacterProjectionRows> {
@@ -228,6 +245,7 @@ export async function loadCharacterProjectionRows(
     xpRecords,
     activeConditionRecords,
     resourcePoolRecords,
+    hitPointRows,
     skillChoiceRecords,
     featChoiceRecords,
     equipmentRecords,
@@ -260,6 +278,11 @@ export async function loadCharacterProjectionRows(
       .from(characterResourcePools)
       .where(eq(characterResourcePools.characterId, characterId))
       .orderBy(asc(characterResourcePools.resourceName)),
+    db
+      .select()
+      .from(characterHitPoints)
+      .where(eq(characterHitPoints.characterId, characterId))
+      .limit(1),
     db
       .select()
       .from(characterSkillChoices)
@@ -302,6 +325,7 @@ export async function loadCharacterProjectionRows(
     xpRecords,
     activeConditionRecords,
     resourcePoolRecords,
+    hitPointRecord: hitPointRows[0] ?? null,
     skillChoiceRecords,
     featChoiceRecords,
     equipmentRecords,
@@ -329,6 +353,7 @@ export function buildCharacterComputationInput(
     xpLedger: mapXpLedger(rows.xpRecords),
     activeConditions: mapActiveConditions(rows.activeConditionRecords),
     resourcePoolState: mapResourcePoolState(rows.resourcePoolRecords),
+    hitPointState: mapHitPointState(rows.hitPointRecord),
   };
 }
 

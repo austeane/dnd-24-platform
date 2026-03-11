@@ -78,6 +78,29 @@ describe("HP explainability — maxHPExplanation structure", () => {
   }
 });
 
+describe("HP runtime state", () => {
+  it("defaults currentHP to maxHP and tempHP to 0 when no persisted state exists", () => {
+    const state = computeCharacterState(buildCharacterFixture(roster, "tali"));
+
+    expect(state.currentHP).toBe(state.maxHP);
+    expect(state.tempHP).toBe(0);
+  });
+
+  it("clamps persisted currentHP to maxHP and tempHP to zero or above", () => {
+    const input = buildCharacterFixture(roster, "ronan-wildspark");
+    const state = computeCharacterState({
+      ...input,
+      hitPointState: {
+        currentHP: input.base.baseMaxHP + 10,
+        tempHP: -3,
+      },
+    });
+
+    expect(state.currentHP).toBe(state.maxHP);
+    expect(state.tempHP).toBe(0);
+  });
+});
+
 // ---------------------------------------------------------------------------
 // HP modifier effects
 // ---------------------------------------------------------------------------

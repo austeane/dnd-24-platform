@@ -1,5 +1,6 @@
 import { buildSpellSlotPoolDefinitions } from "@dnd/library";
 import { buildCharacterRuntimeStateFromRows, loadCharacterProjectionRows } from "./projection.ts";
+import { syncCharacterHitPoints } from "./hit-point-state.ts";
 import { syncCharacterResourcePools } from "./resource-state.ts";
 import type { CharacterRuntimeState } from "./types.ts";
 
@@ -58,6 +59,12 @@ export async function syncCharacterDerivedState(
   await syncCharacterResourcePools({
     characterId,
     pools: authoritativePools,
+  });
+  await syncCharacterHitPoints({
+    characterId,
+    maxHP: runtimeState.maxHP,
+    currentHP: runtimeState.currentHP,
+    tempHP: runtimeState.tempHP,
   });
 
   const syncedRows = await loadCharacterProjectionRows(characterId);

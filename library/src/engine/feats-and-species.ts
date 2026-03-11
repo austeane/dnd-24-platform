@@ -8,7 +8,7 @@
  */
 
 import type { AbilityScoreSet, EvaluatedTrait } from "../types/character.ts";
-import type { Effect, SourceWithEffects } from "../types/effect.ts";
+import type { Effect, RestType, SourceWithEffects } from "../types/effect.ts";
 import type { EffectEnvelope } from "./shared.ts";
 
 // ---------------------------------------------------------------------------
@@ -146,6 +146,77 @@ export function getBardicInspirationResetType(
   sources: SourceWithEffects[],
 ): "short" | "long" {
   return hasMusicianFeat(sources) ? "short" : "long";
+}
+
+/**
+ * Musician changes the Bardic Inspiration pool from long-rest recovery
+ * to short-rest recovery. Canon still defines the base Bardic Inspiration
+ * resource as long-rest, so this helper normalizes the effective source
+ * effects before the runtime state is computed.
+ */
+export function applyFeatAndSpeciesSourceOverrides(
+  sources: SourceWithEffects[],
+): SourceWithEffects[] {
+  if (!hasMusicianFeat(sources)) {
+    return sources;
+  }
+
+  const shortRest: RestType = "short";
+
+  return sources.map((entry) => {
+    const isBardicInspirationSource =
+      entry.source.entityId === "class-feature:bardic-inspiration" ||
+      (entry.source.kind === "class-feature" &&
+        entry.source.name.toLowerCase().includes("bardic inspiration"));
+
+    if (!isBardicInspirationSource) {
+      return entry;
+    }
+
+    let changed = false;
+    const nextEffects = entry.effects.map((effect) => {
+      if (
+        effect.type === "grant-resource" &&
+        effect.resource.name === "Bardic Inspiration" &&
+        effect.resource.resetOn !== "short"
+      ) {
+        changed = true;
+        return {
+          ...effect,
+          resource: {
+            ...effect.resource,
+            resetOn: shortRest,
+          },
+        };
+      }
+
+      if (
+        effect.type === "grant-scaling-resource" &&
+        effect.resource.name === "Bardic Inspiration" &&
+        effect.resource.resetOn !== "short"
+      ) {
+        changed = true;
+        return {
+          ...effect,
+          resource: {
+            ...effect.resource,
+            resetOn: shortRest,
+          },
+        };
+      }
+
+      return effect;
+    });
+
+    if (!changed) {
+      return entry;
+    }
+
+    return {
+      ...entry,
+      effects: nextEffects,
+    };
+  });
 }
 
 // ---------------------------------------------------------------------------

@@ -37,6 +37,7 @@ import {
 import {
   getCharacterRuntimeState,
   listCharacterSources,
+  syncCharacterHitPoints,
   syncCharacterDerivedState,
 } from "../progression/index.ts";
 
@@ -796,6 +797,20 @@ async function seedCharacter(
 
   await seedChoiceState(record.id, character.identity.slug, character);
   await syncCharacterDerivedState(record.id);
+
+  if (character.identity.slug === "tali") {
+    const taliRuntimeState = await getCharacterRuntimeState(record.id);
+    if (!taliRuntimeState) {
+      throw new Error(`Could not compute runtime state for ${character.identity.slug}`);
+    }
+
+    await syncCharacterHitPoints({
+      characterId: record.id,
+      maxHP: taliRuntimeState.maxHP,
+      currentHP: Math.max(taliRuntimeState.maxHP - 4, 1),
+      tempHP: 2,
+    });
+  }
 
   const runtimeState = await getCharacterRuntimeState(record.id);
   if (!runtimeState) {

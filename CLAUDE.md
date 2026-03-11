@@ -75,6 +75,14 @@ Key rules:
 - `docs/plans/active/` — In-progress execution plans
 - `docs/plans/completed/` — Finished plans (for context)
 
+## Tavern Round 7
+
+- DB/bootstrap: `pnpm db:test:up && eval "$(pnpm db:test:env)"` (`db:test:up` now creates/reuses the disposable Postgres and runs migrations).
+- Fast Tavern loop: `pnpm -F @dnd/app test:integration -- progression/resource-rest.integration.test.ts progression/hit-point-state.integration.test.ts`, `pnpm test:acceptance:tavern`, `pnpm test:accessibility:tavern`, `pnpm snapshot:tavern-session --check`.
+- Progression + HP seams: `app/src/server/progression/{projection.ts,derived-state.ts,hit-point-state.ts,resource-rest.integration.test.ts}`, `app/src/server/db/schema/hit-points.ts`, `app/src/server/db/seed-real-campaign.ts`.
+- Tavern UI + a11y seams: `app/src/routes/__root.tsx`, `app/src/routes/index.tsx`, `app/src/routes/characters/$characterId/{route.tsx,index.tsx,spellbook.tsx,inventory.tsx,journal.tsx,compendium.tsx}`, `tests/acceptance/tavern-session.spec.ts`.
+- Read `docs/guides/testing-tavern-frontend.md` before changing Tavern gates or smoke checks.
+
 ## Plans
 
 When creating a plan in Claude plan mode, copy the `~/.claude/plans/` plan file to `docs/plans/active/NNN-slug.md` before presenting for approval. Completed plans move to `docs/plans/completed/`.

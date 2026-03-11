@@ -42,6 +42,8 @@ export function toAbilityScoreProps(
 export function toCombatPanelProps(data: TavernShellData): CombatPanelProps {
   return {
     maxHp: data.summary.combat.maxHp,
+    currentHp: data.summary.combat.currentHp,
+    tempHp: data.summary.combat.tempHp,
     armorClass: data.summary.combat.armorClass,
     acBreakdown: data.summary.combat.acBreakdown,
     initiative: data.summary.combat.initiative,

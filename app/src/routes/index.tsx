@@ -1,6 +1,7 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { TavernLayout } from "../components/tavern/layout/TavernLayout.tsx";
 import { TavernNav } from "../components/tavern/layout/TavernNav.tsx";
+import { TAVERN_ROUTE_HEADING_ATTR } from "../components/tavern/layout/accessibility.ts";
 import { Card } from "../components/tavern/ui/Card.tsx";
 import { ErrorCard } from "../components/tavern/ui/ErrorCard.tsx";
 import { Loading } from "../components/tavern/ui/Loading.tsx";
@@ -27,7 +28,13 @@ function HomePage() {
       <TavernLayout>
         <div className="space-y-8 animate-fade-up">
           <header className="text-center">
-            <h1 className="font-heading text-3xl font-bold text-ink sm:text-4xl">
+            <h1
+              className="font-heading text-3xl font-bold text-ink sm:text-4xl"
+              {...{
+                [TAVERN_ROUTE_HEADING_ATTR]: "true",
+              }}
+              tabIndex={-1}
+            >
               Campaign Platform
             </h1>
             <p className="mt-2 text-sm text-ink-soft">
@@ -82,6 +89,7 @@ function RosterCard({ entry }: { entry: RosterCardProps }) {
     <Link
       to="/characters/$characterId"
       params={{ characterId: entry.characterId }}
+      aria-label={`Open ${entry.characterName}`}
       className="block transition-transform hover:scale-[1.02] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ember"
     >
       <Card className="p-4">

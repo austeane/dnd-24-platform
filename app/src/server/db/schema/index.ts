@@ -14,6 +14,12 @@ export {
   sessions,
 } from "./campaigns.ts";
 export {
+  characterHitPoints,
+  hitPointEventKindEnum,
+  hitPointEventKinds,
+  hitPointEvents,
+} from "./progression.ts";
+export {
   characterEquipment,
   characterFeatChoices,
   characterMetamagicChoices,
@@ -79,6 +85,7 @@ export type {
   CharacterSpendPlanKind,
   CharacterSpendPlanState,
   EquipmentSlot,
+  HitPointEventKind,
   ResourceEventKind,
   RestType,
   SkillChoiceSource,

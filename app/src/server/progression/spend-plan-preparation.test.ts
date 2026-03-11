@@ -56,6 +56,7 @@ function makeProjectionRows(
   return {
     sourceRecords,
     xpRecords,
+    hitPointRecord: null,
     activeConditionRecords: [],
     resourcePoolRecords: [],
     skillChoiceRecords: [],

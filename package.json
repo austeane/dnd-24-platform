@@ -35,6 +35,7 @@
     "snapshot:tavern-session": "tsx scripts/snapshot-tavern-session.ts",
     "seed:tavern-session": "tsx scripts/seed-tavern-session.ts",
     "test:acceptance:tavern": "playwright test -c playwright.tavern.config.ts",
+    "test:accessibility:tavern": "tsx scripts/test-tavern-accessibility.ts",
     "verify:railway:tavern": "tsx scripts/verify-railway-tavern-smoke.ts",
     "prepare": "husky"
   },
@@ -43,6 +44,7 @@
     "fast-glob": "^3.3.3",
     "gray-matter": "^4.0.3",
     "husky": "^9",
+    "lighthouse": "^13.0.3",
     "lint-staged": "^15",
     "oxlint": "^0.16",
     "tsx": "^4.21.0",

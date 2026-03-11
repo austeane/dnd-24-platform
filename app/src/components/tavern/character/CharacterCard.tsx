@@ -1,6 +1,7 @@
 import { Button } from "../ui/Button.tsx";
 import { Card } from "../ui/Card.tsx";
 import { StatBadge } from "../ui/StatBadge.tsx";
+import { TAVERN_ROUTE_HEADING_ATTR } from "../layout/accessibility.ts";
 
 export interface CharacterCardProps {
   name: string;
@@ -26,7 +27,13 @@ export function CharacterCard({
             {name.charAt(0)}
           </div>
           <div>
-            <h1 className="font-heading text-2xl font-bold text-ink">
+            <h1
+              className="font-heading text-2xl font-bold text-ink"
+              {...{
+                [TAVERN_ROUTE_HEADING_ATTR]: "true",
+              }}
+              tabIndex={-1}
+            >
               {name}
             </h1>
             <p className="mt-0.5 text-sm text-ink-soft">{subtitle}</p>

@@ -37,6 +37,8 @@ const shellData: TavernShellData = {
     ],
     combat: {
       maxHp: 17,
+      currentHp: 13,
+      tempHp: 4,
       armorClass: 15,
       acBreakdown: "Leather Armor +2, Shield +2",
       initiative: 2,
@@ -79,6 +81,8 @@ describe("tavern route adapters", () => {
     });
     expect(toCombatPanelProps(shellData)).toMatchObject({
       maxHp: 17,
+      currentHp: 13,
+      tempHp: 4,
       armorClass: 15,
       spellSaveDc: 13,
     });

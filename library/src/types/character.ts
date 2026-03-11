@@ -44,6 +44,7 @@ export interface CharacterComputationInput {
   xpLedger: XPLedgerEntry[];
   activeConditions?: ActiveCondition[];
   resourcePoolState?: PersistedResourcePoolState[];
+  hitPointState?: PersistedHitPointState;
 }
 
 export interface XPLedgerEntry {
@@ -174,6 +175,11 @@ export interface PersistedResourcePoolState {
   sourceName: string;
 }
 
+export interface PersistedHitPointState {
+  currentHP: number;
+  tempHP: number;
+}
+
 export interface PrerequisiteCheck {
   prerequisite: AAPrerequisite;
   passed: boolean;
@@ -252,6 +258,8 @@ export interface CharacterState {
 
   abilityScores: AbilityScoreSet;
   maxHP: number;
+  currentHP: number;
+  tempHP: number;
   maxHPExplanation: ModifierExplanation;
   armorClass: ModifierExplanation;
   acBreakdown: ACBreakdown;
