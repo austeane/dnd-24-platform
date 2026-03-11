@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DnD Platform — Design Exploration</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #0c0c0d;
+    color: #e8e8ea;
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+  }
+
+  h1 {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 2.5rem;
+    font-weight: 400;
+    font-style: italic;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+  }
+
+  .subtitle {
+    color: #666;
+    font-size: 0.9rem;
+    margin-bottom: 3rem;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    max-width: 900px;
+    width: 100%;
+  }
+
+  .option {
+    background: #161618;
+    border: 1px solid #2a2a2e;
+    border-radius: 16px;
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .option:hover {
+    border-color: #444;
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  }
+
+  .option-letter {
+    font-family: 'Instrument Serif', serif;
+    font-size: 3rem;
+    font-style: italic;
+    line-height: 1;
+    margin-bottom: 0.75rem;
+  }
+
+  .option:nth-child(1) .option-letter { color: #c5a044; }
+  .option:nth-child(2) .option-letter { color: #e85d3a; }
+  .option:nth-child(3) .option-letter { color: #c44d1a; }
+  .option:nth-child(4) .option-letter { color: #bf3a2b; }
+
+  .option-name {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.01em;
+  }
+
+  .option-desc {
+    font-size: 0.82rem;
+    color: #888;
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+
+  .option-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .option-tag {
+    font-size: 0.65rem;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255,255,255,0.05);
+    border-radius: 4px;
+    color: #666;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .option-arrow {
+    position: absolute;
+    top: 2rem;
+    right: 2rem;
+    font-size: 1.2rem;
+    color: #444;
+    transition: all 0.2s;
+  }
+
+  .option:hover .option-arrow {
+    color: #888;
+    transform: translate(3px, -3px);
+  }
+
+  .footer {
+    margin-top: 3rem;
+    font-size: 0.75rem;
+    color: #444;
+  }
+</style>
+</head>
+<body>
+
+<h1>Design Exploration</h1>
+<p class="subtitle">D&D 5e (2024) Character Builder — 4 visual directions + accessibility variant</p>
+
+<div class="grid">
+  <a href="option-a-grimoire.html" class="option">
+    <span class="option-arrow">&nearr;</span>
+    <div class="option-letter">A</div>
+    <div class="option-name">The Grimoire</div>
+    <div class="option-desc">Dark, arcane, atmospheric. Gold-on-dark with parchment textures, ornamental borders, and Cinzel serif typography. Feels like opening an ancient spellbook. Vignette and glow effects create dramatic mood.</div>
+    <div class="option-tags">
+      <span class="option-tag">Dark theme</span>
+      <span class="option-tag">Serif-heavy</span>
+      <span class="option-tag">Atmospheric</span>
+      <span class="option-tag">Ornamental</span>
+      <span class="option-tag">Fantasy immersion</span>
+    </div>
+  </a>
+
+  <a href="option-a-grimoire-hc.html" class="option">
+    <span class="option-arrow">&nearr;</span>
+    <div class="option-letter" style="color: #ddb84e;">A+</div>
+    <div class="option-name">The Grimoire (High Contrast)</div>
+    <div class="option-desc">Same arcane atmosphere, now WCAG 2.1 AA compliant. Every text color ≥ 4.5:1, non-text UI ≥ 3:1. Brighter golds (#c9a54a, #ddb84e), warmer crimson (#ef5350). Adds skip link, focus-visible styles, semantic landmarks, ARIA labels, and prefers-reduced-motion support. Vignette softened to preserve edge contrast.</div>
+    <div class="option-tags">
+      <span class="option-tag">WCAG AA</span>
+      <span class="option-tag">Dark theme</span>
+      <span class="option-tag">Accessible</span>
+      <span class="option-tag">Skip link</span>
+      <span class="option-tag">Reduced motion</span>
+    </div>
+  </a>
+
+  <a href="option-b-obsidian.html" class="option">
+    <span class="option-arrow">&nearr;</span>
+    <div class="option-letter">B</div>
+    <div class="option-name">Obsidian Arsenal</div>
+    <div class="option-desc">Modern dark UI with sidebar navigation, accent colors for data types (HP red, AC teal, initiative gold). Instrument Serif headlines + JetBrains Mono data. Clean, app-like, information-dense — closest to DnDBeyond's sensibility but sharper.</div>
+    <div class="option-tags">
+      <span class="option-tag">Dark theme</span>
+      <span class="option-tag">App-like</span>
+      <span class="option-tag">Sidebar nav</span>
+      <span class="option-tag">Data-forward</span>
+      <span class="option-tag">Modern</span>
+    </div>
+  </a>
+
+  <a href="option-c-tavern.html" class="option">
+    <span class="option-arrow">&nearr;</span>
+    <div class="option-letter">C</div>
+    <div class="option-name">The Warm Tavern</div>
+    <div class="option-desc">Light, warm, inviting. Cream backgrounds with rich wood-brown and ember accents. Fraunces variable serif headlines, generous border-radius, card-based layout. Friendly and approachable — feels like a beautifully illustrated handbook.</div>
+    <div class="option-tags">
+      <span class="option-tag">Light theme</span>
+      <span class="option-tag">Warm palette</span>
+      <span class="option-tag">Card layout</span>
+      <span class="option-tag">Rounded</span>
+      <span class="option-tag">Inviting</span>
+    </div>
+  </a>
+
+  <a href="option-d-ironworks.html" class="option">
+    <span class="option-arrow">&nearr;</span>
+    <div class="option-letter">D</div>
+    <div class="option-name">Ironworks</div>
+    <div class="option-desc">Industrial utilitarian. Light background, black top bar, square corners, grid-locked panels with shared borders. Archivo bold sans + Literata serif names + Fira Code mono data. Maximum information density, zero ornamentation — the spreadsheet-player's dream.</div>
+    <div class="option-tags">
+      <span class="option-tag">Light theme</span>
+      <span class="option-tag">Utilitarian</span>
+      <span class="option-tag">Grid-locked</span>
+      <span class="option-tag">Dense</span>
+      <span class="option-tag">No-nonsense</span>
+    </div>
+  </a>
+</div>
+
+<p class="footer">Open each to see a full character sheet mockup &middot; All pure HTML/CSS, no dependencies</p>
+
+</body>
+</html>

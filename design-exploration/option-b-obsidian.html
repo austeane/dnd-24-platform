@@ -1,0 +1,869 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option B — Obsidian Arsenal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0b;
+    --surface: #111113;
+    --surface-2: #19191c;
+    --surface-3: #222226;
+    --border: #2a2a2f;
+    --border-subtle: #1e1e22;
+    --text: #ededef;
+    --text-2: #a0a0a8;
+    --text-3: #606068;
+    --accent: #e85d3a;
+    --accent-muted: rgba(232, 93, 58, 0.15);
+    --accent-glow: rgba(232, 93, 58, 0.08);
+    --teal: #2dd4a8;
+    --teal-muted: rgba(45, 212, 168, 0.12);
+    --yellow: #f0c040;
+    --radius: 12px;
+    --radius-sm: 8px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', -apple-system, sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── SIDEBAR ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--border-subtle);
+    padding: 1.5rem 1rem;
+    display: flex;
+    flex-direction: column;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+  }
+
+  .sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.25rem 0.75rem;
+    margin-bottom: 2rem;
+  }
+
+  .brand-icon {
+    width: 32px;
+    height: 32px;
+    background: var(--accent);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+  }
+
+  .brand-text {
+    font-weight: 700;
+    font-size: 1.05rem;
+    letter-spacing: -0.02em;
+  }
+
+  .sidebar-section {
+    margin-bottom: 1.75rem;
+  }
+
+  .sidebar-section-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    padding: 0 0.75rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    padding: 0.55rem 0.75rem;
+    border-radius: var(--radius-sm);
+    color: var(--text-2);
+    text-decoration: none;
+    font-size: 0.875rem;
+    font-weight: 450;
+    transition: all 0.15s;
+    cursor: pointer;
+  }
+
+  .sidebar-link:hover {
+    background: var(--surface-2);
+    color: var(--text);
+  }
+
+  .sidebar-link.active {
+    background: var(--accent-muted);
+    color: var(--accent);
+  }
+
+  .sidebar-link svg {
+    width: 18px;
+    height: 18px;
+    opacity: 0.7;
+  }
+
+  .sidebar-link.active svg { opacity: 1; }
+
+  .sidebar-char {
+    margin-top: auto;
+    padding: 1rem;
+    background: var(--surface-2);
+    border-radius: var(--radius);
+    border: 1px solid var(--border-subtle);
+  }
+
+  .sidebar-char-name {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 1.1rem;
+    margin-bottom: 0.15rem;
+  }
+
+  .sidebar-char-meta {
+    font-size: 0.75rem;
+    color: var(--text-3);
+  }
+
+  .sidebar-char-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    background: var(--accent-muted);
+    color: var(--accent);
+    padding: 0.15rem 0.5rem;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    margin-top: 0.5rem;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main-content {
+    padding: 2rem 2.5rem;
+    overflow-y: auto;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    margin-bottom: 2rem;
+  }
+
+  .page-title {
+    font-family: 'Instrument Serif', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+    font-style: italic;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .page-title span {
+    color: var(--text-3);
+    font-style: normal;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 400;
+    display: block;
+    margin-top: 0.25rem;
+  }
+
+  .btn-group {
+    display: flex;
+    gap: 0.5rem;
+  }
+
+  .btn {
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    font-size: 0.8rem;
+    font-weight: 550;
+    border: 1px solid var(--border);
+    background: var(--surface-2);
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+
+  .btn:hover {
+    background: var(--surface-3);
+    color: var(--text);
+    border-color: var(--text-3);
+  }
+
+  .btn-primary {
+    background: var(--accent);
+    color: white;
+    border-color: var(--accent);
+  }
+
+  .btn-primary:hover {
+    background: #d14e2d;
+    border-color: #d14e2d;
+    color: white;
+  }
+
+  /* ── TOP STATS ROW ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .stat-tile {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-tile::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+  }
+
+  .stat-tile.hp::before { background: linear-gradient(90deg, var(--accent), transparent); }
+  .stat-tile.ac::before { background: linear-gradient(90deg, var(--teal), transparent); }
+  .stat-tile.init::before { background: linear-gradient(90deg, var(--yellow), transparent); }
+
+  .stat-tile-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-tile-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.8rem;
+    font-weight: 500;
+    letter-spacing: -0.04em;
+    line-height: 1;
+  }
+
+  .stat-tile.hp .stat-tile-value { color: var(--accent); }
+  .stat-tile.ac .stat-tile-value { color: var(--teal); }
+  .stat-tile.init .stat-tile-value { color: var(--yellow); }
+
+  .stat-tile-detail {
+    font-size: 0.75rem;
+    color: var(--text-3);
+    margin-top: 0.35rem;
+  }
+
+  /* HP Bar inside tile */
+  .hp-bar {
+    height: 4px;
+    background: var(--surface-3);
+    border-radius: 2px;
+    margin-top: 0.75rem;
+    overflow: hidden;
+  }
+
+  .hp-bar-fill {
+    height: 100%;
+    width: 84%;
+    background: linear-gradient(90deg, var(--accent), #f08060);
+    border-radius: 2px;
+    transition: width 0.5s ease;
+  }
+
+  /* ── ABILITY SCORES ── */
+  .abilities {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .ability {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    padding: 1rem 0.5rem;
+    text-align: center;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+
+  .ability:hover {
+    border-color: var(--border);
+    transform: translateY(-2px);
+  }
+
+  .ability-name {
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-3);
+    margin-bottom: 0.5rem;
+  }
+
+  .ability-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: var(--text);
+    line-height: 1;
+  }
+
+  .ability-mod {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--accent);
+    margin-top: 0.3rem;
+    font-weight: 400;
+  }
+
+  /* ── BOTTOM PANELS ── */
+  .panels-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+  }
+
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .panel-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-2);
+  }
+
+  .panel-badge {
+    font-size: 0.65rem;
+    padding: 0.15rem 0.5rem;
+    background: var(--surface-3);
+    border-radius: 100px;
+    color: var(--text-3);
+    font-weight: 500;
+  }
+
+  .panel-body {
+    padding: 0.5rem 0;
+  }
+
+  .panel-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 1.25rem;
+    transition: background 0.1s;
+    cursor: pointer;
+  }
+
+  .panel-row:hover {
+    background: var(--surface-2);
+  }
+
+  .panel-row-left {
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .prof-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-3);
+  }
+
+  .prof-dot.active {
+    background: var(--teal);
+    border-color: var(--teal);
+    box-shadow: 0 0 8px rgba(45, 212, 168, 0.3);
+  }
+
+  .prof-dot.expertise {
+    background: var(--accent);
+    border-color: var(--accent);
+    box-shadow: 0 0 8px rgba(232, 93, 58, 0.3);
+  }
+
+  .panel-row-name {
+    font-size: 0.85rem;
+    color: var(--text-2);
+    font-weight: 400;
+  }
+
+  .panel-row:hover .panel-row-name { color: var(--text); }
+
+  .panel-row-value {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--text-3);
+    font-weight: 400;
+  }
+
+  /* Feature chips */
+  .feature-list {
+    padding: 0.75rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  .feature-chip {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background: var(--surface-2);
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-subtle);
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .feature-chip:hover { border-color: var(--border); }
+
+  .feature-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  .feature-icon.class { background: var(--accent-muted); }
+  .feature-icon.species { background: var(--teal-muted); }
+
+  .feature-chip-name {
+    font-size: 0.85rem;
+    font-weight: 550;
+    color: var(--text);
+    margin-bottom: 0.1rem;
+  }
+
+  .feature-chip-source {
+    font-size: 0.7rem;
+    color: var(--text-3);
+  }
+
+  /* Spell tags */
+  .spells-body {
+    padding: 0.75rem 1.25rem;
+  }
+
+  .spell-level-group {
+    margin-bottom: 1rem;
+  }
+
+  .spell-level-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+  }
+
+  .spell-level-name {
+    font-size: 0.7rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-3);
+  }
+
+  .slot-pips {
+    display: flex;
+    gap: 0.25rem;
+  }
+
+  .slot-pip {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    border: 1.5px solid var(--text-3);
+  }
+
+  .slot-pip.used {
+    background: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .spell-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .spell-tag {
+    padding: 0.3rem 0.65rem;
+    background: var(--surface-2);
+    border: 1px solid var(--border-subtle);
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: var(--text-2);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .spell-tag:hover {
+    background: var(--surface-3);
+    border-color: var(--border);
+    color: var(--text);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes slideIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .stat-tile, .ability, .panel {
+    animation: slideIn 0.4s ease-out both;
+  }
+
+  .stat-tile:nth-child(1) { animation-delay: 0.05s; }
+  .stat-tile:nth-child(2) { animation-delay: 0.1s; }
+  .stat-tile:nth-child(3) { animation-delay: 0.15s; }
+
+  .ability:nth-child(1) { animation-delay: 0.1s; }
+  .ability:nth-child(2) { animation-delay: 0.13s; }
+  .ability:nth-child(3) { animation-delay: 0.16s; }
+  .ability:nth-child(4) { animation-delay: 0.19s; }
+  .ability:nth-child(5) { animation-delay: 0.22s; }
+  .ability:nth-child(6) { animation-delay: 0.25s; }
+
+  .panels-grid .panel:nth-child(1) { animation-delay: 0.2s; }
+  .panels-grid .panel:nth-child(2) { animation-delay: 0.25s; }
+  .panels-grid .panel:nth-child(3) { animation-delay: 0.3s; }
+  .panels-grid .panel:nth-child(4) { animation-delay: 0.35s; }
+
+  /* ── DESIGN LABEL ── */
+  .design-label {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    font-size: 0.6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-3);
+    opacity: 0.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">&#9876;</div>
+      <div class="brand-text">Forge</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Character</div>
+      <a class="sidebar-link active">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.5 20.118a7.5 7.5 0 0115 0A17.9 17.9 0 0112 21.75c-2.676 0-5.216-.584-7.5-1.632z"/></svg>
+        Overview
+      </a>
+      <a class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25"/></svg>
+        Spellbook
+      </a>
+      <a class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 00.75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 00-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0112 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 013 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 013.413-.387m7.5 0V5.25A2.25 2.25 0 0013.5 3h-3a2.25 2.25 0 00-2.25 2.25v.894m7.5 0a48.667 48.667 0 00-7.5 0"/></svg>
+        Inventory
+      </a>
+      <a class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/></svg>
+        Actions
+      </a>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Campaign</div>
+      <a class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z"/></svg>
+        Party
+      </a>
+      <a class="sidebar-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 6.75V15m6-6v8.25m.503 3.498l4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 00-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0z"/></svg>
+        World
+      </a>
+    </div>
+
+    <div class="sidebar-char">
+      <div class="sidebar-char-name">Thalindra Ashveil</div>
+      <div class="sidebar-char-meta">Half-Elf Wizard</div>
+      <div class="sidebar-char-level">&#9670; Level 7</div>
+    </div>
+  </aside>
+
+  <div class="main-content">
+    <div class="page-header">
+      <div class="page-title">
+        Character Overview
+        <span>Evocation Wizard &middot; School of Evocation</span>
+      </div>
+      <div class="btn-group">
+        <button class="btn">Export</button>
+        <button class="btn">Rest</button>
+        <button class="btn btn-primary">Level Up</button>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-tile hp">
+        <div class="stat-tile-label">Hit Points</div>
+        <div class="stat-tile-value">38 <span style="color: var(--text-3); font-size: 0.9rem">/ 45</span></div>
+        <div class="stat-tile-detail">7 damage taken</div>
+        <div class="hp-bar"><div class="hp-bar-fill"></div></div>
+      </div>
+      <div class="stat-tile ac">
+        <div class="stat-tile-label">Armor Class</div>
+        <div class="stat-tile-value">15</div>
+        <div class="stat-tile-detail">Mage Armor + DEX</div>
+      </div>
+      <div class="stat-tile init">
+        <div class="stat-tile-label">Initiative</div>
+        <div class="stat-tile-value">+2</div>
+        <div class="stat-tile-detail">Dexterity modifier</div>
+      </div>
+    </div>
+
+    <div class="abilities">
+      <div class="ability">
+        <div class="ability-name">STR</div>
+        <div class="ability-score">8</div>
+        <div class="ability-mod">-1</div>
+      </div>
+      <div class="ability">
+        <div class="ability-name">DEX</div>
+        <div class="ability-score">14</div>
+        <div class="ability-mod">+2</div>
+      </div>
+      <div class="ability">
+        <div class="ability-name">CON</div>
+        <div class="ability-score">13</div>
+        <div class="ability-mod">+1</div>
+      </div>
+      <div class="ability">
+        <div class="ability-name">INT</div>
+        <div class="ability-score">18</div>
+        <div class="ability-mod">+4</div>
+      </div>
+      <div class="ability">
+        <div class="ability-name">WIS</div>
+        <div class="ability-score">12</div>
+        <div class="ability-mod">+1</div>
+      </div>
+      <div class="ability">
+        <div class="ability-name">CHA</div>
+        <div class="ability-score">10</div>
+        <div class="ability-mod">+0</div>
+      </div>
+    </div>
+
+    <div class="panels-grid">
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Skills</div>
+          <div class="panel-badge">Prof +3</div>
+        </div>
+        <div class="panel-body">
+          <div class="panel-row">
+            <div class="panel-row-left">
+              <span class="prof-dot active"></span>
+              <span class="panel-row-name">Arcana</span>
+            </div>
+            <span class="panel-row-value">+7</span>
+          </div>
+          <div class="panel-row">
+            <div class="panel-row-left">
+              <span class="prof-dot active"></span>
+              <span class="panel-row-name">History</span>
+            </div>
+            <span class="panel-row-value">+7</span>
+          </div>
+          <div class="panel-row">
+            <div class="panel-row-left">
+              <span class="prof-dot active"></span>
+              <span class="panel-row-name">Investigation</span>
+            </div>
+            <span class="panel-row-value">+7</span>
+          </div>
+          <div class="panel-row">
+            <div class="panel-row-left">
+              <span class="prof-dot active"></span>
+              <span class="panel-row-name">Perception</span>
+            </div>
+            <span class="panel-row-value">+4</span>
+          </div>
+          <div class="panel-row">
+            <div class="panel-row-left">
+              <span class="prof-dot"></span>
+              <span class="panel-row-name">Insight</span>
+            </div>
+            <span class="panel-row-value">+1</span>
+          </div>
+          <div class="panel-row">
+            <div class="panel-row-left">
+              <span class="prof-dot"></span>
+              <span class="panel-row-name">Stealth</span>
+            </div>
+            <span class="panel-row-value">+2</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-header">
+          <div class="panel-title">Features</div>
+          <div class="panel-badge">6 active</div>
+        </div>
+        <div class="feature-list">
+          <div class="feature-chip">
+            <div class="feature-icon class">&#10040;</div>
+            <div>
+              <div class="feature-chip-name">Sculpt Spells</div>
+              <div class="feature-chip-source">Evocation &middot; Level 2</div>
+            </div>
+          </div>
+          <div class="feature-chip">
+            <div class="feature-icon class">&#10040;</div>
+            <div>
+              <div class="feature-chip-name">Potent Cantrip</div>
+              <div class="feature-chip-source">Evocation &middot; Level 6</div>
+            </div>
+          </div>
+          <div class="feature-chip">
+            <div class="feature-icon class">&#9733;</div>
+            <div>
+              <div class="feature-chip-name">Arcane Recovery</div>
+              <div class="feature-chip-source">Wizard &middot; Level 1</div>
+            </div>
+          </div>
+          <div class="feature-chip">
+            <div class="feature-icon species">&#9672;</div>
+            <div>
+              <div class="feature-chip-name">Darkvision</div>
+              <div class="feature-chip-source">Half-Elf &middot; Species</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="panel" style="grid-column: span 2;">
+        <div class="panel-header">
+          <div class="panel-title">Spells Prepared</div>
+          <div class="panel-badge">11 prepared</div>
+        </div>
+        <div class="spells-body">
+          <div class="spell-level-group">
+            <div class="spell-level-header">
+              <span class="spell-level-name">Cantrips</span>
+            </div>
+            <div class="spell-tags">
+              <span class="spell-tag">Fire Bolt</span>
+              <span class="spell-tag">Mage Hand</span>
+              <span class="spell-tag">Prestidigitation</span>
+              <span class="spell-tag">Minor Illusion</span>
+            </div>
+          </div>
+          <div class="spell-level-group">
+            <div class="spell-level-header">
+              <span class="spell-level-name">1st Level</span>
+              <div class="slot-pips">
+                <span class="slot-pip used"></span>
+                <span class="slot-pip used"></span>
+                <span class="slot-pip"></span>
+                <span class="slot-pip"></span>
+              </div>
+            </div>
+            <div class="spell-tags">
+              <span class="spell-tag">Magic Missile</span>
+              <span class="spell-tag">Shield</span>
+              <span class="spell-tag">Detect Magic</span>
+            </div>
+          </div>
+          <div class="spell-level-group">
+            <div class="spell-level-header">
+              <span class="spell-level-name">2nd Level</span>
+              <div class="slot-pips">
+                <span class="slot-pip used"></span>
+                <span class="slot-pip"></span>
+                <span class="slot-pip"></span>
+              </div>
+            </div>
+            <div class="spell-tags">
+              <span class="spell-tag">Misty Step</span>
+              <span class="spell-tag">Scorching Ray</span>
+            </div>
+          </div>
+          <div class="spell-level-group">
+            <div class="spell-level-header">
+              <span class="spell-level-name">4th Level</span>
+              <div class="slot-pips">
+                <span class="slot-pip"></span>
+              </div>
+            </div>
+            <div class="spell-tags">
+              <span class="spell-tag">Wall of Fire</span>
+              <span class="spell-tag">Greater Invisibility</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="design-label">Option B &mdash; Obsidian Arsenal</div>
+
+</body>
+</html>

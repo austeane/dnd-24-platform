@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option A — The Grimoire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Fira+Code:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --parchment: #f4e8c1;
+    --parchment-dark: #d4c49a;
+    --ink: #1a1209;
+    --ink-faded: #3d2e14;
+    --gold: #c5a044;
+    --gold-bright: #e8c95a;
+    --gold-dim: #8a6f2e;
+    --crimson: #8b1a1a;
+    --crimson-glow: #c42828;
+    --deep-brown: #2a1f0e;
+    --panel-bg: rgba(244, 232, 193, 0.06);
+    --border-ornate: #5a4520;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--deep-brown);
+    color: var(--parchment);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Parchment texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Vignette */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(10, 6, 2, 0.6) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 2rem;
+    background: linear-gradient(180deg, rgba(26, 18, 9, 0.95) 0%, rgba(26, 18, 9, 0.8) 100%);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gold-dim);
+  }
+
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 5%;
+    right: 5%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-shadow: 0 0 20px rgba(197, 160, 68, 0.3);
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--parchment-dark);
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.3s, text-shadow 0.3s;
+    position: relative;
+  }
+
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--gold);
+    text-shadow: 0 0 12px rgba(197, 160, 68, 0.4);
+  }
+
+  .nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--gold);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    padding: 5rem 2rem 3rem;
+    max-width: 1280px;
+    margin: 0 auto;
+  }
+
+  /* ── CHARACTER HEADER ── */
+  .char-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 2rem;
+    align-items: center;
+    margin-bottom: 2.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(197, 160, 68, 0.2);
+  }
+
+  .char-portrait {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    border: 2px solid var(--gold-dim);
+    background: linear-gradient(135deg, #3d2e14, #1a1209);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    box-shadow: 0 0 30px rgba(197, 160, 68, 0.15), inset 0 0 20px rgba(0,0,0,0.4);
+    position: relative;
+  }
+
+  .char-portrait::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid rgba(197, 160, 68, 0.1);
+  }
+
+  .char-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 2.2rem;
+    color: var(--parchment);
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+  }
+
+  .char-subtitle {
+    font-size: 1.1rem;
+    color: var(--gold-dim);
+    font-style: italic;
+    margin-top: 0.25rem;
+    font-weight: 300;
+  }
+
+  .char-level {
+    font-family: 'Cinzel', serif;
+    text-align: center;
+  }
+
+  .char-level-num {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--gold);
+    line-height: 1;
+    text-shadow: 0 0 30px rgba(197, 160, 68, 0.3);
+  }
+
+  .char-level-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--parchment-dark);
+    margin-top: 0.25rem;
+  }
+
+  /* ── XP BAR ── */
+  .xp-bar-container {
+    margin-bottom: 2.5rem;
+    position: relative;
+  }
+
+  .xp-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--gold-dim);
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .xp-bar-track {
+    height: 6px;
+    background: rgba(197, 160, 68, 0.1);
+    border-radius: 3px;
+    overflow: hidden;
+    border: 1px solid rgba(197, 160, 68, 0.15);
+  }
+
+  .xp-bar-fill {
+    height: 100%;
+    width: 65%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-bright));
+    border-radius: 3px;
+    box-shadow: 0 0 12px rgba(197, 160, 68, 0.4);
+    animation: xpGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes xpGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(197, 160, 68, 0.3); }
+    50% { box-shadow: 0 0 16px rgba(197, 160, 68, 0.6); }
+  }
+
+  /* ── STAT GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 1.25rem 0.5rem;
+    background: linear-gradient(180deg, rgba(197, 160, 68, 0.06) 0%, rgba(197, 160, 68, 0.02) 100%);
+    border: 1px solid rgba(197, 160, 68, 0.15);
+    border-radius: 2px;
+    position: relative;
+    transition: border-color 0.3s, box-shadow 0.3s;
+  }
+
+  .stat-card:hover {
+    border-color: rgba(197, 160, 68, 0.35);
+    box-shadow: 0 0 20px rgba(197, 160, 68, 0.1);
+  }
+
+  /* Ornamental corners */
+  .stat-card::before, .stat-card::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: var(--gold-dim);
+  }
+  .stat-card::before {
+    top: -1px; left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  .stat-card::after {
+    bottom: -1px; right: -1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+  }
+
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--parchment);
+    line-height: 1;
+  }
+
+  .stat-mod {
+    font-size: 0.9rem;
+    color: var(--gold);
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+
+  /* ── CONTENT GRID ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(197, 160, 68, 0.05) 0%, rgba(0,0,0,0.1) 100%);
+    border: 1px solid rgba(197, 160, 68, 0.12);
+    padding: 1.5rem;
+    position: relative;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 1.5rem;
+    right: 1.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 1.25rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(197, 160, 68, 0.1);
+  }
+
+  /* Combat stats */
+  .combat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid rgba(197, 160, 68, 0.06);
+  }
+
+  .combat-row:last-child { border-bottom: none; }
+
+  .combat-label {
+    font-size: 0.95rem;
+    color: var(--parchment-dark);
+    font-weight: 400;
+  }
+
+  .combat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--parchment);
+  }
+
+  /* Skills */
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.4rem 0;
+    font-size: 0.9rem;
+    color: var(--parchment-dark);
+  }
+
+  .skill-prof {
+    width: 8px;
+    height: 8px;
+    border: 1px solid var(--gold-dim);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .skill-prof.filled {
+    background: var(--gold);
+    box-shadow: 0 0 6px rgba(197, 160, 68, 0.4);
+  }
+
+  .skill-bonus {
+    margin-left: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: var(--gold-dim);
+    font-weight: 300;
+  }
+
+  /* Features list */
+  .feature-item {
+    padding: 0.75rem 0;
+    border-bottom: 1px solid rgba(197, 160, 68, 0.06);
+  }
+
+  .feature-item:last-child { border-bottom: none; }
+
+  .feature-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--parchment);
+    margin-bottom: 0.2rem;
+  }
+
+  .feature-source {
+    font-size: 0.8rem;
+    color: var(--gold-dim);
+    font-style: italic;
+  }
+
+  /* Spells */
+  .spell-level-group {
+    margin-bottom: 1rem;
+  }
+
+  .spell-level-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--crimson-glow);
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .spell-level-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(196, 40, 40, 0.2);
+  }
+
+  .spell-slots {
+    display: flex;
+    gap: 0.3rem;
+    margin-left: auto;
+  }
+
+  .spell-slot {
+    width: 10px;
+    height: 10px;
+    border: 1px solid var(--crimson);
+    border-radius: 50%;
+  }
+
+  .spell-slot.used {
+    background: var(--crimson-glow);
+    box-shadow: 0 0 6px rgba(196, 40, 40, 0.5);
+  }
+
+  .spell-name {
+    font-size: 0.9rem;
+    color: var(--parchment-dark);
+    padding: 0.25rem 0;
+    padding-left: 0.75rem;
+    border-left: 1px solid rgba(196, 40, 40, 0.15);
+    margin-bottom: 0.15rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+
+  .spell-name:hover {
+    color: var(--parchment);
+    border-left-color: var(--crimson-glow);
+  }
+
+  /* ── HP DISPLAY ── */
+  .hp-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .hp-current {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--crimson-glow);
+    text-shadow: 0 0 20px rgba(196, 40, 40, 0.3);
+  }
+
+  .hp-sep { color: var(--gold-dim); font-size: 1.2rem; }
+
+  .hp-max {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--parchment-dark);
+  }
+
+  /* ── DESIGN LABEL ── */
+  .design-label {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    opacity: 0.5;
+    z-index: 1001;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .char-header { animation: fadeInUp 0.6s ease-out; }
+  .xp-bar-container { animation: fadeInUp 0.6s ease-out 0.1s both; }
+  .stats-grid { animation: fadeInUp 0.6s ease-out 0.2s both; }
+  .content-grid { animation: fadeInUp 0.6s ease-out 0.3s both; }
+
+  .stat-card { animation: fadeInUp 0.5s ease-out both; }
+  .stat-card:nth-child(1) { animation-delay: 0.25s; }
+  .stat-card:nth-child(2) { animation-delay: 0.30s; }
+  .stat-card:nth-child(3) { animation-delay: 0.35s; }
+  .stat-card:nth-child(4) { animation-delay: 0.40s; }
+  .stat-card:nth-child(5) { animation-delay: 0.45s; }
+  .stat-card:nth-child(6) { animation-delay: 0.50s; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">Arcanum</div>
+  <ul class="nav-links">
+    <li><a href="#" class="active">Character</a></li>
+    <li><a href="#">Spellbook</a></li>
+    <li><a href="#">Inventory</a></li>
+    <li><a href="#">Campaign</a></li>
+    <li><a href="#">Compendium</a></li>
+  </ul>
+</nav>
+
+<main>
+  <div class="char-header">
+    <div class="char-portrait">&#9876;</div>
+    <div>
+      <div class="char-name">Thalindra Ashveil</div>
+      <div class="char-subtitle">Half-Elf Wizard &middot; School of Evocation</div>
+    </div>
+    <div class="char-level">
+      <div class="char-level-num">7</div>
+      <div class="char-level-label">Level</div>
+    </div>
+  </div>
+
+  <div class="xp-bar-container">
+    <div class="xp-bar-labels">
+      <span>23,000 XP</span>
+      <span>34,000 XP to Level 8</span>
+    </div>
+    <div class="xp-bar-track">
+      <div class="xp-bar-fill"></div>
+    </div>
+  </div>
+
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Strength</div>
+      <div class="stat-value">8</div>
+      <div class="stat-mod">-1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dexterity</div>
+      <div class="stat-value">14</div>
+      <div class="stat-mod">+2</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Constitution</div>
+      <div class="stat-value">13</div>
+      <div class="stat-mod">+1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Intelligence</div>
+      <div class="stat-value">18</div>
+      <div class="stat-mod">+4</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Wisdom</div>
+      <div class="stat-value">12</div>
+      <div class="stat-mod">+1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Charisma</div>
+      <div class="stat-value">10</div>
+      <div class="stat-mod">+0</div>
+    </div>
+  </div>
+
+  <div class="content-grid">
+    <div class="panel">
+      <div class="panel-title">Combat</div>
+      <div class="combat-row">
+        <span class="combat-label">Hit Points</span>
+        <div class="hp-display">
+          <span class="hp-current">38</span>
+          <span class="hp-sep">/</span>
+          <span class="hp-max">45</span>
+        </div>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Armor Class</span>
+        <span class="combat-value">15</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Initiative</span>
+        <span class="combat-value">+2</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Speed</span>
+        <span class="combat-value">30 ft</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Spell Save DC</span>
+        <span class="combat-value">15</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Spell Attack</span>
+        <span class="combat-value">+7</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Proficient Skills</div>
+      <div class="skill-row">
+        <span class="skill-prof filled"></span>
+        <span>Arcana</span>
+        <span class="skill-bonus">+7</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof filled"></span>
+        <span>History</span>
+        <span class="skill-bonus">+7</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof filled"></span>
+        <span>Investigation</span>
+        <span class="skill-bonus">+7</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof filled"></span>
+        <span>Perception</span>
+        <span class="skill-bonus">+4</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof"></span>
+        <span>Insight</span>
+        <span class="skill-bonus">+1</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof"></span>
+        <span>Persuasion</span>
+        <span class="skill-bonus">+0</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof"></span>
+        <span>Stealth</span>
+        <span class="skill-bonus">+2</span>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Spells Prepared</div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          Cantrips
+        </div>
+        <div class="spell-name">Fire Bolt</div>
+        <div class="spell-name">Mage Hand</div>
+        <div class="spell-name">Prestidigitation</div>
+      </div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          1st Level
+          <div class="spell-slots">
+            <div class="spell-slot used"></div>
+            <div class="spell-slot used"></div>
+            <div class="spell-slot"></div>
+            <div class="spell-slot"></div>
+          </div>
+        </div>
+        <div class="spell-name">Magic Missile</div>
+        <div class="spell-name">Shield</div>
+        <div class="spell-name">Detect Magic</div>
+      </div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          2nd Level
+          <div class="spell-slots">
+            <div class="spell-slot used"></div>
+            <div class="spell-slot"></div>
+            <div class="spell-slot"></div>
+          </div>
+        </div>
+        <div class="spell-name">Misty Step</div>
+        <div class="spell-name">Scorching Ray</div>
+      </div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          4th Level
+          <div class="spell-slots">
+            <div class="spell-slot"></div>
+          </div>
+        </div>
+        <div class="spell-name">Wall of Fire</div>
+        <div class="spell-name">Greater Invisibility</div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-title">Features & Traits</div>
+      <div class="feature-item">
+        <div class="feature-name">Sculpt Spells</div>
+        <div class="feature-source">Evocation &middot; Level 2</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Potent Cantrip</div>
+        <div class="feature-source">Evocation &middot; Level 6</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Arcane Recovery</div>
+        <div class="feature-source">Wizard &middot; Level 1</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Darkvision</div>
+        <div class="feature-source">Half-Elf &middot; Species</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Fey Ancestry</div>
+        <div class="feature-source">Half-Elf &middot; Species</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Skill Versatility</div>
+        <div class="feature-source">Half-Elf &middot; Species</div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="design-label">Option A &mdash; The Grimoire</div>
+
+</body>
+</html>

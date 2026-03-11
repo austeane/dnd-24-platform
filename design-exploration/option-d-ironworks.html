@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option D — Ironworks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900&family=Literata:ital,opsz,wght@0,7..72,300;0,7..72,400;0,7..72,500;0,7..72,600;0,7..72,700;1,7..72,400&family=Fira+Code:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f2f0ec;
+    --bg-warm: #e8e4db;
+    --surface: #ffffff;
+    --ink: #141210;
+    --ink-2: #3a3630;
+    --ink-3: #7a756c;
+    --ink-4: #b0a998;
+    --red: #bf3a2b;
+    --red-bg: #fdf0ee;
+    --blue: #2a5a8c;
+    --blue-bg: #eef4fa;
+    --green: #2d6b3f;
+    --green-bg: #edf7f0;
+    --amber: #9c6e1e;
+    --amber-bg: #fdf6e8;
+    --border: #d6d0c5;
+    --border-heavy: #c0b8aa;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Archivo', 'Helvetica Neue', sans-serif;
+    min-height: 100vh;
+    font-size: 14px;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 2rem;
+    height: 48px;
+    background: var(--ink);
+    color: var(--bg);
+  }
+
+  .topbar-brand {
+    font-weight: 800;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .topbar-nav {
+    display: flex;
+    gap: 0;
+    height: 100%;
+    list-style: none;
+  }
+
+  .topbar-link {
+    display: flex;
+    align-items: center;
+    padding: 0 1rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: rgba(242, 240, 236, 0.5);
+    text-decoration: none;
+    height: 100%;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+  }
+
+  .topbar-link:hover { color: var(--bg); }
+  .topbar-link.active {
+    color: var(--bg);
+    border-bottom-color: var(--red);
+  }
+
+  /* ── BREADCRUMB / CONTEXT BAR ── */
+  .context-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 2rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.78rem;
+    color: var(--ink-3);
+  }
+
+  .breadcrumb-sep { color: var(--ink-4); }
+  .breadcrumb-current {
+    color: var(--ink);
+    font-weight: 600;
+  }
+
+  .context-actions {
+    display: flex;
+    gap: 0.4rem;
+  }
+
+  .btn {
+    padding: 0.4rem 0.9rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink-2);
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.1s;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  .btn:hover {
+    background: var(--bg);
+    border-color: var(--border-heavy);
+  }
+
+  .btn-primary {
+    background: var(--red);
+    color: white;
+    border-color: var(--red);
+  }
+
+  .btn-primary:hover {
+    background: #a83224;
+    border-color: #a83224;
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    max-width: 1240px;
+    margin: 0 auto;
+    padding: 1.5rem 2rem 4rem;
+  }
+
+  /* ── CHARACTER HEADER — UTILITARIAN ── */
+  .char-header {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .char-emblem {
+    width: 56px;
+    height: 56px;
+    background: var(--ink);
+    color: var(--bg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+  }
+
+  .char-title {
+    flex: 1;
+  }
+
+  .char-name {
+    font-family: 'Literata', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+  }
+
+  .char-detail {
+    font-size: 0.82rem;
+    color: var(--ink-3);
+    margin-top: 0.15rem;
+  }
+
+  .char-level-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.5rem 1rem;
+    background: var(--amber-bg);
+    border: 1px solid rgba(156, 110, 30, 0.2);
+  }
+
+  .char-level-num {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.8rem;
+    font-weight: 500;
+    color: var(--amber);
+    line-height: 1;
+  }
+
+  .char-level-text {
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--amber);
+  }
+
+  /* ── XP BAR ── */
+  .xp-strip {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    padding: 0.6rem 0;
+  }
+
+  .xp-label-left, .xp-label-right {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.7rem;
+    color: var(--ink-3);
+    white-space: nowrap;
+    font-weight: 400;
+  }
+
+  .xp-track {
+    flex: 1;
+    height: 4px;
+    background: var(--border);
+    position: relative;
+  }
+
+  .xp-fill {
+    height: 100%;
+    width: 65%;
+    background: var(--ink);
+  }
+
+  .xp-marker {
+    position: absolute;
+    top: -3px;
+    left: 65%;
+    width: 10px;
+    height: 10px;
+    background: var(--red);
+    transform: translateX(-50%);
+  }
+
+  /* ── ABILITY SCORES — UTILITARIAN BLOCKS ── */
+  .abilities-strip {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 0;
+    margin-bottom: 1.5rem;
+    border: 1px solid var(--ink);
+  }
+
+  .ability-block {
+    text-align: center;
+    padding: 1rem 0.5rem;
+    border-right: 1px solid var(--ink);
+    background: var(--surface);
+    transition: background 0.1s;
+  }
+
+  .ability-block:last-child { border-right: none; }
+  .ability-block:hover { background: var(--bg); }
+
+  .ability-abbr {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-3);
+    margin-bottom: 0.3rem;
+  }
+
+  .ability-num {
+    font-family: 'Fira Code', monospace;
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: var(--ink);
+    line-height: 1;
+  }
+
+  .ability-modifier {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--red);
+    margin-top: 0.2rem;
+    font-weight: 400;
+  }
+
+  /* ── DATA GRID ── */
+  .data-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1px;
+    background: var(--border-heavy);
+    border: 1px solid var(--border-heavy);
+    margin-bottom: 1.5rem;
+  }
+
+  .data-panel {
+    background: var(--surface);
+    padding: 0;
+  }
+
+  .data-panel.span-2 { grid-column: span 2; }
+
+  .data-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.65rem 1rem;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .data-panel-title {
+    font-size: 0.65rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-2);
+  }
+
+  .data-panel-tag {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.6rem;
+    color: var(--ink-3);
+  }
+
+  .data-panel-body {
+    padding: 0;
+  }
+
+  /* Data rows — table-like */
+  .data-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    border-bottom: 1px solid rgba(214, 208, 197, 0.5);
+    transition: background 0.08s;
+    cursor: default;
+  }
+
+  .data-row:last-child { border-bottom: none; }
+  .data-row:hover { background: var(--bg); }
+
+  .data-row-label {
+    font-size: 0.82rem;
+    color: var(--ink-2);
+  }
+
+  .data-row-value {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.82rem;
+    color: var(--ink);
+    font-weight: 500;
+  }
+
+  .data-row-value.accent { color: var(--red); }
+
+  /* Skills with proficiency indicator */
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    border-bottom: 1px solid rgba(214, 208, 197, 0.5);
+    font-size: 0.82rem;
+    transition: background 0.08s;
+  }
+
+  .skill-row:last-child { border-bottom: none; }
+  .skill-row:hover { background: var(--bg); }
+
+  .skill-indicator {
+    width: 6px;
+    height: 6px;
+    border: 1.5px solid var(--ink-4);
+    flex-shrink: 0;
+  }
+
+  .skill-indicator.active {
+    background: var(--ink);
+    border-color: var(--ink);
+  }
+
+  .skill-row-name {
+    flex: 1;
+    color: var(--ink-2);
+  }
+
+  .skill-row-mod {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.78rem;
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+
+  /* Features — compact */
+  .feature-row {
+    padding: 0.55rem 1rem;
+    border-bottom: 1px solid rgba(214, 208, 197, 0.5);
+    cursor: pointer;
+    transition: background 0.08s;
+  }
+
+  .feature-row:last-child { border-bottom: none; }
+  .feature-row:hover { background: var(--bg); }
+
+  .feature-row-name {
+    font-family: 'Literata', serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .feature-row-meta {
+    font-size: 0.7rem;
+    color: var(--ink-3);
+    margin-top: 0.1rem;
+  }
+
+  /* Spells — blocky tags */
+  .spells-body {
+    padding: 0.75rem 1rem;
+  }
+
+  .spell-tier {
+    margin-bottom: 0.75rem;
+  }
+
+  .spell-tier-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.4rem;
+  }
+
+  .spell-tier-name {
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-3);
+  }
+
+  .spell-tier-slots {
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  .spell-slot-box {
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid var(--ink-4);
+  }
+
+  .spell-slot-box.used {
+    background: var(--red);
+    border-color: var(--red);
+  }
+
+  .spell-blocks {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.3rem;
+  }
+
+  .spell-block {
+    padding: 0.25rem 0.6rem;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    font-size: 0.78rem;
+    color: var(--ink-2);
+    cursor: pointer;
+    transition: all 0.1s;
+  }
+
+  .spell-block:hover {
+    background: var(--surface);
+    border-color: var(--ink);
+    color: var(--ink);
+  }
+
+  /* ── HP INLINE ── */
+  .hp-inline {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid rgba(214, 208, 197, 0.5);
+  }
+
+  .hp-bar-track {
+    flex: 1;
+    height: 6px;
+    background: var(--bg);
+  }
+
+  .hp-bar-fill {
+    height: 100%;
+    width: 84%;
+    background: var(--red);
+  }
+
+  .hp-text {
+    font-family: 'Fira Code', monospace;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--red);
+    white-space: nowrap;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .char-header { animation: slideDown 0.3s ease-out; }
+  .abilities-strip { animation: slideDown 0.3s ease-out 0.05s both; }
+  .data-grid { animation: slideDown 0.3s ease-out 0.1s both; }
+
+  /* ── LABEL ── */
+  .design-label {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    font-size: 0.6rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.15em;
+    color: var(--ink-4);
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand">Ironworks</div>
+  <ul class="topbar-nav">
+    <a class="topbar-link active" href="#">Character</a>
+    <a class="topbar-link" href="#">Spellbook</a>
+    <a class="topbar-link" href="#">Inventory</a>
+    <a class="topbar-link" href="#">Campaign</a>
+    <a class="topbar-link" href="#">Rules</a>
+  </ul>
+</div>
+
+<div class="context-bar">
+  <div class="breadcrumb">
+    <span>Characters</span>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">Thalindra Ashveil</span>
+  </div>
+  <div class="context-actions">
+    <button class="btn">Export</button>
+    <button class="btn">Rest</button>
+    <button class="btn btn-primary">Level Up</button>
+  </div>
+</div>
+
+<main>
+  <div class="char-header">
+    <div class="char-emblem">&#9876;</div>
+    <div class="char-title">
+      <div class="char-name">Thalindra Ashveil</div>
+      <div class="char-detail">Half-Elf Wizard &middot; School of Evocation &middot; Sage</div>
+    </div>
+    <div class="char-level-badge">
+      <span class="char-level-num">7</span>
+      <span class="char-level-text">Level</span>
+    </div>
+  </div>
+
+  <div class="xp-strip">
+    <span class="xp-label-left">23,000 XP</span>
+    <div class="xp-track">
+      <div class="xp-fill"></div>
+      <div class="xp-marker"></div>
+    </div>
+    <span class="xp-label-right">34,000 XP</span>
+  </div>
+
+  <div class="abilities-strip">
+    <div class="ability-block">
+      <div class="ability-abbr">STR</div>
+      <div class="ability-num">8</div>
+      <div class="ability-modifier">-1</div>
+    </div>
+    <div class="ability-block">
+      <div class="ability-abbr">DEX</div>
+      <div class="ability-num">14</div>
+      <div class="ability-modifier">+2</div>
+    </div>
+    <div class="ability-block">
+      <div class="ability-abbr">CON</div>
+      <div class="ability-num">13</div>
+      <div class="ability-modifier">+1</div>
+    </div>
+    <div class="ability-block">
+      <div class="ability-abbr">INT</div>
+      <div class="ability-num">18</div>
+      <div class="ability-modifier">+4</div>
+    </div>
+    <div class="ability-block">
+      <div class="ability-abbr">WIS</div>
+      <div class="ability-num">12</div>
+      <div class="ability-modifier">+1</div>
+    </div>
+    <div class="ability-block">
+      <div class="ability-abbr">CHA</div>
+      <div class="ability-num">10</div>
+      <div class="ability-modifier">+0</div>
+    </div>
+  </div>
+
+  <div class="data-grid">
+    <div class="data-panel">
+      <div class="data-panel-header">
+        <span class="data-panel-title">Combat</span>
+        <span class="data-panel-tag">prof +3</span>
+      </div>
+      <div class="data-panel-body">
+        <div class="hp-inline">
+          <span class="hp-text">38/45 HP</span>
+          <div class="hp-bar-track"><div class="hp-bar-fill"></div></div>
+        </div>
+        <div class="data-row">
+          <span class="data-row-label">Armor Class</span>
+          <span class="data-row-value">15</span>
+        </div>
+        <div class="data-row">
+          <span class="data-row-label">Initiative</span>
+          <span class="data-row-value">+2</span>
+        </div>
+        <div class="data-row">
+          <span class="data-row-label">Speed</span>
+          <span class="data-row-value">30 ft</span>
+        </div>
+        <div class="data-row">
+          <span class="data-row-label">Spell Save DC</span>
+          <span class="data-row-value accent">15</span>
+        </div>
+        <div class="data-row">
+          <span class="data-row-label">Spell Attack</span>
+          <span class="data-row-value accent">+7</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-panel">
+      <div class="data-panel-header">
+        <span class="data-panel-title">Skills</span>
+        <span class="data-panel-tag">4 proficient</span>
+      </div>
+      <div class="data-panel-body">
+        <div class="skill-row">
+          <span class="skill-indicator active"></span>
+          <span class="skill-row-name">Arcana</span>
+          <span class="skill-row-mod">+7</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-indicator active"></span>
+          <span class="skill-row-name">History</span>
+          <span class="skill-row-mod">+7</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-indicator active"></span>
+          <span class="skill-row-name">Investigation</span>
+          <span class="skill-row-mod">+7</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-indicator active"></span>
+          <span class="skill-row-name">Perception</span>
+          <span class="skill-row-mod">+4</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-indicator"></span>
+          <span class="skill-row-name">Insight</span>
+          <span class="skill-row-mod">+1</span>
+        </div>
+        <div class="skill-row">
+          <span class="skill-indicator"></span>
+          <span class="skill-row-name">Stealth</span>
+          <span class="skill-row-mod">+2</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-panel">
+      <div class="data-panel-header">
+        <span class="data-panel-title">Features</span>
+        <span class="data-panel-tag">6 active</span>
+      </div>
+      <div class="data-panel-body">
+        <div class="feature-row">
+          <div class="feature-row-name">Sculpt Spells</div>
+          <div class="feature-row-meta">Evocation &middot; Level 2</div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-row-name">Potent Cantrip</div>
+          <div class="feature-row-meta">Evocation &middot; Level 6</div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-row-name">Arcane Recovery</div>
+          <div class="feature-row-meta">Wizard &middot; Level 1</div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-row-name">Darkvision</div>
+          <div class="feature-row-meta">Half-Elf &middot; Species</div>
+        </div>
+        <div class="feature-row">
+          <div class="feature-row-name">Fey Ancestry</div>
+          <div class="feature-row-meta">Half-Elf &middot; Species</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="data-panel span-2">
+      <div class="data-panel-header">
+        <span class="data-panel-title">Spells Prepared</span>
+        <span class="data-panel-tag">11 prepared / 8 known</span>
+      </div>
+      <div class="spells-body">
+        <div class="spell-tier">
+          <div class="spell-tier-header">
+            <span class="spell-tier-name">Cantrips</span>
+          </div>
+          <div class="spell-blocks">
+            <span class="spell-block">Fire Bolt</span>
+            <span class="spell-block">Mage Hand</span>
+            <span class="spell-block">Prestidigitation</span>
+            <span class="spell-block">Minor Illusion</span>
+          </div>
+        </div>
+        <div class="spell-tier">
+          <div class="spell-tier-header">
+            <span class="spell-tier-name">1st Level</span>
+            <div class="spell-tier-slots">
+              <span class="spell-slot-box used"></span>
+              <span class="spell-slot-box used"></span>
+              <span class="spell-slot-box"></span>
+              <span class="spell-slot-box"></span>
+            </div>
+          </div>
+          <div class="spell-blocks">
+            <span class="spell-block">Magic Missile</span>
+            <span class="spell-block">Shield</span>
+            <span class="spell-block">Detect Magic</span>
+          </div>
+        </div>
+        <div class="spell-tier">
+          <div class="spell-tier-header">
+            <span class="spell-tier-name">2nd Level</span>
+            <div class="spell-tier-slots">
+              <span class="spell-slot-box used"></span>
+              <span class="spell-slot-box"></span>
+              <span class="spell-slot-box"></span>
+            </div>
+          </div>
+          <div class="spell-blocks">
+            <span class="spell-block">Misty Step</span>
+            <span class="spell-block">Scorching Ray</span>
+          </div>
+        </div>
+        <div class="spell-tier">
+          <div class="spell-tier-header">
+            <span class="spell-tier-name">4th Level</span>
+            <div class="spell-tier-slots">
+              <span class="spell-slot-box"></span>
+            </div>
+          </div>
+          <div class="spell-blocks">
+            <span class="spell-block">Wall of Fire</span>
+            <span class="spell-block">Greater Invisibility</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<div class="design-label">Option D &mdash; Ironworks</div>
+
+</body>
+</html>

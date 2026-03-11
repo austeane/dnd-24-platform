@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Option A — The Grimoire (High Contrast)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,400;1,500&family=Fira+Code:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  /*
+   * WCAG 2.1 AA Contrast Ratios (against --deep-brown #2a1f0e)
+   * ──────────────────────────────────────────────────────────
+   * --parchment     #f4e8c1  → 13.19:1  (AAA body text)
+   * --parchment-mid #e0d4b0  → 10.93:1  (AAA secondary text)
+   * --gold          #ddb84e  →  8.49:1  (AAA accent/labels)
+   * --gold-dim      #c9a54a  →  6.89:1  (AA  meta text, small labels)
+   * --crimson       #ef5350  →  4.63:1  (AA  HP, spell headers)
+   * --crimson-dim   #d44040  →  3.54:1  (AA-large / non-text UI ≥3:1)
+   *
+   * All normal text ≥ 4.5:1. Large text (≥18pt / 14pt bold) ≥ 3:1.
+   * Non-text UI components (borders, icons, slot indicators) ≥ 3:1.
+   */
+
+  :root {
+    --parchment: #f4e8c1;       /* 13.19:1 — primary text */
+    --parchment-mid: #e0d4b0;   /* 10.93:1 — secondary text */
+    --gold: #ddb84e;            /*  8.49:1 — accent text, active states */
+    --gold-dim: #c9a54a;        /*  6.89:1 — labels, meta, small caps */
+    --gold-glow: #e8c95a;       /*  9.94:1 — XP bar fill */
+    --crimson: #ef5350;         /*  4.63:1 — HP, spell level headers */
+    --crimson-dim: #d44040;     /*  3.54:1 — spell slot borders (non-text) */
+    --deep-brown: #2a1f0e;      /* background */
+    --ink-brown: #140d05;       /* deep shadow layer */
+    --panel-shadow: rgba(0, 0, 0, 0.34);
+    --focus-ring: #6db3f2;      /* focus indicator — high visibility on dark bg */
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ── FOCUS STYLES ── */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* ── SKIP LINK ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 1rem;
+    z-index: 10000;
+    padding: 0.5rem 1rem;
+    background: var(--parchment);
+    color: var(--deep-brown);
+    font-family: 'Cinzel', serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-decoration: none;
+    border-radius: 0 0 4px 4px;
+  }
+
+  .skip-link:focus {
+    top: 0;
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 2px;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at top center, rgba(221, 184, 78, 0.16), transparent 24%),
+      radial-gradient(circle at 82% 12%, rgba(239, 83, 80, 0.1), transparent 18%),
+      radial-gradient(circle at 12% 18%, rgba(232, 201, 90, 0.08), transparent 20%),
+      linear-gradient(180deg, #140d05 0%, #26190a 22%, #120b04 100%);
+    color: var(--parchment);
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Parchment texture overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    opacity: 0.6;
+    mix-blend-mode: soft-light;
+    pointer-events: none;
+    z-index: 1000;
+  }
+
+  /* Vignette — reduced intensity so it doesn't hurt text contrast at edges */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(221, 184, 78, 0.1), transparent 26%),
+      radial-gradient(circle at 84% 16%, rgba(239, 83, 80, 0.08), transparent 18%),
+      radial-gradient(ellipse at center, transparent 52%, rgba(6, 3, 0, 0.62) 100%);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* ── NAV ── */
+  nav {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.9rem 2rem;
+    background:
+      linear-gradient(180deg, rgba(22, 15, 7, 0.98) 0%, rgba(22, 15, 7, 0.93) 100%);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--gold-dim);
+    box-shadow: 0 16px 34px rgba(0, 0, 0, 0.34);
+  }
+
+  nav::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 5%;
+    right: 5%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+
+  nav::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, transparent, rgba(221, 184, 78, 0.05), transparent);
+    pointer-events: none;
+  }
+
+  .nav-logo {
+    font-family: 'Cinzel', serif;
+    font-weight: 900;
+    font-size: 1.1rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);  /* 8.49:1 on nav bg */
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 2rem;
+    list-style: none;
+  }
+
+  .nav-links a {
+    color: var(--parchment-mid);  /* 10.93:1 — was parchment-dark at 9.35:1 */
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    transition: color 0.3s;
+    position: relative;
+    padding: 0.25rem 0;
+  }
+
+  .nav-links a:hover, .nav-links a.active {
+    color: var(--gold);  /* 8.49:1 */
+  }
+
+  .nav-links a.active::after {
+    content: '';
+    position: absolute;
+    bottom: -4px;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--gold);
+  }
+
+  /* ── MAIN LAYOUT ── */
+  main {
+    position: relative;
+    padding: 6.4rem 3rem 4rem;
+    max-width: 1320px;
+    margin: 1.2rem auto 0;
+    background: linear-gradient(180deg, rgba(44, 30, 12, 0.76) 0%, rgba(18, 11, 4, 0.92) 100%);
+    border: 1px solid rgba(221, 184, 78, 0.16);
+    border-radius: 6px;
+    box-shadow:
+      0 36px 90px rgba(0, 0, 0, 0.54),
+      inset 0 1px 0 rgba(244, 232, 193, 0.06);
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  main::before {
+    content: '';
+    position: absolute;
+    inset: 1rem;
+    border: 1px solid rgba(201, 165, 74, 0.14);
+    border-radius: 3px;
+    pointer-events: none;
+  }
+
+  main::after {
+    content: '';
+    position: absolute;
+    top: -7rem;
+    right: -5rem;
+    width: 18rem;
+    height: 18rem;
+    background: radial-gradient(circle, rgba(221, 184, 78, 0.16), transparent 70%);
+    filter: blur(10px);
+    pointer-events: none;
+  }
+
+  main > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── CHARACTER HEADER ── */
+  .char-header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 1.75rem;
+    align-items: center;
+    margin-bottom: 1.75rem;
+    padding: 1.8rem 2rem;
+    background: linear-gradient(135deg, rgba(61, 42, 17, 0.78) 0%, rgba(19, 11, 4, 0.94) 100%);
+    border: 1px solid rgba(221, 184, 78, 0.16);
+    border-radius: 2px;
+    box-shadow:
+      0 18px 42px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(244, 232, 193, 0.05);
+    overflow: hidden;
+    position: relative;
+  }
+
+  .char-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(circle at 8% 50%, rgba(221, 184, 78, 0.16), transparent 22%),
+      linear-gradient(90deg, rgba(221, 184, 78, 0.06), transparent 28%, transparent 72%, rgba(239, 83, 80, 0.05));
+    pointer-events: none;
+  }
+
+  .char-header::after {
+    content: '';
+    position: absolute;
+    left: 9rem;
+    right: 9rem;
+    bottom: 1rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(221, 184, 78, 0.32), transparent);
+    pointer-events: none;
+  }
+
+  .char-portrait {
+    width: 112px;
+    height: 112px;
+    border-radius: 50%;
+    border: 1px solid rgba(221, 184, 78, 0.4);
+    background:
+      radial-gradient(circle at 35% 30%, rgba(232, 201, 90, 0.12), transparent 32%),
+      linear-gradient(135deg, #4a3514, #160d04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    box-shadow:
+      0 0 42px rgba(201, 165, 74, 0.16),
+      inset 0 0 22px rgba(0, 0, 0, 0.44);
+    position: relative;
+  }
+
+  .char-portrait::after {
+    content: '';
+    position: absolute;
+    inset: -4px;
+    border-radius: 50%;
+    border: 1px solid rgba(201, 165, 74, 0.15);
+  }
+
+  .char-name {
+    font-family: 'Cinzel', serif;
+    font-weight: 700;
+    font-size: 2.85rem;
+    color: var(--parchment);  /* 13.19:1 */
+    letter-spacing: 0.04em;
+    line-height: 1.1;
+    text-shadow: 0 6px 20px rgba(0, 0, 0, 0.36);
+  }
+
+  .char-subtitle {
+    font-size: 1.05rem;
+    color: var(--gold-dim);  /* 6.89:1 — was #8a6f2e at 3.38:1 */
+    font-style: italic;
+    margin-top: 0.35rem;
+    font-weight: 400;
+    letter-spacing: 0.03em;
+  }
+
+  .char-level {
+    font-family: 'Cinzel', serif;
+    text-align: center;
+    min-width: 110px;
+    padding: 0.95rem 1rem;
+    background: linear-gradient(180deg, rgba(221, 184, 78, 0.08), rgba(0, 0, 0, 0.22));
+    border: 1px solid rgba(221, 184, 78, 0.18);
+    border-radius: 2px;
+    box-shadow: inset 0 1px 0 rgba(244, 232, 193, 0.04);
+  }
+
+  .char-level-num {
+    font-size: 2.8rem;
+    font-weight: 900;
+    color: var(--gold);  /* 8.49:1 */
+    line-height: 1;
+  }
+
+  .char-level-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--parchment-mid);  /* 10.93:1 — was parchment-dark */
+    margin-top: 0.25rem;
+  }
+
+  /* ── XP BAR ── */
+  .xp-bar-container {
+    margin-bottom: 2rem;
+    position: relative;
+    padding: 1rem 1.15rem 1.2rem;
+    background: linear-gradient(180deg, rgba(49, 34, 14, 0.72), rgba(14, 9, 3, 0.88));
+    border: 1px solid rgba(221, 184, 78, 0.14);
+    border-radius: 2px;
+    box-shadow: 0 18px 36px rgba(0, 0, 0, 0.2);
+  }
+
+  .xp-bar-labels {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--gold-dim);  /* 6.89:1 — was #8a6f2e at 3.38:1 */
+    font-family: 'Cinzel', serif;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.5rem;
+  }
+
+  .xp-bar-track {
+    height: 10px;
+    background: rgba(201, 165, 74, 0.08);
+    border-radius: 999px;
+    overflow: hidden;
+    border: 1px solid rgba(201, 165, 74, 0.24);
+  }
+
+  .xp-bar-fill {
+    height: 100%;
+    width: 65%;
+    background: linear-gradient(90deg, var(--gold-dim), var(--gold), var(--gold-glow));
+    border-radius: 999px;
+    box-shadow: 0 0 14px rgba(201, 165, 74, 0.42);
+    animation: xpGlow 3s ease-in-out infinite;
+  }
+
+  @keyframes xpGlow {
+    0%, 100% { box-shadow: 0 0 8px rgba(201, 165, 74, 0.3); }
+    50% { box-shadow: 0 0 16px rgba(201, 165, 74, 0.6); }
+  }
+
+  /* ── STAT GRID ── */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .stat-card {
+    text-align: center;
+    padding: 1.35rem 0.6rem 1.1rem;
+    background: linear-gradient(180deg, rgba(67, 47, 18, 0.78) 0%, rgba(16, 10, 4, 0.9) 100%);
+    border: 1px solid rgba(201, 165, 74, 0.24);
+    border-radius: 2px;
+    position: relative;
+    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s, background 0.3s;
+    box-shadow:
+      0 14px 28px rgba(0, 0, 0, 0.18),
+      inset 0 1px 0 rgba(244, 232, 193, 0.03);
+  }
+
+  .stat-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(201, 165, 74, 0.44);
+    box-shadow: 0 18px 34px rgba(0, 0, 0, 0.24), 0 0 20px rgba(201, 165, 74, 0.12);
+  }
+
+  .stat-card[data-primary] {
+    background: linear-gradient(180deg, rgba(87, 64, 24, 0.82) 0%, rgba(21, 13, 5, 0.95) 100%);
+    border-color: rgba(232, 201, 90, 0.38);
+    box-shadow:
+      0 18px 34px rgba(0, 0, 0, 0.24),
+      inset 0 0 34px rgba(221, 184, 78, 0.08);
+  }
+
+  /* Ornamental corners */
+  .stat-card::before, .stat-card::after {
+    content: '';
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-color: var(--gold-dim);  /* 6.89:1 — non-text, ≥3:1 ✓ */
+  }
+  .stat-card::before {
+    top: -1px; left: -1px;
+    border-top: 1px solid;
+    border-left: 1px solid;
+  }
+  .stat-card::after {
+    bottom: -1px; right: -1px;
+    border-bottom: 1px solid;
+    border-right: 1px solid;
+  }
+
+  .stat-label {
+    font-family: 'Cinzel', serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--gold-dim);  /* 6.89:1 — was #8a6f2e at 3.38:1 FAIL */
+    margin-bottom: 0.5rem;
+  }
+
+  .stat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--parchment);  /* 13.19:1 */
+    line-height: 1;
+  }
+
+  .stat-mod {
+    font-size: 0.9rem;
+    color: var(--gold);  /* 8.49:1 — was #c5a044 at 6.52:1, still passed but now stronger */
+    margin-top: 0.25rem;
+    font-weight: 500;
+  }
+
+  /* ── CONTENT GRID ── */
+  .content-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .panel {
+    background: linear-gradient(180deg, rgba(42, 30, 13, 0.84) 0%, rgba(14, 8, 3, 0.94) 100%);
+    border: 1px solid rgba(201, 165, 74, 0.15);
+    border-radius: 2px;
+    padding: 1.6rem;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+      0 22px 46px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(244, 232, 193, 0.04);
+    transition: transform 0.25s, border-color 0.25s, box-shadow 0.25s;
+    isolation: isolate;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 1.5rem;
+    right: 1.5rem;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+  }
+
+  .panel::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at top right, rgba(221, 184, 78, 0.08), transparent 36%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .panel:hover {
+    transform: translateY(-4px);
+    border-color: rgba(221, 184, 78, 0.32);
+    box-shadow: 0 26px 54px rgba(0, 0, 0, 0.3);
+  }
+
+  .panel > * {
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Spells panel — subtle crimson accent in corner only, not full wash */
+  .panel[data-theme="arcane"]::after {
+    background:
+      radial-gradient(circle at top right, rgba(239, 83, 80, 0.1), transparent 30%),
+      radial-gradient(circle at bottom left, rgba(221, 184, 78, 0.06), transparent 24%);
+  }
+
+  .panel-title {
+    font-family: 'Cinzel', serif;
+    font-size: 0.74rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--gold);  /* 8.49:1 */
+    margin-bottom: 1.35rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(201, 165, 74, 0.15);
+  }
+
+  /* Combat stats */
+  .combat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    padding: 0.65rem 0.2rem;
+    border-bottom: 1px solid rgba(201, 165, 74, 0.08);
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .combat-row:last-child { border-bottom: none; }
+
+  .combat-row:hover {
+    background: rgba(221, 184, 78, 0.05);
+    transform: translateX(3px);
+  }
+
+  .combat-label {
+    font-size: 0.95rem;
+    color: var(--parchment-mid);  /* 10.93:1 — was parchment-dark at 9.35:1 */
+    font-weight: 400;
+  }
+
+  .combat-value {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--parchment);  /* 13.19:1 */
+  }
+
+  /* Skills */
+  .skill-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.45rem 0.2rem;
+    font-size: 0.9rem;
+    color: var(--parchment-mid);  /* 10.93:1 */
+    border-radius: 10px;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .skill-row:hover {
+    background: rgba(221, 184, 78, 0.05);
+    transform: translateX(3px);
+  }
+
+  .skill-prof {
+    width: 8px;
+    height: 8px;
+    border: 1.5px solid var(--gold-dim);  /* non-text: 6.89:1 ≥ 3:1 ✓ */
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .skill-prof.filled {
+    background: var(--gold);
+    border-color: var(--gold);
+    box-shadow: 0 0 6px rgba(221, 184, 78, 0.4);
+  }
+
+  .skill-bonus {
+    margin-left: auto;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.8rem;
+    color: var(--gold-dim);  /* 6.89:1 — was #8a6f2e at 3.38:1 FAIL */
+    font-weight: 400;
+  }
+
+  /* Features list */
+  .feature-item {
+    padding: 0.85rem 0.25rem;
+    border-bottom: 1px solid rgba(201, 165, 74, 0.08);
+    border-radius: 12px;
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .feature-item:last-child { border-bottom: none; }
+
+  .feature-item:hover {
+    background: rgba(221, 184, 78, 0.05);
+    transform: translateX(3px);
+  }
+
+  .feature-name {
+    font-family: 'Cinzel', serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--parchment);  /* 13.19:1 */
+    margin-bottom: 0.2rem;
+  }
+
+  .feature-source {
+    font-size: 0.8rem;
+    color: var(--gold-dim);  /* 6.89:1 — was #8a6f2e at 3.38:1 FAIL */
+    font-style: italic;
+  }
+
+  /* Spells */
+  .spell-level-group {
+    margin-bottom: 1.1rem;
+    padding-bottom: 0.95rem;
+    border-bottom: 1px solid rgba(201, 165, 74, 0.1);
+  }
+
+  .spell-level-group:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+
+  .spell-level-header {
+    font-family: 'Cinzel', serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--crimson);  /* 4.63:1 — was #c42828 at 2.83:1 FAIL */
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .spell-level-header::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(239, 83, 80, 0.25);
+  }
+
+  .spell-slots {
+    display: flex;
+    gap: 0.3rem;
+    margin-left: auto;
+  }
+
+  .spell-slot {
+    width: 10px;
+    height: 10px;
+    border: 1.5px solid var(--crimson-dim);  /* non-text: 3.54:1 ≥ 3:1 ✓ — was #8b1a1a at 1.74:1 FAIL */
+    border-radius: 50%;
+  }
+
+  .spell-slot.used {
+    background: var(--crimson);
+    border-color: var(--crimson);
+    box-shadow: 0 0 6px rgba(239, 83, 80, 0.4);
+  }
+
+  .spell-name {
+    font-size: 0.9rem;
+    color: var(--parchment-mid);  /* 10.93:1 */
+    padding: 0.45rem 0.8rem 0.45rem 1rem;
+    border-left: 2px solid rgba(239, 83, 80, 0.2);
+    border-radius: 999px 12px 12px 999px;
+    margin-bottom: 0.35rem;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+    background: rgba(15, 9, 4, 0.22);
+  }
+
+  .spell-name:hover {
+    color: var(--parchment);
+    border-left-color: var(--crimson);
+    background: rgba(239, 83, 80, 0.08);
+    transform: translateX(4px);
+  }
+
+  /* ── HP DISPLAY ── */
+  .hp-display {
+    display: flex;
+    align-items: baseline;
+    gap: 0.35rem;
+  }
+
+  .hp-current {
+    font-family: 'Cinzel', serif;
+    font-size: 1.8rem;
+    font-weight: 900;
+    color: var(--crimson);  /* 4.63:1 — was #c42828 at 2.83:1 FAIL */
+  }
+
+  .hp-sep { color: var(--gold-dim); font-size: 1.2rem; }
+
+  .hp-max {
+    font-family: 'Cinzel', serif;
+    font-size: 1.3rem;
+    color: var(--parchment-mid);  /* 10.93:1 */
+  }
+
+  /* ── DESIGN LABEL ── */
+  .design-label {
+    position: static;
+    display: block;
+    margin: 1rem auto 0;
+    padding: 0 0.5rem 1.5rem;
+    text-align: right;
+    font-family: 'Cinzel', serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.3em;
+    text-transform: uppercase;
+    color: var(--gold-dim);
+    opacity: 0.58;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .char-header { animation: fadeInUp 0.6s ease-out; }
+  .xp-bar-container { animation: fadeInUp 0.6s ease-out 0.1s both; }
+  .stats-grid { animation: fadeInUp 0.6s ease-out 0.2s both; }
+  .content-grid { animation: fadeInUp 0.6s ease-out 0.3s both; }
+
+  .stat-card { animation: fadeInUp 0.5s ease-out both; }
+  .stat-card:nth-child(1) { animation-delay: 0.25s; }
+  .stat-card:nth-child(2) { animation-delay: 0.30s; }
+  .stat-card:nth-child(3) { animation-delay: 0.35s; }
+  .stat-card:nth-child(4) { animation-delay: 0.40s; }
+  .stat-card:nth-child(5) { animation-delay: 0.45s; }
+  .stat-card:nth-child(6) { animation-delay: 0.50s; }
+
+  /* ── RESPONSIVE — TABLET ── */
+  @media (max-width: 768px) {
+    main {
+      padding: 5.25rem 1.25rem 2.4rem;
+      margin-top: 0;
+      border-radius: 4px;
+    }
+
+    nav {
+      padding: 0.6rem 1rem;
+    }
+
+    .nav-links {
+      gap: 1rem;
+    }
+
+    .nav-links a {
+      font-size: 0.65rem;
+      letter-spacing: 0.08em;
+    }
+
+    .char-header {
+      grid-template-columns: auto 1fr auto;
+      gap: 1rem;
+    }
+
+    .char-portrait {
+      width: 72px;
+      height: 72px;
+      font-size: 1.8rem;
+    }
+
+    .char-name {
+      font-size: 1.6rem;
+    }
+
+    .char-subtitle {
+      font-size: 0.95rem;
+    }
+
+    .char-level-num {
+      font-size: 2.2rem;
+    }
+
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
+    }
+
+    .content-grid {
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+  }
+
+  /* ── RESPONSIVE — MOBILE ── */
+  @media (max-width: 480px) {
+    main {
+      padding: 4.5rem 0.75rem 2rem;
+      border-radius: 4px;
+    }
+
+    /* Nav: hide overflow, show key items */
+    nav {
+      padding: 0.5rem 0.75rem;
+      gap: 0.5rem;
+    }
+
+    .nav-logo {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+    }
+
+    .nav-links {
+      gap: 0.75rem;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+      flex-shrink: 1;
+      min-width: 0;
+    }
+
+    .nav-links::-webkit-scrollbar { display: none; }
+
+    .nav-links a {
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      white-space: nowrap;
+    }
+
+    /* Character header: stack portrait + info */
+    .char-header {
+      grid-template-columns: 1fr;
+      text-align: center;
+      gap: 0.75rem;
+      padding: 1.3rem 1rem;
+    }
+
+    .char-portrait {
+      width: 64px;
+      height: 64px;
+      font-size: 1.6rem;
+      margin: 0 auto;
+    }
+
+    .char-name {
+      font-size: 1.5rem;
+    }
+
+    .char-level {
+      display: flex;
+      align-items: baseline;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .char-level-num {
+      font-size: 1.8rem;
+    }
+
+    .char-level-label {
+      font-size: 0.6rem;
+    }
+
+    /* Stats: 3x2 grid */
+    .stats-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.5rem;
+    }
+
+    .stat-card {
+      padding: 1rem 0.25rem;
+    }
+
+    .stat-value {
+      font-size: 1.6rem;
+    }
+
+    .stat-label {
+      font-size: 0.5rem;
+      letter-spacing: 0.12em;
+    }
+
+    .stat-mod {
+      font-size: 0.8rem;
+    }
+
+    /* Content: single column */
+    .content-grid {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+
+    .panel {
+      padding: 1rem;
+    }
+
+    .panel-title {
+      font-size: 0.65rem;
+      margin-bottom: 1rem;
+    }
+
+    /* XP labels */
+    .xp-bar-labels {
+      font-size: 0.65rem;
+    }
+
+    /* HP display */
+    .hp-current {
+      font-size: 1.4rem;
+    }
+
+    .hp-max {
+      font-size: 1rem;
+    }
+
+    .combat-value {
+      font-size: 1.1rem;
+    }
+
+    .design-label {
+      text-align: center;
+      padding-bottom: 1rem;
+    }
+  }
+
+  /* ── REDUCED MOTION ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main-content" class="skip-link">Skip to main content</a>
+
+<nav aria-label="Primary navigation">
+  <div class="nav-logo" aria-hidden="true">Arcanum</div>
+  <ul class="nav-links" role="list">
+    <li><a href="#" class="active" aria-current="page">Character</a></li>
+    <li><a href="#">Spellbook</a></li>
+    <li><a href="#">Inventory</a></li>
+    <li><a href="#">Campaign</a></li>
+    <li><a href="#">Compendium</a></li>
+  </ul>
+</nav>
+
+<main id="main-content">
+  <header class="char-header">
+    <div class="char-portrait" role="img" aria-label="Character portrait">&#9876;</div>
+    <div>
+      <h1 class="char-name">Thalindra Ashveil</h1>
+      <p class="char-subtitle">Half-Elf Wizard &middot; School of Evocation</p>
+    </div>
+    <div class="char-level" aria-label="Level 7">
+      <div class="char-level-num">7</div>
+      <div class="char-level-label">Level</div>
+    </div>
+  </header>
+
+  <div class="xp-bar-container" role="progressbar" aria-valuenow="23000" aria-valuemin="0" aria-valuemax="34000" aria-label="Experience progress: 23,000 of 34,000 XP">
+    <div class="xp-bar-labels">
+      <span>23,000 XP</span>
+      <span>34,000 XP to Level 8</span>
+    </div>
+    <div class="xp-bar-track">
+      <div class="xp-bar-fill"></div>
+    </div>
+  </div>
+
+  <section aria-label="Ability Scores" class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Strength</div>
+      <div class="stat-value">8</div>
+      <div class="stat-mod">-1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Dexterity</div>
+      <div class="stat-value">14</div>
+      <div class="stat-mod">+2</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Constitution</div>
+      <div class="stat-value">13</div>
+      <div class="stat-mod">+1</div>
+    </div>
+    <div class="stat-card" data-primary>
+      <div class="stat-label">Intelligence</div>
+      <div class="stat-value">18</div>
+      <div class="stat-mod">+4</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Wisdom</div>
+      <div class="stat-value">12</div>
+      <div class="stat-mod">+1</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Charisma</div>
+      <div class="stat-value">10</div>
+      <div class="stat-mod">+0</div>
+    </div>
+  </section>
+
+  <div class="content-grid">
+    <section class="panel" aria-label="Combat statistics">
+      <h2 class="panel-title">Combat</h2>
+      <div class="combat-row">
+        <span class="combat-label">Hit Points</span>
+        <div class="hp-display">
+          <span class="hp-current">38</span>
+          <span class="hp-sep">/</span>
+          <span class="hp-max">45</span>
+        </div>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Armor Class</span>
+        <span class="combat-value">15</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Initiative</span>
+        <span class="combat-value">+2</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Speed</span>
+        <span class="combat-value">30 ft</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Spell Save DC</span>
+        <span class="combat-value">15</span>
+      </div>
+      <div class="combat-row">
+        <span class="combat-label">Spell Attack</span>
+        <span class="combat-value">+7</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Skills">
+      <h2 class="panel-title">Proficient Skills</h2>
+      <div class="skill-row">
+        <span class="skill-prof filled" role="img" aria-label="Proficient"></span>
+        <span>Arcana</span>
+        <span class="skill-bonus">+7</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof filled" role="img" aria-label="Proficient"></span>
+        <span>History</span>
+        <span class="skill-bonus">+7</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof filled" role="img" aria-label="Proficient"></span>
+        <span>Investigation</span>
+        <span class="skill-bonus">+7</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof filled" role="img" aria-label="Proficient"></span>
+        <span>Perception</span>
+        <span class="skill-bonus">+4</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof" role="img" aria-label="Not proficient"></span>
+        <span>Insight</span>
+        <span class="skill-bonus">+1</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof" role="img" aria-label="Not proficient"></span>
+        <span>Persuasion</span>
+        <span class="skill-bonus">+0</span>
+      </div>
+      <div class="skill-row">
+        <span class="skill-prof" role="img" aria-label="Not proficient"></span>
+        <span>Stealth</span>
+        <span class="skill-bonus">+2</span>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Spells" data-theme="arcane">
+      <h2 class="panel-title">Spells Prepared</h2>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          Cantrips
+        </div>
+        <div class="spell-name">Fire Bolt</div>
+        <div class="spell-name">Mage Hand</div>
+        <div class="spell-name">Prestidigitation</div>
+      </div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          1st Level
+          <div class="spell-slots" role="img" aria-label="Spell slots: 2 of 4 used">
+            <div class="spell-slot used"></div>
+            <div class="spell-slot used"></div>
+            <div class="spell-slot"></div>
+            <div class="spell-slot"></div>
+          </div>
+        </div>
+        <div class="spell-name">Magic Missile</div>
+        <div class="spell-name">Shield</div>
+        <div class="spell-name">Detect Magic</div>
+      </div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          2nd Level
+          <div class="spell-slots" role="img" aria-label="Spell slots: 1 of 3 used">
+            <div class="spell-slot used"></div>
+            <div class="spell-slot"></div>
+            <div class="spell-slot"></div>
+          </div>
+        </div>
+        <div class="spell-name">Misty Step</div>
+        <div class="spell-name">Scorching Ray</div>
+      </div>
+      <div class="spell-level-group">
+        <div class="spell-level-header">
+          4th Level
+          <div class="spell-slots" role="img" aria-label="Spell slots: 0 of 1 used">
+            <div class="spell-slot"></div>
+          </div>
+        </div>
+        <div class="spell-name">Wall of Fire</div>
+        <div class="spell-name">Greater Invisibility</div>
+      </div>
+    </section>
+
+    <section class="panel" aria-label="Features and traits">
+      <h2 class="panel-title">Features & Traits</h2>
+      <div class="feature-item">
+        <div class="feature-name">Sculpt Spells</div>
+        <div class="feature-source">Evocation &middot; Level 2</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Potent Cantrip</div>
+        <div class="feature-source">Evocation &middot; Level 6</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Arcane Recovery</div>
+        <div class="feature-source">Wizard &middot; Level 1</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Darkvision</div>
+        <div class="feature-source">Half-Elf &middot; Species</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Fey Ancestry</div>
+        <div class="feature-source">Half-Elf &middot; Species</div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-name">Skill Versatility</div>
+        <div class="feature-source">Half-Elf &middot; Species</div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<div class="design-label" aria-hidden="true">Option A &mdash; The Grimoire (High Contrast)</div>
+
+</body>
+</html>
