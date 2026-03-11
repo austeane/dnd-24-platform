@@ -1,50 +1,31 @@
-import { eq } from "drizzle-orm";
 import { listPlayerCommunicationCards } from "../communication/service.ts";
-import { db } from "../db/index.ts";
-import { characters } from "../db/schema/index.ts";
-import type { CommunicationKind } from "../db/schema/index.ts";
-
-export interface JournalCard {
-  id: string;
-  title: string;
-  bodyMd: string;
-  summary: string | null;
-  category: CommunicationKind;
-  isPinned: boolean;
-  publishedAt: string;
-}
-
-export interface JournalData {
-  cards: JournalCard[];
-}
+import { getTavernCharacterContext } from "./context.ts";
+import type { TavernJournalData } from "./types.ts";
 
 export async function getJournalData(
   characterId: string,
-): Promise<JournalData> {
-  const [character] = await db
-    .select({ campaignId: characters.campaignId })
-    .from(characters)
-    .where(eq(characters.id, characterId))
-    .limit(1);
-
-  if (!character) {
+): Promise<TavernJournalData> {
+  const context = await getTavernCharacterContext(characterId, {
+    includeRuntime: false,
+  });
+  if (!context) {
     return { cards: [] };
   }
 
   const playerCards = await listPlayerCommunicationCards(
-    character.campaignId,
+    context.campaign.id,
     characterId,
   );
 
-  const cards: JournalCard[] = playerCards.map((card) => ({
-    id: card.id,
-    title: card.title,
-    bodyMd: card.bodyMd,
-    summary: card.summary,
-    category: card.kind,
-    isPinned: card.isPinned,
-    publishedAt: card.publishedAt.toISOString(),
-  }));
-
-  return { cards };
+  return {
+    cards: playerCards.map((card) => ({
+      id: card.id,
+      title: card.title,
+      bodyMd: card.bodyMd,
+      summary: card.summary,
+      category: card.kind,
+      isPinned: card.isPinned,
+      publishedAt: card.publishedAt.toISOString(),
+    })),
+  };
 }

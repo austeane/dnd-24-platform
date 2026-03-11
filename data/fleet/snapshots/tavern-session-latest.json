@@ -1,0 +1,871 @@
+{
+  "scenarioId": "tali-druid-3-session",
+  "campaignId": "real-aa-campaign",
+  "characterSlug": "tali",
+  "before": {
+    "shell": {
+      "campaign": {
+        "id": "real-aa-campaign",
+        "name": "Real AA Campaign",
+        "progressionMode": "hybrid",
+        "enabledPackIds": [
+          "srd-5e-2024",
+          "advanced-adventurers"
+        ]
+      },
+      "character": {
+        "slug": "tali",
+        "name": "Tali",
+        "ownerLabel": null
+      },
+      "summary": {
+        "subtitle": "Druid 2",
+        "className": "Druid",
+        "species": "Sheet Species Magic",
+        "level": 2,
+        "abilityScores": [
+          {
+            "name": "strength",
+            "score": 8,
+            "modifier": -1,
+            "isPrimary": false
+          },
+          {
+            "name": "dexterity",
+            "score": 12,
+            "modifier": 1,
+            "isPrimary": false
+          },
+          {
+            "name": "constitution",
+            "score": 14,
+            "modifier": 2,
+            "isPrimary": false
+          },
+          {
+            "name": "intelligence",
+            "score": 14,
+            "modifier": 2,
+            "isPrimary": false
+          },
+          {
+            "name": "wisdom",
+            "score": 17,
+            "modifier": 3,
+            "isPrimary": true
+          },
+          {
+            "name": "charisma",
+            "score": 10,
+            "modifier": 0,
+            "isPrimary": false
+          }
+        ],
+        "combat": {
+          "maxHp": 19,
+          "armorClass": 11,
+          "acBreakdown": "Base AC +10, Dexterity +1",
+          "initiative": 1,
+          "speed": 30,
+          "spellSaveDc": 13,
+          "proficiencyBonus": 2
+        },
+        "skills": [
+          {
+            "name": "Acrobatics",
+            "bonus": 1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Animal Handling",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Arcana",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Athletics",
+            "bonus": -1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Deception",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "History",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Insight",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Intimidation",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Investigation",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Medicine",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Nature",
+            "bonus": 4,
+            "proficient": true,
+            "expertise": false
+          },
+          {
+            "name": "Perception",
+            "bonus": 5,
+            "proficient": true,
+            "expertise": false
+          },
+          {
+            "name": "Performance",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Persuasion",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Religion",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Sleight of Hand",
+            "bonus": 1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Stealth",
+            "bonus": 1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Survival",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          }
+        ],
+        "features": [
+          {
+            "name": "Druid 2",
+            "origin": "Druid 2"
+          },
+          {
+            "name": "Druid spell list",
+            "origin": "Druid spell list"
+          },
+          {
+            "name": "Druidic Spellcasting (Level 2)",
+            "origin": "Druidic Spellcasting (Level 2)"
+          },
+          {
+            "name": "Feerie Tollen",
+            "origin": "Sheet Species Magic"
+          },
+          {
+            "name": "Hex Magic",
+            "origin": "Sheet Species Magic"
+          },
+          {
+            "name": "Primal Order: Warden",
+            "origin": "Primal Order: Warden"
+          },
+          {
+            "name": "Wild Companion Familiar",
+            "origin": "Wild Companion"
+          },
+          {
+            "name": "Wild Shape Forms",
+            "origin": "Wild Shape"
+          }
+        ],
+        "xp": {
+          "totalEarned": 0,
+          "totalSpent": 0,
+          "banked": 0
+        }
+      },
+      "spellbook": {
+        "castingAbility": "Wisdom",
+        "spellSaveDC": 13,
+        "spellAttackBonus": 5,
+        "groups": [
+          {
+            "level": 0,
+            "label": "Cantrips",
+            "spells": [
+              {
+                "name": "Druidcraft",
+                "school": "Transmutation",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Guidance",
+                "school": "Divination",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Message",
+                "school": "Transmutation",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Shillelagh",
+                "school": "Transmutation",
+                "castingTime": "Bonus Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              }
+            ],
+            "slots": null
+          },
+          {
+            "level": 1,
+            "label": "1st Level",
+            "spells": [
+              {
+                "name": "Cure Wounds",
+                "school": "Abjuration",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Detect Magic",
+                "school": "Divination",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": true,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Disguise Self",
+                "school": "Illusion",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Entangle",
+                "school": "Conjuration",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Faerie Fire",
+                "school": "Evocation",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Hex",
+                "school": "Enchantment",
+                "castingTime": "Bonus Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Jump",
+                "school": "Transmutation",
+                "castingTime": "Bonus Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              }
+            ],
+            "slots": {
+              "level": 1,
+              "total": 3,
+              "current": 3
+            }
+          }
+        ]
+      },
+      "inventoryRuntime": {
+        "attackProfiles": [
+          {
+            "weaponName": "Quarterstaff",
+            "attackBonus": "+1",
+            "damage": "1d6-1",
+            "damageType": "bludgeoning",
+            "properties": [
+              "Versatile (1d8)"
+            ],
+            "masteryProperty": null
+          }
+        ],
+        "resources": [
+          {
+            "name": "Wild Shape",
+            "current": 2,
+            "max": 2,
+            "rechargeOn": "Short Rest",
+            "source": "Wild Shape"
+          }
+        ]
+      }
+    },
+    "journal": [
+      {
+        "title": "Spell notes for tonight",
+        "summary": "Hex and Entangle came up in play.",
+        "category": "rule-callout",
+        "isPinned": false
+      }
+    ],
+    "inventoryItems": {
+      "equippedItems": [
+        {
+          "id": "seed:tali:equip:1:equipment:leather-armor",
+          "name": "Leather Armor",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "armor"
+        },
+        {
+          "id": "seed:tali:equip:0:equipment:quarterstaff",
+          "name": "Quarterstaff",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "main-hand"
+        },
+        {
+          "id": "seed:tali:equip:2:equipment:shield",
+          "name": "Shield",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "off-hand"
+        }
+      ],
+      "carriedItems": []
+    },
+    "compendium": {
+      "totalCount": 2,
+      "entryIds": [
+        "advanced-adventurers:aa-spell-hex",
+        "srd-5e-2024:spell-hex"
+      ],
+      "detail": {
+        "entityId": "aa-spell-hex",
+        "packId": "advanced-adventurers",
+        "name": "Hex",
+        "type": "spell"
+      }
+    },
+    "playerCards": [
+      {
+        "title": "Spell notes for tonight",
+        "refs": [
+          {
+            "refId": "aa-spell-hex",
+            "refPackId": "advanced-adventurers",
+            "refType": "spell"
+          },
+          {
+            "refId": "spell-entangle",
+            "refPackId": "srd-5e-2024",
+            "refType": "spell"
+          }
+        ]
+      }
+    ],
+    "xpTransactions": [],
+    "spendPlans": []
+  },
+  "after": {
+    "shell": {
+      "campaign": {
+        "id": "real-aa-campaign",
+        "name": "Real AA Campaign",
+        "progressionMode": "hybrid",
+        "enabledPackIds": [
+          "srd-5e-2024",
+          "advanced-adventurers"
+        ]
+      },
+      "character": {
+        "slug": "tali",
+        "name": "Tali",
+        "ownerLabel": null
+      },
+      "summary": {
+        "subtitle": "Druid 2",
+        "className": "Druid",
+        "species": "Sheet Species Magic",
+        "level": 3,
+        "abilityScores": [
+          {
+            "name": "strength",
+            "score": 8,
+            "modifier": -1,
+            "isPrimary": false
+          },
+          {
+            "name": "dexterity",
+            "score": 12,
+            "modifier": 1,
+            "isPrimary": false
+          },
+          {
+            "name": "constitution",
+            "score": 14,
+            "modifier": 2,
+            "isPrimary": false
+          },
+          {
+            "name": "intelligence",
+            "score": 14,
+            "modifier": 2,
+            "isPrimary": false
+          },
+          {
+            "name": "wisdom",
+            "score": 17,
+            "modifier": 3,
+            "isPrimary": true
+          },
+          {
+            "name": "charisma",
+            "score": 10,
+            "modifier": 0,
+            "isPrimary": false
+          }
+        ],
+        "combat": {
+          "maxHp": 19,
+          "armorClass": 11,
+          "acBreakdown": "Base AC +10, Dexterity +1",
+          "initiative": 1,
+          "speed": 30,
+          "spellSaveDc": 13,
+          "proficiencyBonus": 2
+        },
+        "skills": [
+          {
+            "name": "Acrobatics",
+            "bonus": 1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Animal Handling",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Arcana",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Athletics",
+            "bonus": -1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Deception",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "History",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Insight",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Intimidation",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Investigation",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Medicine",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Nature",
+            "bonus": 4,
+            "proficient": true,
+            "expertise": false
+          },
+          {
+            "name": "Perception",
+            "bonus": 5,
+            "proficient": true,
+            "expertise": false
+          },
+          {
+            "name": "Performance",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Persuasion",
+            "bonus": 0,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Religion",
+            "bonus": 2,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Sleight of Hand",
+            "bonus": 1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Stealth",
+            "bonus": 1,
+            "proficient": false,
+            "expertise": false
+          },
+          {
+            "name": "Survival",
+            "bonus": 3,
+            "proficient": false,
+            "expertise": false
+          }
+        ],
+        "features": [
+          {
+            "name": "Druid +1",
+            "origin": "Druid +1"
+          },
+          {
+            "name": "Druid 2",
+            "origin": "Druid 2"
+          },
+          {
+            "name": "Druid spell list",
+            "origin": "Druid spell list"
+          },
+          {
+            "name": "Druidic Spellcasting (Level 2)",
+            "origin": "Druidic Spellcasting (Level 2)"
+          },
+          {
+            "name": "Feerie Tollen",
+            "origin": "Sheet Species Magic"
+          },
+          {
+            "name": "Hex Magic",
+            "origin": "Sheet Species Magic"
+          },
+          {
+            "name": "Primal Order: Warden",
+            "origin": "Primal Order: Warden"
+          },
+          {
+            "name": "Wild Companion Familiar",
+            "origin": "Wild Companion"
+          },
+          {
+            "name": "Wild Shape Forms",
+            "origin": "Wild Shape"
+          }
+        ],
+        "xp": {
+          "totalEarned": 5,
+          "totalSpent": 5,
+          "banked": 0
+        }
+      },
+      "spellbook": {
+        "castingAbility": "Wisdom",
+        "spellSaveDC": 13,
+        "spellAttackBonus": 5,
+        "groups": [
+          {
+            "level": 0,
+            "label": "Cantrips",
+            "spells": [
+              {
+                "name": "Druidcraft",
+                "school": "Transmutation",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Guidance",
+                "school": "Divination",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Message",
+                "school": "Transmutation",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Shillelagh",
+                "school": "Transmutation",
+                "castingTime": "Bonus Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              }
+            ],
+            "slots": null
+          },
+          {
+            "level": 1,
+            "label": "1st Level",
+            "spells": [
+              {
+                "name": "Cure Wounds",
+                "school": "Abjuration",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Detect Magic",
+                "school": "Divination",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": true,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Disguise Self",
+                "school": "Illusion",
+                "castingTime": "Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Entangle",
+                "school": "Conjuration",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Faerie Fire",
+                "school": "Evocation",
+                "castingTime": "Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Hex",
+                "school": "Enchantment",
+                "castingTime": "Bonus Action",
+                "concentration": true,
+                "ritual": false,
+                "alwaysPrepared": false
+              },
+              {
+                "name": "Jump",
+                "school": "Transmutation",
+                "castingTime": "Bonus Action",
+                "concentration": false,
+                "ritual": false,
+                "alwaysPrepared": false
+              }
+            ],
+            "slots": {
+              "level": 1,
+              "total": 3,
+              "current": 3
+            }
+          }
+        ]
+      },
+      "inventoryRuntime": {
+        "attackProfiles": [
+          {
+            "weaponName": "Quarterstaff",
+            "attackBonus": "+1",
+            "damage": "1d6-1",
+            "damageType": "bludgeoning",
+            "properties": [
+              "Versatile (1d8)"
+            ],
+            "masteryProperty": null
+          }
+        ],
+        "resources": [
+          {
+            "name": "Wild Shape",
+            "current": 2,
+            "max": 2,
+            "rechargeOn": "Short Rest",
+            "source": "Wild Shape"
+          }
+        ]
+      }
+    },
+    "journal": [
+      {
+        "title": "Spell notes for tonight",
+        "summary": "Hex and Entangle came up in play.",
+        "category": "rule-callout",
+        "isPinned": false
+      }
+    ],
+    "inventoryItems": {
+      "equippedItems": [
+        {
+          "id": "seed:tali:equip:1:equipment:leather-armor",
+          "name": "Leather Armor",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "armor"
+        },
+        {
+          "id": "seed:tali:equip:0:equipment:quarterstaff",
+          "name": "Quarterstaff",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "main-hand"
+        },
+        {
+          "id": "seed:tali:equip:2:equipment:shield",
+          "name": "Shield",
+          "quantity": 1,
+          "equipped": true,
+          "slot": "off-hand"
+        }
+      ],
+      "carriedItems": []
+    },
+    "compendium": {
+      "totalCount": 2,
+      "entryIds": [
+        "advanced-adventurers:aa-spell-hex",
+        "srd-5e-2024:spell-hex"
+      ],
+      "detail": {
+        "entityId": "aa-spell-hex",
+        "packId": "advanced-adventurers",
+        "name": "Hex",
+        "type": "spell"
+      }
+    },
+    "playerCards": [
+      {
+        "title": "Spell notes for tonight",
+        "refs": [
+          {
+            "refId": "aa-spell-hex",
+            "refPackId": "advanced-adventurers",
+            "refType": "spell"
+          },
+          {
+            "refId": "spell-entangle",
+            "refPackId": "srd-5e-2024",
+            "refType": "spell"
+          }
+        ]
+      }
+    ],
+    "xpTransactions": [
+      {
+        "category": "spend-level",
+        "amount": 5,
+        "note": "Druid +1 (1 level)"
+      },
+      {
+        "category": "award",
+        "amount": 5,
+        "note": "Session 1 XP award"
+      }
+    ],
+    "spendPlans": [
+      {
+        "state": "committed",
+        "kind": "level-up",
+        "summary": "Tali reaches Druid 3",
+        "totalXpCost": 5
+      }
+    ]
+  }
+}

@@ -25,5 +25,9 @@ pnpm-debug.log*
 # Vitest
 __vitest__/
 
+# Playwright
+playwright-report/
+test-results/
+
 # Repomix
 repomix-output.*

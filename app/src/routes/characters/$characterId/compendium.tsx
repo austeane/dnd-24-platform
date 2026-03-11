@@ -1,15 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import {
-  CompendiumPanel,
-  type CompendiumEntryDetailProps,
-  type CompendiumEntryProps,
-} from "../../../components/tavern/character/CompendiumPanel.tsx";
-import {
-  fetchCompendiumData,
-  fetchCompendiumEntryDetail as fetchCompendiumDetail,
-  type CompendiumData,
-  type CompendiumEntryDetail,
-} from "./-server.ts";
+import { CompendiumPanel } from "../../../components/tavern/character/CompendiumPanel.tsx";
+import { fetchCompendiumData, type TavernCompendiumQuery } from "./-server.ts";
 
 interface CompendiumSearchParams {
   q?: string;
@@ -19,44 +10,48 @@ interface CompendiumSearchParams {
   entryPack?: string;
 }
 
-function toEntryProps(data: CompendiumData): CompendiumEntryProps[] {
-  return data.entries.map((entry) => ({
-    entityId: entry.entityId,
-    packId: entry.packId,
-    type: entry.type,
-    name: entry.name,
-    summary: entry.summary,
-    tags: entry.tags,
-  }));
+export function validateCompendiumSearch(
+  search: Record<string, unknown>,
+): CompendiumSearchParams {
+  return {
+    q: typeof search.q === "string" && search.q.length > 0 ? search.q : undefined,
+    type:
+      typeof search.type === "string" && search.type.length > 0
+        ? search.type
+        : undefined,
+    pack:
+      typeof search.pack === "string" && search.pack.length > 0
+        ? search.pack
+        : undefined,
+    entry:
+      typeof search.entry === "string" && search.entry.length > 0
+        ? search.entry
+        : undefined,
+    entryPack:
+      typeof search.entryPack === "string" && search.entryPack.length > 0
+        ? search.entryPack
+        : undefined,
+  };
 }
 
-function toDetailProps(
-  detail: CompendiumEntryDetail | null,
-): CompendiumEntryDetailProps | null {
-  if (!detail) return null;
+function toCompendiumQuery(
+  characterId: string,
+  search: CompendiumSearchParams,
+): TavernCompendiumQuery {
   return {
-    entityId: detail.entityId,
-    packId: detail.packId,
-    type: detail.type,
-    name: detail.name,
-    summary: detail.summary,
-    tags: detail.tags,
-    bodyMd: detail.bodyMd,
+    characterId,
+    q: search.q,
+    type: search.type,
+    pack: search.pack,
+    entry: search.entry,
+    entryPack: search.entryPack,
   };
 }
 
 export const Route = createFileRoute(
   "/characters/$characterId/compendium",
 )({
-  validateSearch: (
-    search: Record<string, unknown>,
-  ): CompendiumSearchParams => ({
-    q: (search.q as string) ?? undefined,
-    type: (search.type as string) ?? undefined,
-    pack: (search.pack as string) ?? undefined,
-    entry: (search.entry as string) ?? undefined,
-    entryPack: (search.entryPack as string) ?? undefined,
-  }),
+  validateSearch: validateCompendiumSearch,
   loaderDeps: ({ search }) => ({
     q: search.q,
     type: search.type,
@@ -64,57 +59,50 @@ export const Route = createFileRoute(
     entry: search.entry,
     entryPack: search.entryPack,
   }),
-  loader: async ({ deps }) => {
-    const listData = await fetchCompendiumData({
-      data: {
-        q: deps.q,
-        type: deps.type,
-        pack: deps.pack,
-      },
-    });
-
-    let detail: CompendiumEntryDetail | null = null;
-    if (deps.entry && deps.entryPack) {
-      detail = await fetchCompendiumDetail({
-        data: { packId: deps.entryPack, entityId: deps.entry },
-      });
-    }
-
-    return { listData, detail };
-  },
+  loader: ({ params, deps }) =>
+    fetchCompendiumData({
+      data: toCompendiumQuery(params.characterId, deps),
+    }),
   component: CompendiumRoute,
 });
 
 function CompendiumRoute() {
-  const { listData, detail } = Route.useLoaderData();
+  const data = Route.useLoaderData();
   const search = Route.useSearch();
   const navigate = useNavigate({ from: Route.fullPath });
-
-  const entries = toEntryProps(listData);
-  const detailProps = toDetailProps(detail);
 
   return (
     <div className="animate-fade-up">
       <CompendiumPanel
-        entries={entries}
-        totalCount={listData.totalCount}
-        availableTypes={listData.availableTypes}
-        availablePacks={listData.availablePacks}
+        entries={data.entries}
+        totalCount={data.totalCount}
+        availableTypes={data.availableTypes}
+        availablePacks={data.availablePacks}
         query={search.q ?? ""}
         activeType={search.type ?? ""}
         activePack={search.pack ?? ""}
-        detail={detailProps}
+        detail={data.detail}
         onQueryChange={(q) =>
           navigate({ search: { ...search, q: q || undefined } })
         }
         onTypeChange={(type) =>
           navigate({
-            search: { ...search, type: type || undefined, entry: undefined, entryPack: undefined },
+            search: {
+              ...search,
+              type: type || undefined,
+              entry: undefined,
+              entryPack: undefined,
+            },
           })
         }
         onPackChange={(pack) =>
           navigate({
-            search: { ...search, pack: pack || undefined, entry: undefined, entryPack: undefined },
+            search: {
+              ...search,
+              pack: pack || undefined,
+              entry: undefined,
+              entryPack: undefined,
+            },
           })
         }
         onEntrySelect={(packId, entityId) =>

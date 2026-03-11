@@ -1,4 +1,8 @@
-import { listCampaigns, listCampaignRoster } from "../campaigns/service.ts";
+import {
+  listCampaigns,
+  listCampaignRoster,
+  listCampaignSessions,
+} from "../campaigns/service.ts";
 
 export interface HomeRosterCard {
   characterId: string;
@@ -26,14 +30,17 @@ export async function getHomeData(): Promise<HomeData> {
 
   const sections: HomeCampaignSection[] = await Promise.all(
     campaigns.map(async (campaign) => {
-      const roster = await listCampaignRoster(campaign.id);
+      const [roster, sessions] = await Promise.all([
+        listCampaignRoster(campaign.id),
+        listCampaignSessions(campaign.id),
+      ]);
       return {
         campaignId: campaign.id,
         campaignSlug: campaign.slug,
         campaignName: campaign.name,
         progressionMode: campaign.progressionMode,
-        characterCount: campaign.characterCount,
-        sessionCount: campaign.sessionCount,
+        characterCount: roster.length,
+        sessionCount: sessions.length,
         roster: roster.map((entry) => ({
           characterId: entry.id,
           characterSlug: entry.slug,

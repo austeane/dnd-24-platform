@@ -3,10 +3,12 @@ import {
   JournalPanel,
   type JournalCardProps,
 } from "../../../components/tavern/character/JournalPanel.tsx";
-import { fetchJournalData, type JournalData } from "./-server.ts";
+import { fetchJournalData } from "./-server.ts";
 
-function toJournalCardProps(data: JournalData): JournalCardProps[] {
-  return data.cards.map((card) => ({
+export function toJournalCardProps(
+  cards: Awaited<ReturnType<typeof fetchJournalData>>["cards"],
+): JournalCardProps[] {
+  return cards.map((card: Awaited<ReturnType<typeof fetchJournalData>>["cards"][number]) => ({
     id: card.id,
     title: card.title,
     bodyMd: card.bodyMd,
@@ -20,20 +22,18 @@ function toJournalCardProps(data: JournalData): JournalCardProps[] {
 export const Route = createFileRoute(
   "/characters/$characterId/journal",
 )({
-  loader: async ({ params }) => {
-    return fetchJournalData({
+  loader: ({ params }) =>
+    fetchJournalData({
       data: { characterId: params.characterId },
-    });
-  },
+    }),
   component: JournalRoute,
 });
 
 function JournalRoute() {
   const data = Route.useLoaderData();
-  const cards = toJournalCardProps(data);
   return (
     <div className="animate-fade-up">
-      <JournalPanel cards={cards} />
+      <JournalPanel cards={toJournalCardProps(data.cards)} />
     </div>
   );
 }

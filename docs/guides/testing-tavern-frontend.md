@@ -1,131 +1,173 @@
-# Testing & Evaluating the Tavern Frontend
+# Testing Tavern Frontend
 
-Guide for verifying everything built in Rounds 4–6 of the fleet swarm.
+This guide is the current readiness gate for the Tavern surface.
 
-## Quick Verification (Automated)
+## Readiness Gates
 
-```bash
-pnpm check          # TypeScript strict mode — 0 errors
-pnpm test           # 632 tests (558 library + 74 app)
-pnpm lint           # 0 errors
-pnpm build          # Client + Nitro SSR build
-```
+There are two gates:
 
-All four must pass before any commit.
+1. Local disposable Postgres is the primary gate.
+2. Railway smoke is the secondary gate.
 
-## What Was Built
+The app is not ready because `pnpm build` succeeds. It is ready when the Tavern route boundary, read models, and seeded session scenario all hold under a fresh database.
 
-### Round 4: Backend Mechanics
-
-**AC & Equipment Effects** (`library/src/engine/defenses.ts`)
-- Unarmored AC = 10 + DEX modifier (not baseArmorClass snapshot)
-- Formula candidates (armor, Unarmored Defense) compared against unarmored baseline
-- DEX cap enforcement for medium/heavy armor
-- Shield bonus and other AC modifiers applied correctly
-- Full AC breakdown with per-contributor explanations
-
-**Test file**: `library/tests/engine/defenses.test.ts` (23 tests)
+## Fast Path
 
 ```bash
-pnpm -F @dnd/library test -- tests/engine/defenses.test.ts
+pnpm check
+pnpm -F @dnd/app test
+pnpm -F @dnd/app build
 ```
 
-Key cases to verify:
-- Unarmored AC includes DEX modifier
-- Light armor uses full DEX
-- Medium armor caps DEX at +2
-- Heavy armor ignores DEX
-- Best formula wins (highest AC)
-- AC breakdown is fully explainable
+Those are the fast compile and unit gates. They do not replace the seeded DB checks below.
 
-### Round 5: Frontend Foundation
+## Disposable Postgres Bootstrap
 
-**Design system** (`app/src/styles/tavern.css`)
-- Theme tokens: `--color-parchment`, `--color-ink`, `--color-wood`, `--color-ember`, etc.
-- Typography: Fraunces (headings), Source Sans 3 (body), IBM Plex Mono (code)
-- Atmosphere CSS: `@keyframes candleFlicker`, warm tones
+Use a throwaway local Postgres and point `DATABASE_TEST_URL` at it.
 
-**UI primitives** (`app/src/components/tavern/ui/`)
-- Button, Card, StatBadge, ProgressBar, SlotDots
-- Loading, Skeleton, ErrorCard, EmptyState, NotFound
-- ProseContent (markdown rendering)
+```bash
+pnpm db:test:up
+eval "$(pnpm db:test:env)"
+```
 
-**Layout** (`app/src/components/tavern/layout/`)
-- TavernNav — top navigation with optional campaign context
-- TavernLayout — centered content container
+The checked-in helper reuses or creates a disposable Docker container named
+`dnd-tavern-test` on port `55433` by default. It exports:
 
-### Round 6: Tavern Surfaces
+- `DATABASE_TEST_URL`
+- `DATABASE_URL`
+- `DATABASE_PUBLIC_URL`
 
-**Read models** (`app/src/server/tavern/`)
+Useful companion commands:
 
-| File | Purpose |
-|---|---|
-| `home.ts` | Campaign list + character roster |
-| `character-shell.ts` | Full character state (abilities, AC, HP, skills, etc.) |
-| `spellbook.ts` | Spell groups by level + slot tracking |
-| `inventory.ts` | Equipment, attack profiles, resources |
-| `journal.ts` | Communication cards from DM |
-| `compendium.ts` | Searchable compendium with pack/type filters |
+```bash
+pnpm db:test:status
+pnpm db:test:down
+```
 
-**Routes** (`app/src/routes/`)
+The integration runner will:
 
-| Route | Tab |
-|---|---|
-| `/` | Home — campaign cards + roster links |
-| `/characters/$characterId` | Shell layout — loads character state |
-| `/characters/$characterId/` | Overview — abilities, combat stats, skills, features |
-| `/characters/$characterId/spellbook` | Spell list grouped by level |
-| `/characters/$characterId/inventory` | Equipment, attacks, resources |
-| `/characters/$characterId/journal` | DM-published cards |
-| `/characters/$characterId/compendium` | Searchable rules compendium |
+- run migrations against `DATABASE_TEST_URL`
+- truncate the public tables
+- reseed the verified real campaign
+- execute the Tavern scenario assertions
 
-## Manual Testing with Dev Server
+## Local DB Verification
+
+Run the primary readiness checks in this order:
+
+```bash
+pnpm check
+pnpm -F @dnd/app test
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm -F @dnd/app test:integration
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm snapshot:tavern-session --check
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm test:acceptance:tavern
+pnpm -F @dnd/app build
+```
+
+On the first snapshot capture, create or refresh the baseline:
+
+```bash
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm snapshot:tavern-session --update
+```
+
+Snapshot files live at:
+
+- `data/fleet/snapshots/tavern-session-baseline.json`
+- `data/fleet/snapshots/tavern-session-latest.json`
+
+Before the first browser acceptance run on a machine, install the Playwright browser once:
+
+```bash
+pnpm exec playwright install chromium
+```
+
+## What The Tavern Scenario Verifies
+
+The scripted scenario uses `real-aa-campaign` and Tali.
+
+It performs this flow:
+
+1. Create a session.
+2. Publish a DM rule-callout referencing `Hex` and `Entangle`.
+3. Verify Tavern shell, journal, player-card refs, and compendium reads before progression.
+4. Award XP.
+5. Preview, create, and commit a Druid level-up spend plan.
+6. Verify Tavern shell and tab DTOs after the commit.
+
+Current assertions cover:
+
+- shell DTO level progression from 2 to 3
+- campaign-aware compendium access
+- journal visibility for the published note
+- spellbook DTO survival across the level-up flow
+- committed spend plan visibility
+- XP ledger visibility for the award and spend
+
+## Browser Acceptance
+
+The Round 7 browser gate uses the same seeded Tavern scenario against a built app server.
+
+```bash
+DATABASE_TEST_URL="$DATABASE_TEST_URL" pnpm test:acceptance:tavern
+```
+
+The browser spec proves this user-visible flow:
+
+1. Home page renders the seeded campaign and roster.
+2. Tali’s shell reflects the post-scenario level-up state.
+3. Spellbook, inventory, and journal tabs render the expected seeded data.
+4. Compendium search resolves the Advanced Adventurers `Hex` detail view.
+
+## Railway Smoke
+
+Use Railway only after the local gate is green.
+
+Run the smoke check inside a Railway-linked environment:
+
+```bash
+railway run pnpm verify:railway:tavern
+```
+
+The smoke script is read-only. It does three things:
+
+1. Verifies the required public Tavern/progression/communication tables exist.
+2. Verifies the `drizzle.__drizzle_migrations` table exists.
+3. If parity is present, resolves a real Tavern shell read and a compendium read.
+
+If parity is missing, the script fails early with a missing-table summary and skips the deeper Tavern reads.
+
+As of March 11, 2026, the linked Railway production database was migrated to Tavern parity and successfully reseeded with the Tavern session scenario. The verified remote fixture state is 1 campaign, 5 characters, 1 session, 1 published communication item, 1 committed spend plan, and 2 XP transactions.
+
+To reseed a Railway-linked database with the verified campaign plus the Tavern session scenario:
+
+```bash
+railway run pnpm seed:tavern-session -- --destructive
+```
+
+That command is destructive. It runs migrations, truncates the public app tables, reseeds the verified campaign, executes the scripted Tali session scenario, and prints a summary of the resulting campaign/session state.
+
+## Manual UI Pass
+
+After the automated gates are green, run the app against a seeded database:
 
 ```bash
 pnpm -F @dnd/app dev
 ```
 
-The app requires a running Postgres database with seeded data. Without it, server functions will error. To verify:
+Check:
 
-1. **Home page** (`/`): Should show campaign cards with roster entries
-2. **Character page** (`/characters/<id>`): Should show character overview
-3. **Tab navigation**: Click through spellbook, inventory, journal, compendium tabs
-4. **Compendium search**: Type in search box, filter by type/pack, click entries for detail
+1. `/` shows the campaign and roster.
+2. `/characters/<id>` loads the shell without type or not-found regressions.
+3. `Spellbook` uses the parent shell data and still renders correctly.
+4. `Inventory` shows equipment plus runtime attacks/resources.
+5. `Journal` shows the published session note.
+6. `Compendium` filters only to the character’s enabled packs.
 
-If you don't have a database:
-- The build (`pnpm build`) verifies the full compilation pipeline
-- Component tests verify rendering in isolation
-- The server read models are thin wrappers over existing services, so their correctness depends on the underlying services (already tested)
+## Failure Interpretation
 
-## Server/Client Boundary
-
-The `-server.ts` files use `createServerFn` with variable-based dynamic imports:
-
-```typescript
-const shellMod = "../../../server/tavern/character-shell" + ".ts";
-// ...
-const { getCharacterShellData } = await import(/* @vite-ignore */ shellMod);
-```
-
-This pattern prevents Rollup from statically resolving server-only modules (postgres, node:crypto, etc.) during the client build. The string concatenation makes the import path opaque to Rollup's static analysis.
-
-**If the build fails with postgres/perf_hooks errors**, a new server function was likely added with a static string import path. Fix by using the variable-based pattern above.
-
-## Architecture Checks
-
-- [ ] All `import type` in `-server.ts` files (no value imports from `server/tavern/`)
-- [ ] All dynamic imports use variable paths (string concatenation)
-- [ ] Route components only import from `-server.ts` and `-adapters.ts`, never directly from `server/`
-- [ ] `-adapters.ts` files only have `import type` from server modules
-- [ ] UI components in `components/tavern/` have zero server imports
-
-## Test Coverage Summary
-
-| Area | Tests | File |
-|---|---|---|
-| Defense/AC engine | 23 | `library/tests/engine/defenses.test.ts` |
-| Attack engine | 17 | `library/tests/engine/attacks.test.ts` |
-| Character computer | 10 | `library/tests/engine/character-computer.test.ts` |
-| EmptyState component | 4 | `app/src/components/tavern/ui/EmptyState.test.tsx` |
-| Full library suite | 558 | `pnpm -F @dnd/library test` |
-| Full app suite | 74 | `pnpm -F @dnd/app test` |
+- `pnpm check` failure in Tavern route files: route/server contract drift.
+- `pnpm -F @dnd/app test` failure in Tavern DTO tests: adapter or serializer regression.
+- `pnpm -F @dnd/app test:integration` failure in the Tavern scenario: seeded DB behavior changed.
+- `pnpm snapshot:tavern-session --check` drift: Tavern DTO output changed and needs explicit review.
+- `pnpm test:acceptance:tavern` failure: seeded Tavern UI flow regressed in a real browser against a built server.
+- `pnpm verify:railway:tavern` failure: Railway parity is incomplete or Tavern reads do not survive real deployment data.

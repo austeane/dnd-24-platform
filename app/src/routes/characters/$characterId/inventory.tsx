@@ -1,61 +1,39 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, getRouteApi } from "@tanstack/react-router";
 import { InventoryPanel } from "../../../components/tavern/character/InventoryPanel.tsx";
-import type { InventoryPanelProps } from "../../../components/tavern/character/InventoryPanel.tsx";
-import { fetchInventoryData, type InventoryData } from "./-server.ts";
+import {
+  fetchInventoryItemsData,
+  type TavernInventoryItemsData,
+  type TavernShellData,
+} from "./-server.ts";
 
-function formatAttackBonus(bonus: number): string {
-  return bonus >= 0 ? `+${bonus}` : `${bonus}`;
-}
+const parentApi = getRouteApi("/characters/$characterId");
 
-function toInventoryPanelProps(data: InventoryData): InventoryPanelProps {
+function toInventoryPanelProps(
+  items: TavernInventoryItemsData,
+  runtime: TavernShellData["inventoryRuntime"],
+) {
   return {
-    equippedItems: data.equippedItems.map((item) => ({
-      id: item.id,
-      name: item.name,
-      quantity: item.quantity,
-      equipped: item.equipped,
-      slot: item.slot,
-    })),
-    carriedItems: data.carriedItems.map((item) => ({
-      id: item.id,
-      name: item.name,
-      quantity: item.quantity,
-      equipped: item.equipped,
-      slot: item.slot,
-    })),
-    attackProfiles: data.attackProfiles.map((profile) => ({
-      weaponName: profile.weaponName,
-      attackBonus: formatAttackBonus(profile.attackBonus),
-      damage: profile.damage,
-      damageType: profile.damageType,
-      properties: profile.properties,
-      masteryProperty: profile.masteryProperty,
-    })),
-    resources: data.resources.map((resource) => ({
-      name: resource.name,
-      current: resource.current,
-      max: resource.max,
-      rechargeOn: resource.rechargeOn,
-      source: resource.source,
-    })),
+    equippedItems: items.equippedItems,
+    carriedItems: items.carriedItems,
+    attackProfiles: runtime.attackProfiles,
+    resources: runtime.resources,
   };
 }
 
 export const Route = createFileRoute(
   "/characters/$characterId/inventory",
 )({
-  loader: async ({ params }) => {
-    const data = await fetchInventoryData({
+  loader: ({ params }) =>
+    fetchInventoryItemsData({
       data: { characterId: params.characterId },
-    });
-    return { inventory: data };
-  },
+    }),
   component: InventoryRoute,
 });
 
 function InventoryRoute() {
-  const { inventory } = Route.useLoaderData();
-  const props = toInventoryPanelProps(inventory);
+  const items = Route.useLoaderData();
+  const { inventoryRuntime } = parentApi.useLoaderData();
+  const props = toInventoryPanelProps(items, inventoryRuntime);
 
   return (
     <div className="animate-fade-up py-4">

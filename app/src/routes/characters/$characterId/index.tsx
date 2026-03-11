@@ -5,7 +5,6 @@ import { CombatPanel } from "../../../components/tavern/character/CombatPanel.ts
 import { FeaturesPanel } from "../../../components/tavern/character/FeaturesPanel.tsx";
 import { SkillsPanel } from "../../../components/tavern/character/SkillsPanel.tsx";
 import { XPProgressBar } from "../../../components/tavern/character/XPProgressBar.tsx";
-import type { CharacterShellData } from "./-server.ts";
 import {
   toAbilityScoreProps,
   toCharacterCardProps,
@@ -22,8 +21,7 @@ export const Route = createFileRoute("/characters/$characterId/")({
 });
 
 function CharacterTab() {
-  // Cast required: parent loader type is erased due to serialization workaround
-  const data = parentApi.useLoaderData() as CharacterShellData;
+  const data = parentApi.useLoaderData();
 
   return (
     <div className="space-y-4 animate-fade-up">

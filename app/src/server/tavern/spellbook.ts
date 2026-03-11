@@ -1,36 +1,12 @@
-import { getCanonicalSpellByName, type PackId } from "@dnd/library";
-import { getCharacterRuntimeState } from "../progression/character-state.ts";
-
-export interface SpellbookSpell {
-  name: string;
-  level: number;
-  school: string;
-  castingTime: string;
-  concentration: boolean;
-  ritual: boolean;
-  alwaysPrepared: boolean;
-  source: string;
-}
-
-export interface SpellbookSlotPool {
-  level: number;
-  total: number;
-  current: number;
-}
-
-export interface SpellbookGroup {
-  level: number;
-  label: string;
-  spells: SpellbookSpell[];
-  slots: SpellbookSlotPool | null;
-}
-
-export interface SpellbookData {
-  castingAbility: string | null;
-  spellSaveDC: number | null;
-  spellAttackBonus: number | null;
-  groups: SpellbookGroup[];
-}
+import {
+  getCanonicalEntity,
+  getCanonicalSpellByName,
+  type CharacterSpellcastingState,
+  type PackId,
+} from "@dnd/library";
+import { getTavernCharacterContext } from "./context.ts";
+import { isCanonicalPackId, toCanonicalPackIds } from "./packs.ts";
+import type { TavernSpellData, TavernSpellbookData } from "./types.ts";
 
 const LEVEL_LABELS: Record<number, string> = {
   0: "Cantrips",
@@ -45,101 +21,130 @@ const LEVEL_LABELS: Record<number, string> = {
   9: "9th Level",
 };
 
-function capitalize(s: string): string {
-  return s.charAt(0).toUpperCase() + s.slice(1);
+function capitalize(value: string): string {
+  return value.charAt(0).toUpperCase() + value.slice(1);
 }
 
-export async function getSpellbookData(
-  characterId: string,
-): Promise<SpellbookData> {
-  const runtime = await getCharacterRuntimeState(characterId);
-  if (!runtime) {
-    return {
-      castingAbility: null,
-      spellSaveDC: null,
-      spellAttackBonus: null,
-      groups: [],
-    };
+function getEmptySpellbookData(): TavernSpellbookData {
+  return {
+    castingAbility: null,
+    spellSaveDC: null,
+    spellAttackBonus: null,
+    groups: [],
+  };
+}
+
+export function resolveGrantedSpell(
+  grantedSpell: CharacterSpellcastingState["grantedSpells"][number],
+  enabledPackIds: PackId[],
+) {
+  if (
+    isCanonicalPackId(grantedSpell.spellPackId) &&
+    grantedSpell.spellEntityId &&
+    enabledPackIds.includes(grantedSpell.spellPackId)
+  ) {
+    const canonical = getCanonicalEntity(
+      grantedSpell.spellPackId,
+      grantedSpell.spellEntityId,
+    );
+
+    if (canonical?.type === "spell") {
+      return canonical;
+    }
   }
 
-  const spellcasting = runtime.spellcasting;
+  return getCanonicalSpellByName(grantedSpell.spellName, enabledPackIds);
+}
+
+export function buildSpellbookData(
+  spellcasting: CharacterSpellcastingState | null | undefined,
+  enabledPackIds: string[],
+): TavernSpellbookData {
   if (!spellcasting) {
-    return {
-      castingAbility: null,
-      spellSaveDC: null,
-      spellAttackBonus: null,
-      groups: [],
-    };
+    return getEmptySpellbookData();
   }
 
-  const enabledPacks: PackId[] = ["srd-5e-2024", "advanced-adventurers"];
-
-  // Enrich granted spells with canonical metadata
-  const enrichedSpells: SpellbookSpell[] = spellcasting.grantedSpells.map(
-    (granted) => {
-      const canonical = getCanonicalSpellByName(granted.spellName, enabledPacks);
+  const canonicalPackIds = toCanonicalPackIds(enabledPackIds);
+  const enrichedSpells: Array<TavernSpellData & { level: number }> =
+    spellcasting.grantedSpells.map((grantedSpell) => {
+      const canonical = resolveGrantedSpell(grantedSpell, canonicalPackIds);
       return {
-        name: granted.spellName,
+        name: grantedSpell.spellName,
         level: canonical?.level ?? 0,
         school: canonical?.school ?? "Unknown",
         castingTime: canonical?.castingTime ?? "1 action",
         concentration: canonical?.concentration ?? false,
         ritual: canonical?.ritual ?? false,
-        alwaysPrepared: granted.alwaysPrepared,
-        source: granted.source,
+        alwaysPrepared: grantedSpell.alwaysPrepared,
       };
-    },
-  );
+    });
 
-  // Group spells by level
-  const spellsByLevel = new Map<number, SpellbookSpell[]>();
+  const spellsByLevel = new Map<number, Array<TavernSpellData & { level: number }>>();
   for (const spell of enrichedSpells) {
-    const existing = spellsByLevel.get(spell.level) ?? [];
-    existing.push(spell);
-    spellsByLevel.set(spell.level, existing);
+    const levelSpells = spellsByLevel.get(spell.level) ?? [];
+    levelSpells.push(spell);
+    spellsByLevel.set(spell.level, levelSpells);
   }
 
-  // Build slot lookup from all slot pools
-  const slotsByLevel = new Map<number, SpellbookSlotPool>();
+  const slotsByLevel = new Map<
+    number,
+    {
+      level: number;
+      total: number;
+      current: number;
+    }
+  >();
+
   for (const pool of spellcasting.slotPools) {
     for (const slot of pool.slots) {
       const existing = slotsByLevel.get(slot.level);
       if (existing) {
         existing.total += slot.total;
         existing.current += slot.current;
-      } else {
-        slotsByLevel.set(slot.level, {
-          level: slot.level,
-          total: slot.total,
-          current: slot.current,
-        });
+        continue;
       }
+
+      slotsByLevel.set(slot.level, {
+        level: slot.level,
+        total: slot.total,
+        current: slot.current,
+      });
     }
   }
 
-  // Build groups, sorted by level
-  const allLevels = new Set([
-    ...spellsByLevel.keys(),
-    ...slotsByLevel.keys(),
-  ]);
-  const sortedLevels = [...allLevels].sort((a, b) => a - b);
-
-  const groups: SpellbookGroup[] = sortedLevels.map((level) => {
-    const spells = spellsByLevel.get(level) ?? [];
-    spells.sort((a, b) => a.name.localeCompare(b.name));
-
-    return {
-      level,
-      label: LEVEL_LABELS[level] ?? `Level ${level}`,
-      spells,
-      slots: level > 0 ? (slotsByLevel.get(level) ?? null) : null,
-    };
-  });
+  const sortedLevels = [...new Set([...spellsByLevel.keys(), ...slotsByLevel.keys()])].sort(
+    (left, right) => left - right,
+  );
 
   return {
     castingAbility: capitalize(spellcasting.ability),
     spellSaveDC: spellcasting.spellSaveDc,
     spellAttackBonus: spellcasting.spellAttackBonus,
-    groups,
+    groups: sortedLevels.map((level) => {
+      const spells = (spellsByLevel.get(level) ?? [])
+        .sort((left, right) => left.name.localeCompare(right.name))
+        .map(({ level: _level, ...spell }) => spell);
+
+      return {
+        level,
+        label: LEVEL_LABELS[level] ?? `Level ${level}`,
+        spells,
+        slots: level > 0 ? (slotsByLevel.get(level) ?? null) : null,
+      };
+    }),
   };
+}
+
+export async function getSpellbookData(
+  characterId: string,
+): Promise<TavernSpellbookData> {
+  const context = await getTavernCharacterContext(characterId);
+  if (!context?.runtime) {
+    return getEmptySpellbookData();
+  }
+
+  return buildSpellbookData(
+    context.runtime.spellcasting,
+    context.campaign.enabledPackIds,
+  );
 }

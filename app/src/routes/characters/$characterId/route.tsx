@@ -1,24 +1,40 @@
-import { Outlet, createFileRoute } from "@tanstack/react-router";
+import {
+  Outlet,
+  createFileRoute,
+  notFound,
+} from "@tanstack/react-router";
 import { TavernLayout } from "../../../components/tavern/layout/TavernLayout.tsx";
 import { TavernNav } from "../../../components/tavern/layout/TavernNav.tsx";
 import { ErrorCard } from "../../../components/tavern/ui/ErrorCard.tsx";
 import { Loading } from "../../../components/tavern/ui/Loading.tsx";
 import { NotFound } from "../../../components/tavern/ui/NotFound.tsx";
-import type { CharacterShellData } from "./-server.ts";
+import type { TavernShellData } from "./-server.ts";
 import { fetchCharacterShellData } from "./-server.ts";
 
+const characterRouteId = "/characters/$characterId" as const;
+
+export function requireCharacterShellData(
+  data: TavernShellData | null,
+): TavernShellData {
+  if (!data) {
+    throw notFound({ routeId: characterRouteId });
+  }
+
+  return data;
+}
+
+export async function loadCharacterShellData(
+  characterId: string,
+): Promise<TavernShellData> {
+  const data = await fetchCharacterShellData({
+    data: { characterId },
+  });
+
+  return requireCharacterShellData(data);
+}
+
 export const Route = createFileRoute("/characters/$characterId")({
-  loader: (async ({ params }: { params: { characterId: string } }) => {
-    const data = await fetchCharacterShellData({
-      data: { characterId: params.characterId },
-    });
-
-    if (!data) {
-      throw new Error("Character not found");
-    }
-
-    return data;
-  }) as never,
+  loader: ({ params }) => loadCharacterShellData(params.characterId),
   pendingComponent: CharacterShellPending,
   errorComponent: CharacterShellError,
   notFoundComponent: CharacterShellNotFound,
@@ -26,8 +42,7 @@ export const Route = createFileRoute("/characters/$characterId")({
 });
 
 function CharacterShellLayout() {
-  // Cast useLoaderData since the loader's return type is erased by `as never`
-  const data = Route.useLoaderData() as CharacterShellData;
+  const data = Route.useLoaderData();
 
   return (
     <>
